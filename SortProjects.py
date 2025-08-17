@@ -6,9 +6,15 @@ import pygsheets
 
 
 home_directory = os.getcwd()
-csvPath = home_directory + '/Professor Clinic Request (Responses) [Spring 2025] - Form.csv'
+csvPath = home_directory + '/Professor Clinic Request (Responses) - Form.csv'
 
 client = pygsheets.authorize(client_secret='client_secret.json')
+
+black_rgb = {
+    "red": 0,
+    "green": 0,
+    "blue": 0
+}
 
 ME_color = (
      0.44,
@@ -42,14 +48,12 @@ BME_color = (
     0.75
 )
 
-client.open('Initial Sheet')
-sheet = client.open('Initial Sheet').sheet1
+client.open('Initial Sheet') # Sheet opened by name
+sheet = client.open('Initial Sheet').sheet1 #Select the first page of the sheet
 
 
 
-
-# Fields to be populated by Project class
-# Timestamp	Email Address	Manager Last Name(s):	Department:	Concise Clinic Project Name:	Concise Project Description	The project is currently externally funded.	Project URL Links	Project Image	External Funding Source	Specific student requests	Student Request Classification	Minimum Students Required for Project Operation	Maximum Students for Project Operation	ME	ChE	ECE	CEE	EXE	ME	ChE	ECE	CEE	EXE
+#Project class for filtering through the CSV.
 
 class Project:
     def __init__(self, row):
@@ -60,7 +64,7 @@ class Project:
         self.project_name = row[4]
         self.project_description = row[5]
         self.is_externally_funded = row[6]
-        self.project_url_links = row[7]
+        self.project_url_links = row[7].split(',') if row[7] else []
         self.project_image = row[8]
         self.external_funding_source = row[9]
         self.student_requests = row[10]
@@ -73,8 +77,16 @@ class Project:
         self.cee_students = (row[17])
         self.exe_students = (row[18])
         self.bme_students = (row[19])
-        self.eet_students = (row[20]) or 99999  # Default to a large number if not provided
-        self.met_students = (row[21]) or 99999  # Default to a large number if not provided
+        self.eet_students =  99999  # Default to a large number if not provided
+        self.met_students =  99999  # Default to a large number if not provided
+        self.max_me_students = (row[20])
+        self.max_che_students = (row[21])
+        self.max_ece_students = (row[22])
+        self.max_cee_students = (row[23])
+        self.max_exe_students = (row[24])
+        self.max_bme_students = (row[25])
+        self.project_type = row[26]
+        self.project_justification = row[27]
         self.current_students = []
         self.current_me_students = 0
         self.current_che_students = 0
@@ -112,17 +124,20 @@ def get_project_data():
     with open(csvPath, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # Skip header row
+        #print("Length of CSV: ", len(list(reader)))
         for row in reader:
             if len(row) > 1:  # Ensure the row is not empty
                 project = Project(row)
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
                 Projects.append(project)
+        print(len(Projects), " projects loaded.")
         csvfile.close()
 
     return Projects
     #Clinic displays are in blocks of 5x6 cells
 
+get_project_data()
 
 def rgb_dict_to_hex(rgb):
     r = int(rgb['red'] * 255)
@@ -132,21 +147,30 @@ def rgb_dict_to_hex(rgb):
 
 
 def assemble_data_chunk(project):
+    #Arrange the hyperlinks properly
+    count = 1
+    for link in project.project_url_links:
+        newlink = f'=HYPERLINK("{link.strip()}", "[{count}]")'
+        count += 1
+        project.project_url_links[project.project_url_links.index(link)] = newlink
+    project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=4000"))'
     data_chunk = [
-        ['', project.project_name + ' | ' + project.department, '', '', '', '', ''],
+        ['', project.project_name + ' | ' + project.department, '', '', '', '', '', project.project_image],
         ['Manager(s)', project.manager_last_names, '', '', '', '', ''],
         ['Description', project.project_description, '', '', '', '', ''],
         ['Seeking', 'ME: ' + project.me_students, 'ChE: ' + project.che_students, 'ECE: ' + project.ece_students, 'CEE: ' + project.cee_students, 'EXE: ' + project.exe_students, 'BME: ' + project.bme_students],
-        ['Links:', project.project_url_links, '', '', '', '', ''],
+        ['Links:'] + project.project_url_links + [''] * (6 - len(project.project_url_links)),
+        ['Project Type', project.project_type, project.project_justification, '', '', '', ''],
     ]
     return data_chunk
 
 project_counter = 0
 for project in Projects:
+    print(project.project_type)
     project_counter += 1
     data_chunk = assemble_data_chunk(project)
     data_chunk[0][0] = 'Project ' + str(project_counter)  # Set the project number in the first cell of the first row
-    sheet.update_values('A' + str((project_counter - 1) * 5 + 1), data_chunk) 
+    sheet.update_values('A' + str((project_counter - 1) * 6 + 1), data_chunk) 
     
 
     color = {
@@ -154,38 +178,120 @@ for project in Projects:
         "green": 203 / 255,
         "blue": 255 / 255
     }
+    
+    factor = 0.5
+    if project.department == "ME":
+        color = {
+            "red": ME_color[0] + (1 - ME_color[0]) * factor,  # Slightly lighter
+            "green": ME_color[1] + (1 - ME_color[1]) * factor,
+            "blue": ME_color[2] + (1 - ME_color[2]) * factor,
+  
+        }
+    elif project.department == "ChE":
+        color = {
+            "red": ChE_color[0] + (1 - ChE_color[0]) * factor,
+            "green": ChE_color[1] + (1 - ChE_color[1]) * factor,
+            "blue": ChE_color[2] + (1 - ChE_color[2]) * factor,
+        }
+    elif project.department == "ECE":
+        color = {
+            "red": ECE_color[0] + (1 - ECE_color[0]) * factor,
+            "green": ECE_color[1] + (1 - ECE_color[1]) * factor,
+            "blue": ECE_color[2] + (1 - ECE_color[2]) * factor,
+        }
+    elif project.department == "CEE":
+        color = {
+            "red": CEE_color[0] + (1 - CEE_color[0]) * factor,
+            "green": CEE_color[1] + (1 - CEE_color[1]) * factor,
+            "blue": CEE_color[2] + (1 - CEE_color[2]) * factor,
+        }
+    elif project.department == "EXE":
+        color = {
+            "red": EXE_color[0] + (1 - EXE_color[0]) * factor,
+            "green": EXE_color[1] + (1 - EXE_color[1]) * factor,
+            "blue": EXE_color[2] + (1 - EXE_color[2]) * factor,
+        }
+    elif project.department == "BME":
+        color = {
+            "red": BME_color[0] + (1 - BME_color[0]) * factor,
+            "green": BME_color[1] + (1 - BME_color[1]) * factor,
+            "blue": BME_color[2] + (1 - BME_color[2]) * factor,
+        }
+    elif project.department == "EET":
+        color = {
+            "red": 0.95,
+            "green": 0.95,
+            "blue": 0.44
+        }
+    elif project.department == "MET":
+        color = {
+            "red": 0.95,
+            "green": 0.44,
+            "blue": 0.44
+        }
 
     format = {
-"numberFormat": {
-    
-},
-"backgroundColor": color,
-"backgroundColorStyle":{ "rgbColor": color},
-"borders": {
+        "numberFormat": {
+            
+        },
+        "backgroundColor": color,
+        "backgroundColorStyle":{ "rgbColor": color},
+        "borders": {
 
-},
-"padding": {
+        },
+        "padding": {
 
-},
-"horizontalAlignment": "CENTER",
-"verticalAlignment": "MIDDLE",
-"wrapStrategy": "WRAP",
-"textFormat": {
-},
-"textRotation": {
-}
-}
+        },
+        "horizontalAlignment": "CENTER",
+        "verticalAlignment": "MIDDLE",
+        "wrapStrategy": "WRAP",
+        "textFormat": {
+        },
+        "textRotation": {
+        }
+    }
+    titleFormat = {
+        "textFormat": {
+            "fontSize": 16,
+            "bold": True
+        },
+        "horizontalAlignment": "CENTER",
+        "verticalAlignment": "MIDDLE",
+        "wrapStrategy": "WRAP",
+        "backgroundColor": color,
+        "borders": {
+            "top": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+            "bottom": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+            "left": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+            "right": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}}
+            }
+    }
+    seekingFormat = {
+        "textFormat": {
+            "fontSize": 14,
+            "bold": True
+        },
+        "horizontalAlignment": "CENTER",
+        "verticalAlignment": "MIDDLE",
+        "wrapStrategy": "WRAP",
+        "backgroundColor": color,
+    }
     
     #Merging the rows 1 and 3 of the set, columns 2-7
-    row_start = (project_counter - 1) * 5 + 1
+    row_start = (project_counter - 1) * 6 + 1
     sheet.merge_cells((row_start, 2),(row_start,7 ))
     cell = sheet.cell((row_start, 2))
     cell.wrap_strategy = 'WRAP' 
     sheet.merge_cells((row_start + 2, 2), (row_start + 2, 7))
     cell = sheet.cell((row_start + 2, 2))
     cell.wrap_strategy = 'WRAP'
+    #Merge row 6, columns 3-7
+    sheet.merge_cells((row_start + 5, 3), (row_start + 5, 7))
+    sheet.merge_cells((row_start, 8), (row_start + 5, 12))
     #Formatting the data chunk
-    sheet.apply_format('A' + str((project_counter - 1) * 5 + 1) + ':G' + str((project_counter - 1) * 5 + 5), format )
+    sheet.apply_format('A' + str((project_counter - 1) * 6 + 1) + ':G' + str((project_counter - 1) * 6 + 1),titleFormat)
+    sheet.apply_format('A' + str((project_counter - 1) * 6 + 2) + ':G' + str((project_counter - 1) * 6 + 6), format )
+    sheet.apply_format('A' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
 
     #Go through each cell and check if it contains ME, etc, to change the color of the cell
     for val in data_chunk:
@@ -203,6 +309,8 @@ for project in Projects:
                 sheet.cell((row_start + 3, i + 1)).color = EXE_color
             elif val[i] == 'BME: ' + project.bme_students:
                 sheet.cell((row_start + 3, i + 1)).color = BME_color
+    print("Image formula:", f'=IMAGE("{project.project_image}", 3)')
+    
 
 
 

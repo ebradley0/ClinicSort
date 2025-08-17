@@ -73,7 +73,7 @@ for project in Projects:
             if student not in project.current_students:
                 student_object = next((s for s in Students if s.email == student + '@students.rowan.edu' or s.email == student + '@rowan.edu'), None)
                 project.current_students.append(student_object)
-            
+            #Check if student requested the project as #1
             student_object = next((s for s in Students if s.email == student + '@students.rowan.edu' or s.email == student + '@rowan.edu'), None)
             if student_object is None:
             
@@ -187,9 +187,11 @@ for junior in Juniors:
 
 
 for project in Projects:
-    print(f"Project: {project.project_name},\n Current Students: {[s.email for s in project.current_students if s]},\n Max Students: {project.max_students_for_operation}")
+    print(f"Project: {project.project_name},\n Current Students: {[s.email for s in project.current_students if s]},\n Max Students: {project.max_students_for_operation}\n, Current Student Count: {len(project.current_students)}\n")
+
 
 for student in failed_students:
     print(f"Failed to add student: " + student)
 
 
+print("Total Failed Students: ", len(failed_students)  )
