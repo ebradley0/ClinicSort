@@ -121,7 +121,7 @@ Projects = []
 
 
 def get_project_data():
-
+    Projects = []
     with open(csvPath, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # Skip header row
@@ -159,7 +159,7 @@ def assemble_data_chunk(project):
         ['', project.project_name + ' | ' + project.department, '', '', '', '', 'PI: ', project.project_image],
         ['Manager(s)', project.manager_last_names, '', '', '', '', ''],
         ['Description', project.project_description, '', '', '', '', ''],
-        ['Seeking', 'ME: ' + project.me_students, 'ChE: ' + project.che_students, 'ECE: ' + project.ece_students, 'CEE: ' + project.cee_students, 'EXE: ' + project.exe_students, 'BME: ' + project.bme_students],
+        ['Seeking', 'ME: ' + project.max_me_students, 'ChE: ' + project.max_che_students, 'ECE: ' + project.max_ece_students, 'CEE: ' + project.max_cee_students, 'EXE: ' + project.max_exe_students, 'BME: ' + project.max_bme_students],
         ['Links:'] + project.project_url_links + [''] * (6 - len(project.project_url_links)),
     ]
     return data_chunk
@@ -169,9 +169,10 @@ def clear_sheet():
     sheet.clear(start='A1', end='Z1000')  # Adjust the range as needed
 
 def updateSheet():
-    get_project_data()  # Load the project data from the CSV
+    Projects = get_project_data()  # Load the project data from the CSV
     clear_sheet()  # Clear the sheet before updating
     project_counter = 0
+    print("Updating the sheet with project data...")
     for project in Projects:
         print(project.project_type)
         project_counter += 1
@@ -320,17 +321,17 @@ def updateSheet():
             for val in data_chunk:
                 for i in range(1, 7):
                     print(val[i])  # Debugging line to see the values being processed
-                    if val[i] == 'ME: ' + project.me_students:
+                    if val[i] == 'ME: ' + project.max_me_students:
                         sheet.cell((row_start + 3, i + 1)).color = ME_color
-                    elif val[i] == 'ChE: ' + project.che_students:
+                    elif val[i] == 'ChE: ' + project.max_che_students:
                         sheet.cell((row_start + 3, i + 1)).color = ChE_color
-                    elif val[i] == 'ECE: ' + project.ece_students:
+                    elif val[i] == 'ECE: ' + project.max_ece_students:
                         sheet.cell((row_start + 3, i + 1)).color = ECE_color
-                    elif val[i] == 'CEE: ' + project.cee_students:
+                    elif val[i] == 'CEE: ' + project.max_cee_students:
                         sheet.cell((row_start + 3, i + 1)).color = CEE_color
-                    elif val[i] == 'EXE: ' + project.exe_students:
+                    elif val[i] == 'EXE: ' + project.max_exe_students:
                         sheet.cell((row_start + 3, i + 1)).color = EXE_color
-                    elif val[i] == 'BME: ' + project.bme_students:
+                    elif val[i] == 'BME: ' + project.max_bme_students:
                         sheet.cell((row_start + 3, i + 1)).color = BME_color
         
 
