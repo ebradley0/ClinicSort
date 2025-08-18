@@ -48,8 +48,7 @@ BME_color = (
     0.75
 )
 
-client.open('Initial Sheet') # Sheet opened by name
-sheet = client.open('Initial Sheet').sheet1 #Select the first page of the sheet
+sheet = client.open('Clinic Project View Fall FY26').sheet1 #Select the first page of the sheet
 
 
 
@@ -155,7 +154,7 @@ def assemble_data_chunk(project):
         project.project_url_links[project.project_url_links.index(link)] = newlink
     project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=4000"))'
     data_chunk = [
-        ['', project.project_name + ' | ' + project.department, '', '', '', '', '', project.project_image],
+        ['', project.project_name + ' | ' + project.department, '', '', '', '', 'PI: ', project.project_image],
         ['Manager(s)', project.manager_last_names, '', '', '', '', ''],
         ['Description', project.project_description, '', '', '', '', ''],
         ['Seeking', 'ME: ' + project.me_students, 'ChE: ' + project.che_students, 'ECE: ' + project.ece_students, 'CEE: ' + project.cee_students, 'EXE: ' + project.exe_students, 'BME: ' + project.bme_students],
@@ -279,7 +278,7 @@ for project in Projects:
     
     #Merging the rows 1 and 3 of the set, columns 2-7
     row_start = (project_counter - 1) * 6 + 1
-    sheet.merge_cells((row_start, 2),(row_start,7 ))
+    sheet.merge_cells((row_start, 2),(row_start,6 ))
     cell = sheet.cell((row_start, 2))
     cell.wrap_strategy = 'WRAP' 
     sheet.merge_cells((row_start + 2, 2), (row_start + 2, 7))
@@ -291,25 +290,35 @@ for project in Projects:
     #Formatting the data chunk
     sheet.apply_format('A' + str((project_counter - 1) * 6 + 1) + ':G' + str((project_counter - 1) * 6 + 1),titleFormat)
     sheet.apply_format('A' + str((project_counter - 1) * 6 + 2) + ':G' + str((project_counter - 1) * 6 + 6), format )
-    sheet.apply_format('A' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
+    
 
-    #Go through each cell and check if it contains ME, etc, to change the color of the cell
-    for val in data_chunk:
-        for i in range(1, 7):
-            print(val[i])  # Debugging line to see the values being processed
-            if val[i] == 'ME: ' + project.me_students:
-                sheet.cell((row_start + 3, i + 1)).color = ME_color
-            elif val[i] == 'ChE: ' + project.che_students:
-                sheet.cell((row_start + 3, i + 1)).color = ChE_color
-            elif val[i] == 'ECE: ' + project.ece_students:
-                sheet.cell((row_start + 3, i + 1)).color = ECE_color
-            elif val[i] == 'CEE: ' + project.cee_students:
-                sheet.cell((row_start + 3, i + 1)).color = CEE_color
-            elif val[i] == 'EXE: ' + project.exe_students:
-                sheet.cell((row_start + 3, i + 1)).color = EXE_color
-            elif val[i] == 'BME: ' + project.bme_students:
-                sheet.cell((row_start + 3, i + 1)).color = BME_color
-    print("Image formula:", f'=IMAGE("{project.project_image}", 3)')
+   
+    #Merge the cells to just display total students, rather than specifics
+    if project.request_classification =='General: I would like to specify a general number of students required.':
+        sheet.merge_cells((row_start + 3, 2), (row_start + 3, 7))
+        sheet.cell((row_start + 3, 2)).value = 'Total Students: ' + str(project.min_students_required)
+        cell = sheet.cell((row_start + 3, 2))
+        seekingFormat["backgroundColor"] = {"red":1, "green": 1, "blue": 1}
+        sheet.apply_format('B' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
+        pass
+    else:
+         #Go through each cell and check if it contains ME, etc, to change the color of the cell
+        sheet.apply_format('A' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
+        for val in data_chunk:
+            for i in range(1, 7):
+                print(val[i])  # Debugging line to see the values being processed
+                if val[i] == 'ME: ' + project.me_students:
+                    sheet.cell((row_start + 3, i + 1)).color = ME_color
+                elif val[i] == 'ChE: ' + project.che_students:
+                    sheet.cell((row_start + 3, i + 1)).color = ChE_color
+                elif val[i] == 'ECE: ' + project.ece_students:
+                    sheet.cell((row_start + 3, i + 1)).color = ECE_color
+                elif val[i] == 'CEE: ' + project.cee_students:
+                    sheet.cell((row_start + 3, i + 1)).color = CEE_color
+                elif val[i] == 'EXE: ' + project.exe_students:
+                    sheet.cell((row_start + 3, i + 1)).color = EXE_color
+                elif val[i] == 'BME: ' + project.bme_students:
+                    sheet.cell((row_start + 3, i + 1)).color = BME_color
     
 
 
