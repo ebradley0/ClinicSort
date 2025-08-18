@@ -50,7 +50,9 @@ BME_color = (
 
 sheet = client.open('Clinic Project View Fall FY26').sheet1 #Select the first page of the sheet
 
-
+def initialize_sheet():
+    client = pygsheets.authorize(client_secret='client_secret.json')
+    sheet = client.open('Clinic Project View Fall FY26').sheet1  # Select the first page of the sheet
 
 #Project class for filtering through the CSV.
 
@@ -136,7 +138,7 @@ def get_project_data():
     return Projects
     #Clinic displays are in blocks of 5x6 cells
 
-get_project_data()
+#get_project_data()
 
 def rgb_dict_to_hex(rgb):
     r = int(rgb['red'] * 255)
@@ -152,178 +154,188 @@ def assemble_data_chunk(project):
         newlink = f'=HYPERLINK("{link.strip()}", "[{count}]")'
         count += 1
         project.project_url_links[project.project_url_links.index(link)] = newlink
-    project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=4000"))'
+    project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=h800w800"))'
     data_chunk = [
         ['', project.project_name + ' | ' + project.department, '', '', '', '', 'PI: ', project.project_image],
         ['Manager(s)', project.manager_last_names, '', '', '', '', ''],
         ['Description', project.project_description, '', '', '', '', ''],
         ['Seeking', 'ME: ' + project.me_students, 'ChE: ' + project.che_students, 'ECE: ' + project.ece_students, 'CEE: ' + project.cee_students, 'EXE: ' + project.exe_students, 'BME: ' + project.bme_students],
         ['Links:'] + project.project_url_links + [''] * (6 - len(project.project_url_links)),
-        ['Project Type', project.project_type, project.project_justification, '', '', '', ''],
     ]
     return data_chunk
 
-project_counter = 0
-for project in Projects:
-    print(project.project_type)
-    project_counter += 1
-    data_chunk = assemble_data_chunk(project)
-    data_chunk[0][0] = 'Project ' + str(project_counter)  # Set the project number in the first cell of the first row
-    sheet.update_values('A' + str((project_counter - 1) * 6 + 1), data_chunk) 
-    
+def clear_sheet():
+    # Clear the sheet before writing new data
+    sheet.clear(start='A1', end='Z1000')  # Adjust the range as needed
 
-    color = {
-        "red": 171 / 255,
-        "green": 203 / 255,
-        "blue": 255 / 255
-    }
-    
-    factor = 0.5
-    if project.department == "ME":
-        color = {
-            "red": ME_color[0] + (1 - ME_color[0]) * factor,  # Slightly lighter
-            "green": ME_color[1] + (1 - ME_color[1]) * factor,
-            "blue": ME_color[2] + (1 - ME_color[2]) * factor,
-  
-        }
-    elif project.department == "ChE":
-        color = {
-            "red": ChE_color[0] + (1 - ChE_color[0]) * factor,
-            "green": ChE_color[1] + (1 - ChE_color[1]) * factor,
-            "blue": ChE_color[2] + (1 - ChE_color[2]) * factor,
-        }
-    elif project.department == "ECE":
-        color = {
-            "red": ECE_color[0] + (1 - ECE_color[0]) * factor,
-            "green": ECE_color[1] + (1 - ECE_color[1]) * factor,
-            "blue": ECE_color[2] + (1 - ECE_color[2]) * factor,
-        }
-    elif project.department == "CEE":
-        color = {
-            "red": CEE_color[0] + (1 - CEE_color[0]) * factor,
-            "green": CEE_color[1] + (1 - CEE_color[1]) * factor,
-            "blue": CEE_color[2] + (1 - CEE_color[2]) * factor,
-        }
-    elif project.department == "EXE":
-        color = {
-            "red": EXE_color[0] + (1 - EXE_color[0]) * factor,
-            "green": EXE_color[1] + (1 - EXE_color[1]) * factor,
-            "blue": EXE_color[2] + (1 - EXE_color[2]) * factor,
-        }
-    elif project.department == "BME":
-        color = {
-            "red": BME_color[0] + (1 - BME_color[0]) * factor,
-            "green": BME_color[1] + (1 - BME_color[1]) * factor,
-            "blue": BME_color[2] + (1 - BME_color[2]) * factor,
-        }
-    elif project.department == "EET":
-        color = {
-            "red": 0.95,
-            "green": 0.95,
-            "blue": 0.44
-        }
-    elif project.department == "MET":
-        color = {
-            "red": 0.95,
-            "green": 0.44,
-            "blue": 0.44
-        }
-
-    format = {
-        "numberFormat": {
-            
-        },
-        "backgroundColor": color,
-        "backgroundColorStyle":{ "rgbColor": color},
-        "borders": {
-
-        },
-        "padding": {
-
-        },
-        "horizontalAlignment": "CENTER",
-        "verticalAlignment": "MIDDLE",
-        "wrapStrategy": "WRAP",
-        "textFormat": {
-        },
-        "textRotation": {
-        }
-    }
-    titleFormat = {
-        "textFormat": {
-            "fontSize": 16,
-            "bold": True
-        },
-        "horizontalAlignment": "CENTER",
-        "verticalAlignment": "MIDDLE",
-        "wrapStrategy": "WRAP",
-        "backgroundColor": color,
-        "borders": {
-            "top": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-            "bottom": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-            "left": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-            "right": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}}
-            }
-    }
-    seekingFormat = {
-        "textFormat": {
-            "fontSize": 14,
-            "bold": True
-        },
-        "horizontalAlignment": "CENTER",
-        "verticalAlignment": "MIDDLE",
-        "wrapStrategy": "WRAP",
-        "backgroundColor": color,
-    }
-    
-    #Merging the rows 1 and 3 of the set, columns 2-7
-    row_start = (project_counter - 1) * 6 + 1
-    sheet.merge_cells((row_start, 2),(row_start,6 ))
-    cell = sheet.cell((row_start, 2))
-    cell.wrap_strategy = 'WRAP' 
-    sheet.merge_cells((row_start + 2, 2), (row_start + 2, 7))
-    cell = sheet.cell((row_start + 2, 2))
-    cell.wrap_strategy = 'WRAP'
-    #Merge row 6, columns 3-7
-    sheet.merge_cells((row_start + 5, 3), (row_start + 5, 7))
-    sheet.merge_cells((row_start, 8), (row_start + 5, 12))
-    #Formatting the data chunk
-    sheet.apply_format('A' + str((project_counter - 1) * 6 + 1) + ':G' + str((project_counter - 1) * 6 + 1),titleFormat)
-    sheet.apply_format('A' + str((project_counter - 1) * 6 + 2) + ':G' + str((project_counter - 1) * 6 + 6), format )
-    
-
-   
-    #Merge the cells to just display total students, rather than specifics
-    if project.request_classification =='General: I would like to specify a general number of students required.':
-        sheet.merge_cells((row_start + 3, 2), (row_start + 3, 7))
-        sheet.cell((row_start + 3, 2)).value = 'Total Students: ' + str(project.min_students_required)
-        cell = sheet.cell((row_start + 3, 2))
-        seekingFormat["backgroundColor"] = {"red":1, "green": 1, "blue": 1}
-        sheet.apply_format('B' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
-        pass
-    else:
-         #Go through each cell and check if it contains ME, etc, to change the color of the cell
-        sheet.apply_format('A' + str((project_counter - 1) * 6 + 4) + ':G' + str((project_counter - 1) * 6 + 4), seekingFormat)
-        for val in data_chunk:
-            for i in range(1, 7):
-                print(val[i])  # Debugging line to see the values being processed
-                if val[i] == 'ME: ' + project.me_students:
-                    sheet.cell((row_start + 3, i + 1)).color = ME_color
-                elif val[i] == 'ChE: ' + project.che_students:
-                    sheet.cell((row_start + 3, i + 1)).color = ChE_color
-                elif val[i] == 'ECE: ' + project.ece_students:
-                    sheet.cell((row_start + 3, i + 1)).color = ECE_color
-                elif val[i] == 'CEE: ' + project.cee_students:
-                    sheet.cell((row_start + 3, i + 1)).color = CEE_color
-                elif val[i] == 'EXE: ' + project.exe_students:
-                    sheet.cell((row_start + 3, i + 1)).color = EXE_color
-                elif val[i] == 'BME: ' + project.bme_students:
-                    sheet.cell((row_start + 3, i + 1)).color = BME_color
-    
-
-
-
-
-
-
+def updateSheet():
+    get_project_data()  # Load the project data from the CSV
+    clear_sheet()  # Clear the sheet before updating
+    project_counter = 0
+    for project in Projects:
+        print(project.project_type)
+        project_counter += 1
+        data_chunk = assemble_data_chunk(project)
+        data_chunk[0][0] = 'Project ' + str(project_counter)  # Set the project number in the first cell of the first row
+        sheet.update_values('A' + str((project_counter - 1) * 5 + 1), data_chunk) 
         
+
+        color = {
+            "red": 171 / 255,
+            "green": 203 / 255,
+            "blue": 255 / 255
+        }
+        
+        factor = 0.5
+        if project.department == "ME":
+            color = {
+                "red": ME_color[0] + (1 - ME_color[0]) * factor,  # Slightly lighter
+                "green": ME_color[1] + (1 - ME_color[1]) * factor,
+                "blue": ME_color[2] + (1 - ME_color[2]) * factor,
+    
+            }
+        elif project.department == "ChE":
+            color = {
+                "red": ChE_color[0] + (1 - ChE_color[0]) * factor,
+                "green": ChE_color[1] + (1 - ChE_color[1]) * factor,
+                "blue": ChE_color[2] + (1 - ChE_color[2]) * factor,
+            }
+        elif project.department == "ECE":
+            color = {
+                "red": ECE_color[0] + (1 - ECE_color[0]) * factor,
+                "green": ECE_color[1] + (1 - ECE_color[1]) * factor,
+                "blue": ECE_color[2] + (1 - ECE_color[2]) * factor,
+            }
+        elif project.department == "CEE":
+            color = {
+                "red": CEE_color[0] + (1 - CEE_color[0]) * factor,
+                "green": CEE_color[1] + (1 - CEE_color[1]) * factor,
+                "blue": CEE_color[2] + (1 - CEE_color[2]) * factor,
+            }
+        elif project.department == "EXE":
+            color = {
+                "red": EXE_color[0] + (1 - EXE_color[0]) * factor,
+                "green": EXE_color[1] + (1 - EXE_color[1]) * factor,
+                "blue": EXE_color[2] + (1 - EXE_color[2]) * factor,
+            }
+        elif project.department == "BME":
+            color = {
+                "red": BME_color[0] + (1 - BME_color[0]) * factor,
+                "green": BME_color[1] + (1 - BME_color[1]) * factor,
+                "blue": BME_color[2] + (1 - BME_color[2]) * factor,
+            }
+        elif project.department == "EET":
+            color = {
+                "red": 0.95,
+                "green": 0.95,
+                "blue": 0.44
+            }
+        elif project.department == "MET":
+            color = {
+                "red": 0.95,
+                "green": 0.44,
+                "blue": 0.44
+            }
+
+        format = {
+            "numberFormat": {
+                
+            },
+            "backgroundColor": color,
+            "backgroundColorStyle":{ "rgbColor": color},
+            "borders": {
+
+            },
+            "padding": {
+
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "textFormat": {
+            },
+            "textRotation": {
+            }
+        }
+        titleFormat = {
+            "textFormat": {
+                "fontSize": 16,
+                "bold": True
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "backgroundColor": color,
+            "borders": {
+                "top": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+                "bottom": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+                "left": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+                "right": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}}
+                }
+        }
+        seekingFormat = {
+            "textFormat": {
+                "fontSize": 14,
+                "bold": True
+            },
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "backgroundColor": color,
+        }
+        white_background = {
+            "backgroundColor": {"red": 1, "green": 1, "blue": 1},
+            "horizontalAlignment": "CENTER",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+
+        }
+        
+        #Merging the rows 1 and 3 of the set, columns 2-7
+        row_start = (project_counter - 1) * 5 + 1
+        sheet.merge_cells((row_start, 2),(row_start,6 ))
+        cell = sheet.cell((row_start, 2))
+        cell.wrap_strategy = 'WRAP' 
+        sheet.merge_cells((row_start + 2, 2), (row_start + 2, 7))
+        cell = sheet.cell((row_start + 2, 2))
+        cell.wrap_strategy = 'WRAP'
+        sheet.merge_cells((row_start, 8), (row_start + 4, 11))
+        #Formatting the data chunk
+        sheet.apply_format('A' + str((project_counter - 1) * 5 + 1) + ':G' + str((project_counter - 1) * 5 + 1),titleFormat)
+        sheet.apply_format('A' + str((project_counter - 1) * 5 + 2) + ':G' + str((project_counter - 1) * 5 + 5), format )
+        sheet.apply_format('B' + str((project_counter - 1) * 5 + 2) + ':F' + str((project_counter - 1) * 5 + 3), white_background)
+
+    
+        #Merge the cells to just display total students, rather than specifics
+        if project.request_classification =='General: I would like to specify a general number of students required.':
+            sheet.merge_cells((row_start + 3, 2), (row_start + 3, 7))
+            sheet.cell((row_start + 3, 2)).value = 'Total Students: ' + str(project.min_students_required)
+            cell = sheet.cell((row_start + 3, 2))
+            seekingFormat["backgroundColor"] = {"red":1, "green": 1, "blue": 1}
+            sheet.apply_format('B' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
+            pass
+        else:
+            #Go through each cell and check if it contains ME, etc, to change the color of the cell
+            sheet.apply_format('A' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
+            for val in data_chunk:
+                for i in range(1, 7):
+                    print(val[i])  # Debugging line to see the values being processed
+                    if val[i] == 'ME: ' + project.me_students:
+                        sheet.cell((row_start + 3, i + 1)).color = ME_color
+                    elif val[i] == 'ChE: ' + project.che_students:
+                        sheet.cell((row_start + 3, i + 1)).color = ChE_color
+                    elif val[i] == 'ECE: ' + project.ece_students:
+                        sheet.cell((row_start + 3, i + 1)).color = ECE_color
+                    elif val[i] == 'CEE: ' + project.cee_students:
+                        sheet.cell((row_start + 3, i + 1)).color = CEE_color
+                    elif val[i] == 'EXE: ' + project.exe_students:
+                        sheet.cell((row_start + 3, i + 1)).color = EXE_color
+                    elif val[i] == 'BME: ' + project.bme_students:
+                        sheet.cell((row_start + 3, i + 1)).color = BME_color
+        
+
+
+
+
+
+#updateSheet()  # Call the function to update the sheet with project data
