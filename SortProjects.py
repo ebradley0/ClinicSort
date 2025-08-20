@@ -152,7 +152,6 @@ Projects = []
 
 
 def get_project_data():
-    Projects = []
     with open(csvPath, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # Skip header row
@@ -162,11 +161,13 @@ def get_project_data():
                 project = Project(row)
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
+                for Existingproject in Projects:
+                    if (Existingproject.project_name) == (project.project_name): #Check if the project was already stored
+                        print("Duplicate project found:", project.project_name)
+                        continue  # Skip adding this duplicate project
                 Projects.append(project)
         print(len(Projects), " projects loaded.")
         csvfile.close()
-
-    return Projects
     #Clinic displays are in blocks of 5x6 cells
 
 #get_project_data()
@@ -200,7 +201,7 @@ def clear_sheet():
     sheet.clear(start='A1', end='Z1000')  # Adjust the range as needed
 
 def updateSheet():
-    Projects = get_project_data()  # Load the project data from the CSV
+    get_project_data()  # Load the project data from the CSV
     clear_sheet()  # Clear the sheet before updating
     project_counter = 0
     print("Updating the sheet with project data...")
