@@ -79,7 +79,7 @@ BME_text_color = (
 )
 
 sheet = client.open('Clinic Project View Fall FY26').sheet1 #Select the first page of the sheet
-
+project_counter = 0
 def initialize_sheet():
     client = pygsheets.authorize(client_secret='client_secret.json')
     sheet = client.open('Clinic Project View Fall FY26').sheet1  # Select the first page of the sheet
@@ -145,11 +145,19 @@ class Project:
     def check_max_students(self):
         if self.max_students_for_operation == '':
             self.max_students_for_operation = int(self.me_students) + int(self.che_students) + int(self.ece_students) + int(self.cee_students) + int(self.exe_students) + int(self.bme_students)
+    
         return int(self.max_students_for_operation)
+    def fixLinks(self):
+        count = 1
+        for link in self.project_url_links:
+            newlink = f'=HYPERLINK("{link.strip()}", "[{count}]")'
+            count += 1
+            self.project_url_links[self.project_url_links.index(link)] = newlink
+        self.project_image = f'=HYPERLINK("{self.project_image}", IMAGE("https://drive.google.com/thumbnail?id={self.project_image.split("id=")[-1]}&sz=h800w800"))'
 
 
 Projects = []
-
+completed_projects = []
 
 def get_project_data():
     with open(csvPath, encoding='utf-8') as csvfile:
@@ -161,10 +169,10 @@ def get_project_data():
                 project = Project(row)
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
-                for Existingproject in Projects:
-                    if (Existingproject.project_name) == (project.project_name): #Check if the project was already stored
-                        print("Duplicate project found:", project.project_name)
-                        continue  # Skip adding this duplicate project
+                if any(existing.project_name == project.project_name for existing in Projects):
+                    print("Duplicate project found, skipping:", project.project_name)
+                    continue
+                project.fixLinks()
                 Projects.append(project)
         print(len(Projects), " projects loaded.")
         csvfile.close()
@@ -182,11 +190,7 @@ def rgb_dict_to_hex(rgb):
 def assemble_data_chunk(project):
     #Arrange the hyperlinks properly
     count = 1
-    for link in project.project_url_links:
-        newlink = f'=HYPERLINK("{link.strip()}", "[{count}]")'
-        count += 1
-        project.project_url_links[project.project_url_links.index(link)] = newlink
-    project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=h800w800"))'
+    
     data_chunk = [
         ['', project.project_name + ' | ' + project.department, '', '', '', '', '', project.project_image],
         ['Manager(s)'] + project.manager_last_names + ([''] * (5 - len(project.manager_last_names)) + ['PI: XX']),
@@ -202,12 +206,15 @@ def clear_sheet():
 
 def updateSheet():
     get_project_data()  # Load the project data from the CSV
-    clear_sheet()  # Clear the sheet before updating
-    project_counter = 0
+    #clear_sheet()  # Clear the sheet before updating
+    
     print("Updating the sheet with project data...")
     for project in Projects:
-        print(project.project_type)
-        project_counter += 1
+        if project in completed_projects:
+            print("Skipping already completed project:", project.project_name)
+            continue
+        #print(project.project_type)
+        project_counter = Projects.index(project) + 1
         data_chunk = assemble_data_chunk(project)
         data_chunk[0][0] = 'Project ' + str(project_counter)  # Set the project number in the first cell of the first row
         sheet.update_values('A' + str((project_counter - 1) * 5 + 1), data_chunk) 
@@ -341,7 +348,7 @@ def updateSheet():
             "wrapStrategy": "WRAP",
             "backgroundColor": color,
             "borders": {
-                "top": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
+                "top": {"style": "SOLID", "width": 1, "colorStyle": {"rgbColor": black_rgb}},
                 }
         }
         seekingFormat = {
@@ -409,7 +416,7 @@ def updateSheet():
             sheet.apply_format('B' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
             for val in data_chunk:
                 for i in range(1, 7):
-                    print(val[i])  # Debugging line to see the values being processed
+                    #print(val[i])  # Debugging line to see the values being processed
                     if val[i] == 'ME: ' + project.max_me_students:
                         sheet.cell((row_start + 3, i + 1)).color = ME_color
                     elif val[i] == 'ChE: ' + project.max_che_students:
@@ -423,7 +430,7 @@ def updateSheet():
                     elif val[i] == 'BME: ' + project.max_bme_students:
                         sheet.cell((row_start + 3, i + 1)).color = BME_color
         
-
+        completed_projects.append(project)
 
 
 
