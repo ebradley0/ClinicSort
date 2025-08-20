@@ -3,3 +3,4 @@ sheets.googleapis.com-python.json
 .venv/
 __pycache__/
 *.csv
+failed_students.txt
