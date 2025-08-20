@@ -17,35 +17,65 @@ black_rgb = {
 }
 
 ME_color = (
-     0.44,
-     0.67,
-    0.95
+     0.788235294117647,
+     0.8549019607843137,
+    0.9725490196
 )
 
 ChE_color = (
-     0.48,
-     0.95,
-    0.44
+     0.8509803921568627,
+     0.8235294117647058,
+    0.9137254901960784
 )
 ECE_color = (
-    0.95,
-     0.92,
-     0.44
+    0.9882352941176471,
+     0.8980392156862745,
+     0.803921568627451
 )
 CEE_color = (
-  0.95,
-    0.63,
-  0.44
+  0.8509803921568627,
+    0.9176470588235294,
+  0.8274509803921568
 )
 EXE_color = (
-    1.0,
-    0.28,
-   0.28
+    0.5019607843137255,
+    0.9490196078431372,
+   0.9215686274509803
 )
 BME_color = (
-    0.43,
-    0.95,
-    0.75
+    0.9019607843137255,
+    0.7215686274509804,
+    0.6862745098039216
+)
+ME_text_color = (
+    0.23529411764705882,
+    0.47058823529411764,
+    0.8470588235294118,
+)
+ChE_text_color = (
+    0.403921568627451,
+    0.3058823529411765,
+    0.6549019607843137,
+)
+ECE_text_color = (
+    0.9019607843137255,
+    0.5686274509803921,
+    0.2196078431372549,
+)
+CEE_text_color = (
+    0.41568627450980394,
+    0.6588235294117647,
+    0.30980392156862746
+)
+EXE_text_color = (    
+    0.12941176470588237,
+    0.4666666666666667,
+    0.4470588235294118
+)
+BME_text_color = (
+    0.6509803921568628,
+    0.10980392156862745,
+    0,
 )
 
 sheet = client.open('Clinic Project View Fall FY26').sheet1 #Select the first page of the sheet
@@ -60,7 +90,7 @@ class Project:
     def __init__(self, row):
         self.timestamp = row[0]
         self.email = row[1]
-        self.manager_last_names = row[2]
+        self.manager_last_names = row[2].split(',') if row[2] else []
         self.department = row[3]
         self.project_name = row[4]
         self.project_description = row[5]
@@ -97,6 +127,7 @@ class Project:
         self.current_bme_students = 0
         self.current_eet_students = 0
         self.current_met_students = 0
+        self.manager_last_names[0] = f'=HYPERLINK("mailto:{self.email}", "{self.manager_last_names[0].strip()}")'  # Make the first manager a mailto link
 
     def __str__(self):
         return f"{self.project_name} ({self.department}) - {self.project_description}"
@@ -156,8 +187,8 @@ def assemble_data_chunk(project):
         project.project_url_links[project.project_url_links.index(link)] = newlink
     project.project_image = f'=HYPERLINK("{project.project_image}", IMAGE("https://drive.google.com/thumbnail?id={project.project_image.split("id=")[-1]}&sz=h800w800"))'
     data_chunk = [
-        ['', project.project_name + ' | ' + project.department, '', '', '', '', 'PI: ', project.project_image],
-        ['Manager(s)', project.manager_last_names, '', '', '', '', ''],
+        ['', project.project_name + ' | ' + project.department, '', '', '', '', '', project.project_image],
+        ['Manager(s)'] + project.manager_last_names + ([''] * (5 - len(project.manager_last_names)) + ['PI: XX']),
         ['Description', project.project_description, '', '', '', '', ''],
         ['Seeking', 'ME: ' + project.max_me_students, 'ChE: ' + project.max_che_students, 'ECE: ' + project.max_ece_students, 'CEE: ' + project.max_cee_students, 'EXE: ' + project.max_exe_students, 'BME: ' + project.max_bme_students],
         ['Links:'] + project.project_url_links + [''] * (6 - len(project.project_url_links)),
@@ -187,7 +218,7 @@ def updateSheet():
             "blue": 255 / 255
         }
         
-        factor = 0.5
+        factor = 0
         if project.department == "ME":
             color = {
                 "red": ME_color[0] + (1 - ME_color[0]) * factor,  # Slightly lighter
@@ -195,11 +226,21 @@ def updateSheet():
                 "blue": ME_color[2] + (1 - ME_color[2]) * factor,
     
             }
+            textColor = {
+                "red": ME_text_color[0],
+                "green": ME_text_color[1],
+                "blue": ME_text_color[2],
+            }
         elif project.department == "ChE":
             color = {
                 "red": ChE_color[0] + (1 - ChE_color[0]) * factor,
                 "green": ChE_color[1] + (1 - ChE_color[1]) * factor,
                 "blue": ChE_color[2] + (1 - ChE_color[2]) * factor,
+            }
+            textColor = {
+                "red": ChE_text_color[0],
+                "green": ChE_text_color[1],
+                "blue": ChE_text_color[2],
             }
         elif project.department == "ECE":
             color = {
@@ -207,11 +248,21 @@ def updateSheet():
                 "green": ECE_color[1] + (1 - ECE_color[1]) * factor,
                 "blue": ECE_color[2] + (1 - ECE_color[2]) * factor,
             }
+            textColor = {
+                "red": ECE_text_color[0],
+                "green": ECE_text_color[1],
+                "blue": ECE_text_color[2],
+            }
         elif project.department == "CEE":
             color = {
                 "red": CEE_color[0] + (1 - CEE_color[0]) * factor,
                 "green": CEE_color[1] + (1 - CEE_color[1]) * factor,
                 "blue": CEE_color[2] + (1 - CEE_color[2]) * factor,
+            }
+            textColor = {
+                "red": CEE_text_color[0],
+                "green": CEE_text_color[1],
+                "blue": CEE_text_color[2],
             }
         elif project.department == "EXE":
             color = {
@@ -219,11 +270,21 @@ def updateSheet():
                 "green": EXE_color[1] + (1 - EXE_color[1]) * factor,
                 "blue": EXE_color[2] + (1 - EXE_color[2]) * factor,
             }
+            textColor = {
+                "red": EXE_text_color[0],
+                "green": EXE_text_color[1],
+                "blue": EXE_text_color[2],
+            }
         elif project.department == "BME":
             color = {
                 "red": BME_color[0] + (1 - BME_color[0]) * factor,
                 "green": BME_color[1] + (1 - BME_color[1]) * factor,
                 "blue": BME_color[2] + (1 - BME_color[2]) * factor,
+            }
+            textColor = {
+                "red": BME_text_color[0],
+                "green": BME_text_color[1],
+                "blue": BME_text_color[2],
             }
         elif project.department == "EET":
             color = {
@@ -231,11 +292,21 @@ def updateSheet():
                 "green": 0.95,
                 "blue": 0.44
             }
+            textColor = {
+                "red": 0.65,
+                "green": 0.65,
+                "blue": 0
+            }
         elif project.department == "MET":
             color = {
                 "red": 0.95,
                 "green": 0.44,
                 "blue": 0.44
+            }
+            textColor = {
+                "red": 0.65,
+                "green": 0,
+                "blue": 0
             }
 
         format = {
@@ -260,8 +331,9 @@ def updateSheet():
         }
         titleFormat = {
             "textFormat": {
-                "fontSize": 16,
-                "bold": True
+                "fontSize": 10,
+                "bold": True,
+                "fontFamily": "Verdana"
             },
             "horizontalAlignment": "CENTER",
             "verticalAlignment": "MIDDLE",
@@ -269,15 +341,13 @@ def updateSheet():
             "backgroundColor": color,
             "borders": {
                 "top": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-                "bottom": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-                "left": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}},
-                "right": {"style": "SOLID", "width": 2, "colorStyle": {"rgbColor": black_rgb}}
                 }
         }
         seekingFormat = {
             "textFormat": {
-                "fontSize": 14,
-                "bold": True
+                "fontSize": 10,
+                "bold": False,
+                "fontFamily": "Verdana"
             },
             "horizontalAlignment": "CENTER",
             "verticalAlignment": "MIDDLE",
@@ -286,10 +356,25 @@ def updateSheet():
         }
         white_background = {
             "backgroundColor": {"red": 1, "green": 1, "blue": 1},
-            "horizontalAlignment": "CENTER",
+            "horizontalAlignment": "LEFT",
             "verticalAlignment": "MIDDLE",
             "wrapStrategy": "WRAP",
+            "textFormat": {
+                "fontSize": 10,
+                "bold": False,
+                "fontFamily": "Verdana"}
 
+        }
+        rightJustified = {
+            "horizontalAlignment": "RIGHT",
+            "verticalAlignment": "MIDDLE",
+            "wrapStrategy": "WRAP",
+            "backgroundColor": color,
+            "textFormat": {
+                "fontSize": 10,
+                "bold": False,
+                "fontFamily": "Verdana",
+                "foregroundColor": textColor}
         }
         
         #Merging the rows 1 and 3 of the set, columns 2-7
@@ -300,11 +385,14 @@ def updateSheet():
         sheet.merge_cells((row_start + 2, 2), (row_start + 2, 7))
         cell = sheet.cell((row_start + 2, 2))
         cell.wrap_strategy = 'WRAP'
-        sheet.merge_cells((row_start, 8), (row_start + 4, 11))
+        sheet.merge_cells((row_start, 8), (row_start + 4, 9)) #Merging the image cells
+        sheet.apply_format('H' + str(row_start) + ':I' + str(row_start + 4), white_background)
         #Formatting the data chunk
         sheet.apply_format('A' + str((project_counter - 1) * 5 + 1) + ':G' + str((project_counter - 1) * 5 + 1),titleFormat)
         sheet.apply_format('A' + str((project_counter - 1) * 5 + 2) + ':G' + str((project_counter - 1) * 5 + 5), format )
         sheet.apply_format('B' + str((project_counter - 1) * 5 + 2) + ':F' + str((project_counter - 1) * 5 + 3), white_background)
+        sheet.apply_format('A' + str((project_counter - 1) * 5 + 2) + ':A' + str((project_counter - 1) * 5 + 5), rightJustified)
+        
 
     
         #Merge the cells to just display total students, rather than specifics
@@ -317,7 +405,7 @@ def updateSheet():
             pass
         else:
             #Go through each cell and check if it contains ME, etc, to change the color of the cell
-            sheet.apply_format('A' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
+            sheet.apply_format('B' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
             for val in data_chunk:
                 for i in range(1, 7):
                     print(val[i])  # Debugging line to see the values being processed
