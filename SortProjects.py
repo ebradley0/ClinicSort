@@ -6,7 +6,7 @@ import pygsheets
 
 
 home_directory = os.getcwd()
-csvPath = home_directory + '/Professor Clinic Request (Responses) - Form.csv'
+csvPath = home_directory + '/Professor Clinic Request (Responses) [Spring 2025] - Form.csv'
 
 client = pygsheets.authorize(client_secret='client_secret.json')
 
@@ -116,6 +116,8 @@ class Project:
         self.max_cee_students = (row[23])
         self.max_exe_students = (row[24])
         self.max_bme_students = (row[25])
+        self.max_eet_students = 99999  # Default to a large number if not provided
+        self.max_met_students = 99999
         self.project_type = row[26]
         self.project_justification = row[27]
         self.current_students = []
@@ -128,24 +130,27 @@ class Project:
         self.current_eet_students = 0
         self.current_met_students = 0
         self.manager_last_names[0] = f'=HYPERLINK("mailto:{self.email}", "{self.manager_last_names[0].strip()}")'  # Make the first manager a mailto link
-
+        print("Loaded project:", self.project_name)
+        print("Max students for operation:", self.max_students_for_operation)
     def __str__(self):
         return f"{self.project_name} ({self.department}) - {self.project_description}"
     
     def check_if_major_reqs(self):
-        if self.me_students == '' and self.che_students == '' and self.ece_students == '' and self.cee_students == '' and self.exe_students == '' and self.bme_students == '':
-            #Max them out so theres always room no matter the range, and fall back to max students for operation
-            self.me_students = self.max_students_for_operation
-            self.che_students = self.max_students_for_operation
-            self.ece_students = self.max_students_for_operation
-            self.cee_students = self.max_students_for_operation
-            self.exe_students = self.max_students_for_operation
-            self.bme_students = self.max_students_for_operation
-            return False
+        if self.me_students == '':
+            self.max_me_students = self.max_students_for_operation
+        if self.che_students == '':
+            self.max_che_students = self.max_students_for_operation
+        if self.ece_students == '':
+            self.max_ece_students = self.max_students_for_operation
+        if self.cee_students == '':
+            self.max_cee_students = self.max_students_for_operation
+        if self.exe_students == '':
+            self.max_exe_students = self.max_students_for_operation
+        if self.bme_students == '':
+            self.max_bme_students = self.max_students_for_operation
     def check_max_students(self):
         if self.max_students_for_operation == '':
-            self.max_students_for_operation = int(self.me_students) + int(self.che_students) + int(self.ece_students) + int(self.cee_students) + int(self.exe_students) + int(self.bme_students)
-    
+            self.max_students_for_operation = int(self.max_me_students) + int(self.max_che_students) + int(self.max_ece_students) + int(self.max_cee_students) + int(self.max_exe_students) + int(self.max_bme_students)
         return int(self.max_students_for_operation)
     def fixLinks(self):
         count = 1
@@ -176,6 +181,7 @@ def get_project_data():
                 Projects.append(project)
         print(len(Projects), " projects loaded.")
         csvfile.close()
+        return Projects
     #Clinic displays are in blocks of 5x6 cells
 
 #get_project_data()
@@ -193,7 +199,7 @@ def assemble_data_chunk(project):
     
     data_chunk = [
         ['', project.project_name + ' | ' + project.department, '', '', '', '', '', project.project_image],
-        ['Manager(s)'] + project.manager_last_names + ([''] * (5 - len(project.manager_last_names)) + ['PI: XX']),
+        ['Manager(s)'] + project.manager_last_names + ([''] * (5 - len(project.manager_last_names)) + ['PI: 0']),
         ['Description', project.project_description, '', '', '', '', ''],
         ['Seeking', 'ME: ' + project.max_me_students, 'ChE: ' + project.max_che_students, 'ECE: ' + project.max_ece_students, 'CEE: ' + project.max_cee_students, 'EXE: ' + project.max_exe_students, 'BME: ' + project.max_bme_students],
         ['Links:'] + project.project_url_links + [''] * (6 - len(project.project_url_links)),
@@ -400,13 +406,14 @@ def updateSheet():
         sheet.apply_format('A' + str((project_counter - 1) * 5 + 2) + ':G' + str((project_counter - 1) * 5 + 5), format )
         sheet.apply_format('B' + str((project_counter - 1) * 5 + 2) + ':F' + str((project_counter - 1) * 5 + 3), white_background)
         sheet.apply_format('A' + str((project_counter - 1) * 5 + 2) + ':A' + str((project_counter - 1) * 5 + 5), rightJustified)
+        sheet.apply_format('G' + str((project_counter - 1) * 5 + 2) +':G' + str((project_counter - 1) * 5 + 2)  , rightJustified)
         
 
     
         #Merge the cells to just display total students, rather than specifics
         if project.request_classification =='General: I would like to specify a general number of students required.':
             sheet.merge_cells((row_start + 3, 2), (row_start + 3, 7))
-            sheet.cell((row_start + 3, 2)).value = 'Total Students: ' + str(project.min_students_required)
+            sheet.cell((row_start + 3, 2)).value = 'Total Students: ' + str(project.max_students_for_operation)
             cell = sheet.cell((row_start + 3, 2))
             seekingFormat["backgroundColor"] = {"red":1, "green": 1, "blue": 1}
             sheet.apply_format('B' + str((project_counter - 1) * 5 + 4) + ':G' + str((project_counter - 1) * 5 + 4), seekingFormat)
