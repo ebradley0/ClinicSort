@@ -126,11 +126,13 @@ def filter_student(student):
     for project_name in student_projects:
         project_name = project_name.strip()
         if project_name:
-           
-            projectJunk = project_name.split(' - ')
-            
-            project = next((p for p in Projects if (p.project_name.strip()) == (project_name.strip())), None)
 
+            projectJunk = project_name.split(' ')
+            project_name = ' '.join(projectJunk[2:]).strip()  # Combine all parts after the first hyphen
+            project = next((p for p in Projects if (p.project_name.strip()) == (project_name.strip())), None)
+            for p in Projects:
+                print(f"Project: '{normalize(p.project_name)}'")
+                print(f"Looking for: '{normalize(project_name)}'")
             major_counts_map = {
                     'ME': 'current_me_students',
                     'ChE': 'current_che_students',
@@ -157,17 +159,14 @@ def filter_student(student):
             RequiredAttribute = major_required_map.get(student_major, None)
 
             print(project_name, student_major, currentAttribute, RequiredAttribute)
-            if project and len(project.current_students) < int(project.max_students_for_operation):
+            if len(project.current_students) < int(project.max_students_for_operation):
                 #Check if the students major matches the project requirements
                 if int(getattr(project, currentAttribute)) < int(getattr(project, RequiredAttribute)): #Check if the project can accept more students of this major
                     # Check if the student is already in the project
-                    
-                    # Check if the project can still accept students
-                    if len(project.current_students) < int(project.max_students_for_operation):
                         # Add student to the project
                         if student not in project.current_students:
                             project.current_students.append(student)
-                            setattr(project, currentAttribute) + 1
+                            setattr(project, currentAttribute, getattr(project, currentAttribute) + 1)
                             print(f"Added {student.email} to project {project_name}")
                             return True
     
@@ -176,30 +175,23 @@ def filter_student(student):
 
 
 for senior in Seniors:
-    
-    print(f"Filtering senior: {senior.email}")   
     if not filter_student(senior):
-        print(f"Could not add Senior {senior.email} to any project.")
+       
         failed_students.append(senior.email)
 
 for junior in Juniors:
     if not filter_student(junior):
-        print(f"Could not add Junior {junior.email} to any project.")
         failed_students.append(junior.email)
 
 
 
 
 
-for student in failed_students:
-    print(f"Failed to add student: " + student)
-
 totalStudentSlots = 0
 for project in Projects:
     totalStudentSlots += int(project.max_students_for_operation)
+    print("Project: ", project.project_name)
 
-print("Total Student Slots Available: ", totalStudentSlots)
 
-print("Total Students Processed: ", len(Students))
 
-print("Total Failed Students: ", len(failed_students)  )
+print("Total Failed Students: ", len(failed_students) / len(Students) * 100, "%")

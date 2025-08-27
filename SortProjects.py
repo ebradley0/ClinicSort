@@ -172,6 +172,8 @@ def get_project_data():
         for row in reader:
             if len(row) > 1:  # Ensure the row is not empty
                 project = Project(row)
+                if project is None:
+                    break
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
                 if any(existing.project_name == project.project_name for existing in Projects):
