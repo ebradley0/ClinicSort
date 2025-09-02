@@ -6,7 +6,8 @@ import pygsheets
 
 
 home_directory = os.getcwd()
-csvPath = home_directory + '/Professor Clinic Request (Responses) [Spring 2025] - Form.csv'
+csvPath = home_directory + '/Professor Clinic Request (Responses) - Form.csv'
+AddedProjectsPath = home_directory + '/AddedProjects.csv'
 
 client = pygsheets.authorize(client_secret='client_secret.json')
 
@@ -163,7 +164,7 @@ class Project:
 
 Projects = []
 completed_projects = []
-
+AddedProjects = []
 def get_project_data():
     with open(csvPath, encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
@@ -179,8 +180,10 @@ def get_project_data():
                 if any(existing.project_name == project.project_name for existing in Projects):
                     print("Duplicate project found, skipping:", project.project_name)
                     continue
+                
                 project.fixLinks()
                 Projects.append(project)
+                
         print(len(Projects), " projects loaded.")
         csvfile.close()
         return Projects
