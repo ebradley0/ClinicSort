@@ -130,9 +130,6 @@ def filter_student(student):
             projectJunk = project_name.split(' ')
             project_name = ' '.join(projectJunk[2:]).strip()  # Combine all parts after the first hyphen
             project = next((p for p in Projects if (p.project_name.strip()) == (project_name.strip())), None)
-            for p in Projects:
-                print(f"Project: '{normalize(p.project_name)}'")
-                print(f"Looking for: '{normalize(project_name)}'")
             major_counts_map = {
                     'ME': 'current_me_students',
                     'ChE': 'current_che_students',
@@ -190,8 +187,11 @@ for junior in Juniors:
 totalStudentSlots = 0
 for project in Projects:
     totalStudentSlots += int(project.max_students_for_operation)
-    print("Project: ", project.project_name)
-
+    print('===========================================================================')
+    print("Project: ", project.project_name, " has ", len(project.current_students), " students assigned out of ", project.max_students_for_operation)
+    for student in project.current_students:
+        print(" - ", student.first_name, student.last_name, " (", student.email, ")")
+    print('===========================================================================')
 
 
 print("Total Failed Students: ", len(failed_students) / len(Students) * 100, "%")
