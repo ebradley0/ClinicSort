@@ -178,7 +178,7 @@ def get_project_data():
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
                 if any(existing.project_name == project.project_name for existing in Projects):
-                    print("Duplicate project found, skipping:", project.project_name)
+                    #print("Duplicate project found, skipping:", project.project_name)
                     continue
                 
                 project.fixLinks()
@@ -215,17 +215,26 @@ def clear_sheet():
     # Clear the sheet before writing new data
     sheet.clear(start='A1', end='Z1000')  # Adjust the range as needed
 
+
 def updateSheet():
     get_project_data()  # Load the project data from the CSV
     #clear_sheet()  # Clear the sheet before updating
+    with open('AddedProjects.csv', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            AddedProjects.append(row)
     
     print("Updating the sheet with project data...")
     for project in Projects:
         if project in completed_projects:
-            print("Skipping already completed project:", project.project_name)
             continue
         #print(project.project_type)
         project_counter = Projects.index(project) + 1
+        if any(project.project_name.strip() == added[0].strip() for added in AddedProjects):
+            continue
+        
+        print(project.project_name.strip(), " is project number ", project_counter)
+        
         data_chunk = assemble_data_chunk(project)
         data_chunk[0][0] = 'Project ' + str(project_counter)  # Set the project number in the first cell of the first row
         sheet.update_values('A' + str((project_counter - 1) * 5 + 1), data_chunk) 
@@ -443,6 +452,11 @@ def updateSheet():
                         sheet.cell((row_start + 3, i + 1)).color = BME_color
         
         completed_projects.append(project)
+        #Add the projec tto the end of AddedProjects.csv
+        with open('AddedProjects.csv', 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([project.project_name])
+            csvfile.close()
 
 
 

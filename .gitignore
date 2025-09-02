@@ -4,3 +4,4 @@ sheets.googleapis.com-python.json
 __pycache__/
 *.csv
 failed_students.txt
+!AddedProjects.csv

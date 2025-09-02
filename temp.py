@@ -16,6 +16,7 @@ def main():
     
     print('Sleeping for 30 seconds...')
     Projects = SortProjects.get_project_data()
+    SortProjects.updateSheet()
     print(len(Projects), " projects loaded.")
 
     
