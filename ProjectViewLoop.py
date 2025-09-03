@@ -12,8 +12,11 @@ def main():
         response = requests.get(csvDL_link)
         with open('Professor Clinic Request (Responses) - Form.csv', 'wb') as file:
             file.write(response.content)
+     
         updateSheet()
+        print("Checking Project PI")
         ProjectPI()
+        
         print('Sleeping for 30 seconds...')
         time.sleep(30)
 

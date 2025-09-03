@@ -185,7 +185,7 @@ def get_project_data():
                 project.fixLinks()
                 Projects.append(project)
                 
-        print(len(Projects), " projects loaded.")
+        #print(len(Projects), " projects loaded.")
         csvfile.close()
         return Projects
     #Clinic displays are in blocks of 5x6 cells
@@ -458,11 +458,12 @@ def updateSheet():
             writer = csv.writer(csvfile)
             writer.writerow([project.project_name])
             csvfile.close()
-csvDL_link = 'https://docs.google.com/spreadsheets/d/1_pwkw2Ld3o3EZt6FIeJlFeFmleYWzjWoKTNpDPmDbOo/gviz/tq?tqx=out:csv&sheet=Form'
+csvDL_link = 'https://docs.google.com/spreadsheets/d/1_pwkw2Ld3o3EZt6FIeJlFeFmleYWzjWoKTNpDPmDbOo/gviz/tq?tqx=out:csv&sheet=Form Responses 30'
 
 StudentResponses = []
 
 def getStudentResponses():
+    StudentResponses = []
     response = requests.get(csvDL_link)
     with open('Student Clinic Requests (Responses) - Form.csv', 'wb') as file:
         file.write(response.content)
@@ -498,8 +499,10 @@ def ProjectPI():
         
     counter = 0
     for project, pi in PIDict.items():
-        RowCalc = project + 1 +  (counter * 5)
+        
+        RowCalc = (project + 1) +  (counter * 4)
         cell = (RowCalc, 7)
+        print(RowCalc)
         sheet.update_value(cell, 'PI: ' + str(pi))
         counter += 1
         
