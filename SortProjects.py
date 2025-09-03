@@ -1,7 +1,7 @@
 import csv
 import os
 import pygsheets
-
+import requests
 
 
 
@@ -130,6 +130,7 @@ class Project:
         self.current_bme_students = 0
         self.current_eet_students = 0
         self.current_met_students = 0
+        self.project_ID = 0
         self.manager_last_names[0] = f'=HYPERLINK("mailto:{self.email}", "{self.manager_last_names[0].strip()}")'  # Make the first manager a mailto link
         print("Loaded project:", self.project_name)
         print("Max students for operation:", self.max_students_for_operation)
@@ -180,7 +181,7 @@ def get_project_data():
                 if any(existing.project_name == project.project_name for existing in Projects):
                     #print("Duplicate project found, skipping:", project.project_name)
                     continue
-                
+                project.project_ID = (len(Projects) + 1) #Track each projects ID by counting the length of the project and adding one. The one is needed because Project 0 cannot exist, so the counter will always be ahead of the length by one.
                 project.fixLinks()
                 Projects.append(project)
                 
@@ -457,7 +458,56 @@ def updateSheet():
             writer = csv.writer(csvfile)
             writer.writerow([project.project_name])
             csvfile.close()
+csvDL_link = 'https://docs.google.com/spreadsheets/d/1_pwkw2Ld3o3EZt6FIeJlFeFmleYWzjWoKTNpDPmDbOo/gviz/tq?tqx=out:csv&sheet=Form'
 
+StudentResponses = []
+
+def getStudentResponses():
+    response = requests.get(csvDL_link)
+    with open('Student Clinic Requests (Responses) - Form.csv', 'wb') as file:
+        file.write(response.content)
+
+    with open('Student Clinic Requests (Responses) - Form.csv', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)
+        for line in reader:
+            StudentResponses.append(line)
+    print(len(StudentResponses), " student responses loaded.")
+    return StudentResponses
+
+
+
+def ProjectPI():
+    PIDict = {}
+    Projects = get_project_data()  # Load the project data from the CSV
+    for project in Projects:
+        PIDict[project.project_ID] = 0 #Create a dictionary entry for each project, associated by its ID.
+    StudentResponses = getStudentResponses()  # Load the student responses from the CSV
+    for response in StudentResponses:
+        firstChoice = response[6].strip()
+        '''filteredChoice = ' '.join(firstChoice.split(' ')[2:]).strip()
+        filteredChoice = filteredChoice.split()
+        for word in filteredChoice:
+            word.capitalize()
+        filteredChoice = ' '.join(filteredChoice).strip()'''
+        filteredchoice = firstChoice.split(' ')[0].strip()
+        filteredchoice = filteredchoice.replace('-', '')
+        ProjectID = int(filteredchoice) #Grab the number which is at the start of the string
+        PIDict[ProjectID] += 1 #Add one to the PI counter
+    
+        
+    counter = 0
+    for project, pi in PIDict.items():
+        RowCalc = project + 1 +  (counter * 5)
+        cell = (RowCalc, 7)
+        sheet.update_value(cell, 'PI: ' + str(pi))
+        counter += 1
+        
+
+    
+
+
+    
 
 
 

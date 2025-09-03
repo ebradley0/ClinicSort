@@ -1,4 +1,4 @@
-from SortProjects import updateSheet, initialize_sheet
+from SortProjects import updateSheet, initialize_sheet, ProjectPI
 import time
 import requests
 
@@ -13,6 +13,7 @@ def main():
         with open('Professor Clinic Request (Responses) - Form.csv', 'wb') as file:
             file.write(response.content)
         updateSheet()
+        ProjectPI()
         print('Sleeping for 30 seconds...')
         time.sleep(30)
 
