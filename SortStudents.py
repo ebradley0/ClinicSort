@@ -5,10 +5,11 @@ import SortProjects
 
 
 home_directory = os.getcwd()
-csvPath = home_directory + '\Student Clinic Request (Responses) [Spring 2025] - Form (1).csv'
+csvPath = home_directory + '\Student Clinic Request (Responses) - Form.csv'
 Seniors = []
 Juniors = []
 failed_students = []
+Students = []
 class Student:
     def __init__(self, row):
         self.timestamp = row[0]
@@ -37,14 +38,16 @@ class Student:
         self.resume = row[23]
         self.linkedin = row[24]
 
+def findStudents():
+    pass
 
 with open(csvPath, 'r', encoding='utf-8') as csvfile:
-    reader = csv.reader(csvfile)
-    next(reader)  # Skip the header row
-    Students = []
-    for row in reader:
-        if len(row) > 1:  # Ensure the row is not empty
-            Students.append(Student(row))
+        reader = csv.reader(csvfile)
+        next(reader)  # Skip the header row
+        Students = []
+        for row in reader:
+            if len(row) > 1:  # Ensure the row is not empty
+                Students.append(Student(row))
 
 #Student class with fields for Timestamp	Email Address	First Name:	Last Name:	Major:	Year:	Project 1:	I have _________ on the above project before.	Project 2:	I have _________ on the above project before.	Project 3:	I have _________ on the above project before.	Project 4:	I have _________ on the above project before.	Project 5:	I have _________ on the above project before.	Project 6:	I have _________ on the above project before.	Project 7:	I have _________ on the above project before.	Project 8:	I have _________ on the above project before.	Electronic Signature:	Resume:	LinkedIn
 Projects = SortProjects.get_project_data()
@@ -52,58 +55,60 @@ Projects = SortProjects.get_project_data()
 
 def normalize(s):
     return s.strip().lower().replace('\r', '').replace('\n', '').replace('\xa0', ' ')
+def SortStudents():
+    for student in Students:
+    
+        if student.year == 'SENIOR':
+            Seniors.append(student)
+        elif student.year == 'JUNIOR':
+            Juniors.append(student)
 
-for student in Students:
-   
-    if student.year == 'SENIOR':
-        Seniors.append(student)
-    elif student.year == 'JUNIOR':
-        Juniors.append(student)
+def matchRequestedStudents():
 
-for project in Projects:
-    #Handling Priority Student Requests
-    requested_students = project.student_requests.split(',')
-    for student in requested_students:
-        student = student.strip()
-        if student and len(project.current_students) <=  int(project.max_students_for_operation): # Ensure the project can still accept students
-            # Add student to the project
-            if student not in project.current_students:
+    for project in Projects:
+        #Handling Priority Student Requests
+        requested_students = project.student_requests.split(',')
+        for student in requested_students:
+            student = student.strip()
+            if student and len(project.current_students) <=  int(project.max_students_for_operation): # Ensure the project can still accept students
+                # Add student to the project
+                if student not in project.current_students:
+                    student_object = next((s for s in Students if s.email == student + '@students.rowan.edu' or s.email == student + '@rowan.edu'), None)
+                    if student_object == None:
+                        Warning(f"Student object for {student} not found.")
+                        failed_students.append(student)
+                        continue
+                    project.current_students.append(student_object)
+                #Check if student requested the project as #1
+                print(student)
                 student_object = next((s for s in Students if s.email == student + '@students.rowan.edu' or s.email == student + '@rowan.edu'), None)
-                if student_object == None:
-                    Warning(f"Student object for {student} not found.")
-                    failed_students.append(student)
-                    continue
-                project.current_students.append(student_object)
-            #Check if student requested the project as #1
-            print(student)
-            student_object = next((s for s in Students if s.email == student + '@students.rowan.edu' or s.email == student + '@rowan.edu'), None)
 
-            if student_object.year == 'SENIOR':
-                for s in Seniors:
-                    if s.email == student_object.email:
-                        Seniors.remove(s)
-                        break
-            if student_object.year == 'JUNIOR':
-                for j in Juniors:
-                    if j.email == student_object.email:
-                        Juniors.remove(j)
-                        break
-            student_major = student_object.major
-            if student_major == 'ME':
-                project.current_me_students += 1
-            elif student_major == 'ChE':
-                project.current_che_students += 1
-            elif student_major == 'ECE': 
-                project.current_ece_students += 1
-            elif student_major == 'CEE':
-                project.current_cee_students += 1
-            elif student_major == 'EXE':
-                project.current_exe_students += 1
-            elif student_major == 'BME':
-                project.current_bme_students += 1
-            elif student_major == 'EET':
-                project.current_eet_students += 1
-         
+                if student_object.year == 'SENIOR':
+                    for s in Seniors:
+                        if s.email == student_object.email:
+                            Seniors.remove(s)
+                            break
+                if student_object.year == 'JUNIOR':
+                    for j in Juniors:
+                        if j.email == student_object.email:
+                            Juniors.remove(j)
+                            break
+                student_major = student_object.major
+                if student_major == 'ME':
+                    project.current_me_students += 1
+                elif student_major == 'ChE':
+                    project.current_che_students += 1
+                elif student_major == 'ECE': 
+                    project.current_ece_students += 1
+                elif student_major == 'CEE':
+                    project.current_cee_students += 1
+                elif student_major == 'EXE':
+                    project.current_exe_students += 1
+                elif student_major == 'BME':
+                    project.current_bme_students += 1
+                elif student_major == 'EET':
+                    project.current_eet_students += 1
+            
 
 
 def filter_student(student):
@@ -129,7 +134,8 @@ def filter_student(student):
 
             projectJunk = project_name.split(' ')
             project_name = ' '.join(projectJunk[2:]).strip()  # Combine all parts after the first hyphen
-            project = next((p for p in Projects if (p.project_name.strip()) == (project_name.strip())), None)
+            projectID = int(projectJunk[0].replace('-',''))
+            project = next((p for p in Projects if (p.project_ID) == (projectID)), None)
             major_counts_map = {
                     'ME': 'current_me_students',
                     'ChE': 'current_che_students',
@@ -169,29 +175,54 @@ def filter_student(student):
     
                         
 
+def matchStudents():
+    SortStudents()
+    matchRequestedStudents()
+    for senior in Seniors:
+        if not filter_student(senior):
+        
+            failed_students.append(senior.email)
+
+    for junior in Juniors:
+        if not filter_student(junior):
+            failed_students.append(junior.email)
 
 
-for senior in Seniors:
-    if not filter_student(senior):
-       
-        failed_students.append(senior.email)
-
-for junior in Juniors:
-    if not filter_student(junior):
-        failed_students.append(junior.email)
 
 
 
+    totalStudentSlots = 0
+    for project in Projects:
+        totalStudentSlots += int(project.max_students_for_operation)
+        print('===========================================================================')
+        print("Project: ", project.project_name, " has ", len(project.current_students), " students assigned out of ", project.max_students_for_operation)
+        for student in project.current_students:
+            print(" - ", student.first_name, student.last_name, " (", student.email, ")")
+        print('===========================================================================')
 
 
-totalStudentSlots = 0
-for project in Projects:
-    totalStudentSlots += int(project.max_students_for_operation)
-    print('===========================================================================')
-    print("Project: ", project.project_name, " has ", len(project.current_students), " students assigned out of ", project.max_students_for_operation)
-    for student in project.current_students:
-        print(" - ", student.first_name, student.last_name, " (", student.email, ")")
-    print('===========================================================================')
+    print("Total Failed Students: ", len(failed_students) / len(Students) * 100, "%")
 
 
-print("Total Failed Students: ", len(failed_students) / len(Students) * 100, "%")
+def resultOutput():
+    findStudents()
+    matchStudents()
+    client = pygsheets.authorize(client_secret='client_secret.json')
+    sheet = client.open('Assignment Output').sheet1  # Select the first page of the sheet
+    dataChunk = []
+    
+    row = 2 #Starting at row 2 to make room for headers
+    for project in Projects:
+        currentStudents = []
+        studentString = ''
+        for student in project.current_students:
+            studentString = student.last_name + ',' + student.first_name + ' | ' + student.year + ' | ' + student.major + ' | ' + student.email 
+            currentStudents.append(studentString)
+        #Fix manager_last_names[0] to no longer be a hyperlink
+        project.manager_last_names[0] = project.email.split('@')[0]
+        minString = project.me_students + ',' + project.che_students + ',' + project.ece_students + ',' + project.cee_students + ',' + project.exe_students + ',' + project.bme_students
+        maxString = project.max_me_students + ',' + project.max_che_students + ',' + project.max_ece_students + ',' + project.max_cee_students + ',' + project.max_exe_students + ',' + project.max_bme_students
+        dataChunk = [[str(project.project_ID)] + [project.project_name ]+ [','.join(project.manager_last_names)] + [project.department] + [project.is_externally_funded] + [project.request_classification] + [minString ]+ [maxString] + currentStudents]
+        sheet.update_values('A' + str(row), dataChunk)
+        row += 1
+    pass
