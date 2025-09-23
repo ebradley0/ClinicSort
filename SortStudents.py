@@ -204,6 +204,38 @@ def matchStudents():
     print("Total Failed Students: ", len(failed_students) / len(Students) * 100, "%")
 
 
+ME_color = (
+     0.788235294117647,
+     0.8549019607843137,
+    0.9725490196
+)
+
+ChE_color = (
+     0.8509803921568627,
+     0.8235294117647058,
+    0.9137254901960784
+)
+ECE_color = (
+    0.9882352941176471,
+     0.8980392156862745,
+     0.803921568627451
+)
+CEE_color = (
+  0.8509803921568627,
+    0.9176470588235294,
+  0.8274509803921568
+)
+EXE_color = (
+    0.5019607843137255,
+    0.9490196078431372,
+   0.9215686274509803
+)
+BME_color = (
+    0.9019607843137255,
+    0.7215686274509804,
+    0.6862745098039216
+)
+
 def resultOutput():
     findStudents()
     matchStudents()
@@ -225,4 +257,4 @@ def resultOutput():
         dataChunk = [[str(project.project_ID)] + [project.project_name ]+ [','.join(project.manager_last_names)] + [project.department] + [project.is_externally_funded] + [project.request_classification] + [minString ]+ [maxString] + currentStudents]
         sheet.update_values('A' + str(row), dataChunk)
         row += 1
-    pass
+    
