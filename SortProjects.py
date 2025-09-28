@@ -179,7 +179,7 @@ def get_project_data():
                 project.check_if_major_reqs()
                 project.check_max_students() # Check if max was provided
                 if any(existing.project_name == project.project_name for existing in Projects):
-                    #print("Duplicate project found, skipping:", project.project_name)
+                    print("Duplicate project found,  28394 skipping:", project.project_name)
                     continue
                 project.project_ID = (len(Projects) + 1) #Track each projects ID by counting the length of the project and adding one. The one is needed because Project 0 cannot exist, so the counter will always be ahead of the length by one.
                 project.fixLinks()
