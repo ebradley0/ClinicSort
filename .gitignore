@@ -1,0 +1,9 @@
+client_secret.json
+sheets.googleapis.com-python.json
+.venv/
+__pycache__/
+*.csv
+failed_students.txt
+!AddedProjects.csv
+!Student Clinic Request (Responses) - Form.csv
+!Professor Clinic Request (Responses) - Form.csv

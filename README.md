@@ -1,0 +1,1 @@
+Requires a client_secret.json containing secret information for your Google Sheets API Key.
