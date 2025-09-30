@@ -22,17 +22,22 @@ class Major(models.Model):
 class Clinic(models.Model):
     title = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
-    clinic_mgmt = models.ManyToManyField('Professor', related_name="professor_list")
+    clinic_mgmt = models.ManyToManyField('Professor', related_name="professor_list", null=True, blank=True) #Connects to professor objects
     description = models.TextField(max_length=500, null=True)
-    #Notice that theres no fields for min and max students of various majors. This is because of Clinic Number Handler
-    #Each Clinic Object owns 1 ClinicNumberHandler, which stores the various majors. This is registed in admin.py
-    #To access the fields of a given major, you can use Clinic.major_requirements.filter(major=Major) to access its contents.
+
+    def __init__(self, *args, **kwargs):
+        super(Clinic, self).__init__(*args, **kwargs)
+        #Create a major field for each major in the database using ClinicNumberHandler
+        
+                
 
 class ClinicNumberHandler(models.Model): #Used for dynamically select numbers for each major. Clinic Owns this model via the "major_requirements" related_name trait from the foreignkey
-    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='major_requirements')
+    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="numberHandler", null=True) #Which clinic this min max requirement is related to.
     major = models.ForeignKey(Major, on_delete=models.CASCADE) #Which major this min max requirement is related to.
     min = models.PositiveIntegerField(null=True, blank=True) #This can be blank or null if this major isnt needed
     max = models.PositiveIntegerField(null=True, blank=True)
+    class Meta:
+        unique_together = ('clinic', 'major') #Ensure that each clinic can only have one entry per major
 class Review(models.Model):
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='reviews') # Connect each review to a professor object
     review_text = models.TextField(max_length=500) # Limit the maximum number of characters to 500.
