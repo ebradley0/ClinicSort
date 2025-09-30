@@ -42,9 +42,9 @@ class Professor(models.Model):
     last_name = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     email = models.CharField()
-    currentClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="Active_Clinic") # Connect to a clinic objects
-    prev_clinics = models.ManyToManyField(Clinic, related_name="Previous_Clinics") # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
-    prof_reviews = models.ManyToManyField(Review, related_name='prof_review_history')
+    currentClinic = models.ManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
+    prev_clinics = models.ManyToManyField(Clinic, related_name="Previous_Clinics", null=True, blank=True) # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
+    prof_reviews = models.ManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)
 
 class Student(models.Model):
     CHOICES = [ #Predefining the choices for students to ensure consistency.
@@ -58,7 +58,7 @@ class Student(models.Model):
     j_or_s = models.CharField(choices=CHOICES)
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
     choices = models.ManyToManyField(Clinic, related_name='Students_top_8_Choices')
-    assignedClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output')
+    assignedClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
 
 
 
