@@ -5,6 +5,9 @@ from .models import Student, Major, Clinic, Professor, Review, ClinicNumberHandl
 
 
 class ClinicForm(forms.ModelForm):
+
+    
+
     class Meta:
         model = Clinic
         fields = '__all__' #Use all fields from the model
@@ -24,4 +27,18 @@ extraMajorCount = Major.objects.count() if Major.objects.count() > 0 else 1 # Ca
             
 
 ClinicNumbersFormset = inlineformset_factory(Clinic,  ClinicNumberHandler, form=ClinicNumbersForm, extra=extraMajorCount, can_delete=False,) #Formset for the major requirement numbers associated with a clinic
+
+class StudentForm(forms.ModelForm):
+    firstChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    secondChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    thirdChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    fourthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    fifthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    sixthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    seventhChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    eighthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    class Meta:
+        model = Student
+        fields = ['first_name', 'last_name', 'email', 'bannerID', 'j_or_s', 'major', 'firstChoice', 'secondChoice', 'thirdChoice', 'fourthChoice', 'fifthChoice', 'sixthChoice', 'seventhChoice', 'eighthChoice'] #Use all fields from the model except choices, we'll handle that manually
+    
 

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from ClinicMatchApp.models import ClinicNumberHandler
-from .forms import ClinicForm, ClinicNumbersFormset
+from .forms import ClinicForm, ClinicNumbersFormset, StudentForm
 
 # Create your views here.
 
@@ -39,3 +39,11 @@ def clinicView(request):
 
         context = {}
         return render(request, 'clinicsubmit.html', context)
+
+
+def studentView(request):
+    if request.method == "GET":
+        context = {}
+        form = StudentForm()
+        context['form'] = form
+        return render(request, 'studentsubmit.html', context)
