@@ -1,6 +1,7 @@
 from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import m2m_changed
+from sortedm2m.fields import SortedManyToManyField
 
 # Models are Stored here.
 
@@ -9,9 +10,7 @@ from django.db.models.signals import m2m_changed
 # Anything that ends in Field() is an input method. Users can supply information which will be used when creating an item from a given model
 # Methods ending in handler are not their own unique models, rather they are owned and used by other models. Look at ClinicNumberHandler for example. This has its own fields, but is only accessed through a Clinic instance. This was done to ensure dynamic allocation of majors for futureproofing.
 # Within all field() methods, you can pass various settings. These include things like whether it can be empty, blank, or maximum input length. Additionally, on_delete=models.CASCADE is used on all modelFields (foreignKeysFields) to ensure the reference will be deleted to prevent issues if a referenced object is deleted.
-# related_name is used to define internal names for ManyToManyFields. This is done in case of things like the Professor Model, where you have multiple M2M Fields pointing to the same Model. Django uses these names internally to differentiate between the two.
-# ForeignKey is a Many to One Relationship. For example, look at Clinic.department. Many clinics can belong to one major.
-# Additionally, ClinicNumberHandler.clinic is a ForeignKey to Clinic. Many ClinicNumberHandlers can be owned by one Clinic. 
+# related_name is used to define internal names for SortedManyToManyFieldFields. This is done in case of things like the Professor Model, where you have multiple M2M Fields pointing to the same Model. Django uses these names internally to differentiate between the two.
 # Fill in more as need #
 #######################################
 class Major(models.Model):
@@ -24,17 +23,22 @@ class Major(models.Model):
 class Clinic(models.Model):
     title = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
-    clinic_mgmt = models.ManyToManyField('Professor', related_name="professor_list")
+    clinic_mgmt = SortedManyToManyField('Professor', related_name="professor_list", null=True, blank=True) #Connects to professor objects
     description = models.TextField(max_length=500, null=True)
-    #Notice that theres no fields for min and max students of various majors. This is because of Clinic Number Handler
-    #Each Clinic Object owns 1 ClinicNumberHandler Major Pair, which stores the various majors. This is registed in admin.py
-    #To access the fields of a given major, you can use Clinic.major_requirements.filter(major=Major) to access its contents.
+
+    def __init__(self, *args, **kwargs):
+        super(Clinic, self).__init__(*args, **kwargs)
+        #Create a major field for each major in the database using ClinicNumberHandler
+        
+                
 
 class ClinicNumberHandler(models.Model): #Used for dynamically select numbers for each major. Clinic Owns this model via the "major_requirements" related_name trait from the foreignkey
-    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='major_requirements')
+    clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="numberHandler", null=True) #Which clinic this min max requirement is related to.
     major = models.ForeignKey(Major, on_delete=models.CASCADE) #Which major this min max requirement is related to.
     min = models.PositiveIntegerField(null=True, blank=True) #This can be blank or null if this major isnt needed
     max = models.PositiveIntegerField(null=True, blank=True)
+    class Meta:
+        unique_together = ('clinic', 'major') #Ensure that each clinic can only have one entry per major
 class Review(models.Model):
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='reviews') # Connect each review to a professor object
     review_text = models.TextField(max_length=500) # Limit the maximum number of characters to 500.
@@ -44,9 +48,9 @@ class Professor(models.Model):
     last_name = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     email = models.CharField()
-    currentClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="Active_Clinic") # Connect to a clinic objects
-    prev_clinics = models.ManyToManyField(Clinic, related_name="Previous_Clinics") # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
-    prof_reviews = models.ManyToManyField(Review, related_name='prof_review_history')
+    currentClinic = SortedManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
+    prev_clinics = SortedManyToManyField(Clinic, related_name="Previous_Clinics", null=True, blank=True) # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
+    prof_reviews = SortedManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)
 
 class Student(models.Model):
     CHOICES = [ #Predefining the choices for students to ensure consistency.
@@ -59,8 +63,9 @@ class Student(models.Model):
     bannerID = models.FloatField()
     j_or_s = models.CharField(choices=CHOICES)
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
-    choices = models.ManyToManyField(Clinic, related_name='Students_top_8_Choices')
-    assignedClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output')
+
+    choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
+    assignedClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
 
 
 

@@ -11,6 +11,8 @@ admin.site.register(Review)
 class ClinicNumberHandlerInline(admin.TabularInline): # Creating a table for the major requirement numbers to be displayed. This is attached to ClinicAdmin
     
     model = ClinicNumberHandler
+    #Display the same number of rows as there are majors in the database
+    extra = Major.objects.count() if Major.objects.count() > 0 else 1
 
 
 class ClinicAdmin(admin.ModelAdmin):
