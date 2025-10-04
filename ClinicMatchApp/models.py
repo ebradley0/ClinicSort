@@ -10,6 +10,8 @@ from django.db.models.signals import m2m_changed
 # Methods ending in handler are not their own unique models, rather they are owned and used by other models. Look at ClinicNumberHandler for example. This has its own fields, but is only accessed through a Clinic instance. This was done to ensure dynamic allocation of majors for futureproofing.
 # Within all field() methods, you can pass various settings. These include things like whether it can be empty, blank, or maximum input length. Additionally, on_delete=models.CASCADE is used on all modelFields (foreignKeysFields) to ensure the reference will be deleted to prevent issues if a referenced object is deleted.
 # related_name is used to define internal names for ManyToManyFields. This is done in case of things like the Professor Model, where you have multiple M2M Fields pointing to the same Model. Django uses these names internally to differentiate between the two.
+# ForeignKey is a Many to One Relationship. For example, look at Clinic.department. Many clinics can belong to one major.
+# Additionally, ClinicNumberHandler.clinic is a ForeignKey to Clinic. Many ClinicNumberHandlers can be owned by one Clinic. 
 # Fill in more as need #
 #######################################
 class Major(models.Model):
@@ -25,7 +27,7 @@ class Clinic(models.Model):
     clinic_mgmt = models.ManyToManyField('Professor', related_name="professor_list")
     description = models.TextField(max_length=500, null=True)
     #Notice that theres no fields for min and max students of various majors. This is because of Clinic Number Handler
-    #Each Clinic Object owns 1 ClinicNumberHandler, which stores the various majors. This is registed in admin.py
+    #Each Clinic Object owns 1 ClinicNumberHandler Major Pair, which stores the various majors. This is registed in admin.py
     #To access the fields of a given major, you can use Clinic.major_requirements.filter(major=Major) to access its contents.
 
 class ClinicNumberHandler(models.Model): #Used for dynamically select numbers for each major. Clinic Owns this model via the "major_requirements" related_name trait from the foreignkey
