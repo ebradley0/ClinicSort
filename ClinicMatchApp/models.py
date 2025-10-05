@@ -25,16 +25,22 @@ class Clinic(models.Model):
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     clinic_mgmt = SortedManyToManyField('Professor', related_name="professor_list", null=True, blank=True) #Connects to professor objects
     description = models.TextField(max_length=500, null=True)
-
+    min = models.PositiveIntegerField(null=True, blank=True) # Minimum number of students required for the clinic to run
+    max = models.PositiveIntegerField(null=True, blank=True) # Maximum number of students that can be accepted into the clinic
+    links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
+    requestedStudents = models.CharField(null=True, blank=True) # CSV of requested students
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
+    def __str__(self):
+        return f"{self.title} ({self.department})"
         
                 
 
 class ClinicNumberHandler(models.Model): #Used for dynamically select numbers for each major. Clinic Owns this model via the "major_requirements" related_name trait from the foreignkey
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="numberHandler", null=True) #Which clinic this min max requirement is related to.
     major = models.ForeignKey(Major, on_delete=models.CASCADE) #Which major this min max requirement is related to.
+    general = models.BooleanField(default=False) #If this is a general requirement, not tied to a specific major
     min = models.PositiveIntegerField(null=True, blank=True) #This can be blank or null if this major isnt needed
     max = models.PositiveIntegerField(null=True, blank=True)
     class Meta:
@@ -42,6 +48,7 @@ class ClinicNumberHandler(models.Model): #Used for dynamically select numbers fo
 class Review(models.Model):
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='reviews') # Connect each review to a professor object
     review_text = models.TextField(max_length=500) # Limit the maximum number of characters to 500.
+    
 
 class Professor(models.Model):
     first_name = models.CharField()
@@ -51,7 +58,8 @@ class Professor(models.Model):
     currentClinic = SortedManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
     prev_clinics = SortedManyToManyField(Clinic, related_name="Previous_Clinics", null=True, blank=True) # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
     prof_reviews = SortedManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)
-
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.email})"
 class Student(models.Model):
     CHOICES = [ #Predefining the choices for students to ensure consistency.
         ('J', 'Junior'),
