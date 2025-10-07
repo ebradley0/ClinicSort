@@ -12,7 +12,10 @@ class ClinicNumberHandlerInline(admin.TabularInline): # Creating a table for the
     
     model = ClinicNumberHandler
     #Display the same number of rows as there are majors in the database
-    extra = Major.objects.count() if Major.objects.count() > 0 else 1
+    try:
+        extra = Major.objects.count() if Major.objects.count() > 0 else 1
+    except:
+        extra = 1  # Fallback during migrations or early stage
 
 
 class ClinicAdmin(admin.ModelAdmin):
