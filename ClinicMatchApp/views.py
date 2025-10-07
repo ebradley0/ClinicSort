@@ -60,7 +60,7 @@ def studentView(request):
         choices =  []
 
         for item in request.POST: # Grabbing the 8 choices from the request
-            if 'Choice' in item:
+            if '_choice' in item:
                 choices.append(request.POST[item])
 
         studentObject = form.instance
@@ -148,7 +148,7 @@ def loadProjectsFromCSV(request):
             department= Major.objects.get(major=project.department) if Major.objects.filter(major=project.department).exists() else None,
             description=project.project_description,
             links= project.project_url_links,
-            requestedStudents= project.student_requests,
+            requested_students= project.student_requests,
         )
         professor, created = Professor.objects.get_or_create(
             last_name=primaryManager,
