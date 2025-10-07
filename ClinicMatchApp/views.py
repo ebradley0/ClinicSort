@@ -1,7 +1,6 @@
 from django.shortcuts import render
-
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
-from .forms import ClinicForm, ClinicNumbersFormset, StudentForm
+from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm
 
 # Create your views here.
 
@@ -17,6 +16,7 @@ def clinicView(request):
         context = {}
         form = ClinicForm()
         context['form'] = form
+        ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
         formset = ClinicNumbersFormset(initial=major_dict) #Populate the formset with a major field for each major in the database
         
         context['formset'] = formset
@@ -27,6 +27,7 @@ def clinicView(request):
         print("Posting Request Recieved")
         print(request.POST)
         form = ClinicForm(request.POST)
+        ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
         formset = ClinicNumbersFormset(request.POST)
         if form.is_valid() and formset.is_valid():
             clinic_instance = form.save() #Save the clinic instance first to get the foreign key relationship
