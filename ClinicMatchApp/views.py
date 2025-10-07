@@ -68,6 +68,11 @@ def studentView(request):
         context = {}
         context['form'] = form
         return render(request, 'studentsubmit.html', context)
+    
+def projectView(request):
+    context = {}
+    context['clinics'] = Clinic.objects.all()
+    return render(request, "projectview.html", context=context)
 
 
 

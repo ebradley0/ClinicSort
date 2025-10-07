@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+.grid {
+  position: relative;
+}
+.item {
+  display: flex;
+    flex-direction: column;
+  position: absolute;
+  width: 20vw;
+  height: 20vh;
+  margin: 5px;
+  z-index: 1;
+  background: #343434;
+  color: black;
+}
+.item.muuri-item-dragging {
+  z-index: 3;
+}
+.item.muuri-item-releasing {
+  z-index: 2;
+}
+.item.muuri-item-hidden {
+  z-index: 0;
+}
+.item-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.clinic-card {
+  padding: 10px;
+  size: 50px;
+}
+
+.clinic-card.ME {
+    background-color: lightblue;
+}
+.clinic-card.ECE {
+    background-color: yellow;
+}
+.clinic-card.EXE {
+    background-color: turquoise;
+
+}
+.clinic-card.BME {
+    background-color: lightgreen;
+}
+.clinic-card.ChE {
+    background-color: plum;
+
+}
+.clinic-card.CE {
+    background-color: lightcoral;
+}
+
+.clinic-title {
+    font-weight: bold;
+    font-size: 20px;
+}
+.remove-button {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    align-self: flex-end;
+}
+
+</style>
+
+<body>
+
+<!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
+TITLE
+<div class="grid">
+    
+    <!-- Each item must be of class item -->
+    {% for clinic in clinics %}
+    <div class="item">
+        
+        <button class="remove-button" type="button">x</button>
+            <div class="clinic-card {{clinic.department}}">
+
+                <p class="clinic-title">{{clinic.title}}</p>
+                <p>{{clinic.description}}</p>
+
+            </div>
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- End Grid -->
+
+    
+</body>
+
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2/web-animations.min.js"></script>
+<script>
+    var grid = new Muuri('.grid', {dragEnabled: true});
+</script>
+
+</html>
