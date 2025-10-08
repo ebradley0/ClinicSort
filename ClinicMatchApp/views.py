@@ -75,7 +75,14 @@ def projectView(request):
     context['clinics'] = Clinic.objects.all()
     return render(request, "projectview.html", context=context)
 
+def clinicManagementHomepage(request):
+    return render(request, "clinicmanagement.html")
 
+def clinicManagementView(request, title="all"):
+    context = {}
+    context['clinics'] = Clinic.objects.all()
+    context['title'] = title
+    return render(request, "clinicmanagementview.html", context=context)
 
 
 

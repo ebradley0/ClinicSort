@@ -1,6 +1,35 @@
 from django.apps import AppConfig
+import sys
 
 
-class ClinicmatchappConfig(AppConfig):
+class ClinicMatchAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'ClinicMatchApp'
+    verbose_name = "Clinic Match App"
+
+    def ready(self):
+        # avoid DB access during migration, makemigrations, tests, etc.
+        skip_commands = {"makemigrations", "migrate", "collectstatic", "test", "shell", "check"}
+        if any(cmd in sys.argv for cmd in skip_commands):
+            return
+
+        try:
+            from django.urls import path
+            from . import views
+            from .models import Major
+            import importlib
+
+            urls_module = importlib.import_module("ClinicMatchApp.urls")
+
+            for major in Major.objects.all():
+                urls_module.urlpatterns.append(
+                    path(
+                        f"clinicManagementView/{major.major}/",
+                        views.clinicManagementView,
+                        {"title": f"{major.major}"},
+                        name=f"clinicManagementView_{major.major}"
+                    )
+                )
+        except Exception:
+            # don't crash startup — optionally log the error
+            pass

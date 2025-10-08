@@ -2,6 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import m2m_changed
 from sortedm2m.fields import SortedManyToManyField
+from colorfield.fields import ColorField
 
 # Models are Stored here.
 
@@ -15,6 +16,7 @@ from sortedm2m.fields import SortedManyToManyField
 #######################################
 class Major(models.Model):
     major = models.CharField()
+    color = ColorField(default='#FFFFFF') #Color associated with the major, used for visualizations
 
     def __str__(self): #This defines how the models items will be displayed, think of it like toString. Without this it will just say 'model' Object (n) where n is the number assigned to it internally
         return self.major
@@ -55,6 +57,7 @@ class Professor(models.Model):
     last_name = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     email = models.CharField()
+    crn = models.PositiveIntegerField(null=True, blank=True)
     current_clinic = SortedManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
     prev_clinics = SortedManyToManyField(Clinic, related_name="Previous_Clinics", null=True, blank=True) # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
     prof_reviews = SortedManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)

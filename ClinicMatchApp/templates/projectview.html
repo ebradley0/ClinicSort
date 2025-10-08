@@ -40,27 +40,6 @@
   size: 50px;
 }
 
-.clinic-card.ME {
-    background-color: lightblue;
-}
-.clinic-card.ECE {
-    background-color: yellow;
-}
-.clinic-card.EXE {
-    background-color: turquoise;
-
-}
-.clinic-card.BME {
-    background-color: lightgreen;
-}
-.clinic-card.ChE {
-    background-color: plum;
-
-}
-.clinic-card.CE {
-    background-color: lightcoral;
-}
-
 .clinic-title {
     font-weight: bold;
     font-size: 20px;
@@ -87,7 +66,8 @@ TITLE
     <div class="item">
         
         <button class="remove-button" type="button">x</button>
-            <div class="clinic-card {{clinic.department}}">
+            <div class="clinic-card {{clinic.department}}" 
+                 style="background-color: {{clinic.department.color}};">
 
                 <p class="clinic-title">{{clinic.title}}</p>
                 <p>{{clinic.description}}</p>
