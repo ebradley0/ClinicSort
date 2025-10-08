@@ -1,3 +1,4 @@
+from multiprocessing import context
 from django.shortcuts import render
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
 from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm
@@ -76,7 +77,9 @@ def projectView(request):
     return render(request, "projectview.html", context=context)
 
 def clinicManagementHomepage(request):
-    return render(request, "clinicmanagement.html")
+    context = {}
+    context['majors'] = Major.objects.all()
+    return render(request, "clinicmanagement.html", context=context)
 
 def clinicManagementView(request, title="all"):
     context = {}
