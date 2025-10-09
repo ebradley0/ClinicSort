@@ -1,11 +1,171 @@
 <!DOCTYPE html>
 <html lang="en">
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clinic Management</title>
+    <link rel="stylesheet" href="{% static 'css/clinic_ops.css' %}">
 </head>
+<style>
+/* .board {
+  position: relative;
+}
+.board-row {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0 10px;
+  width: calc(100% / 3);
+  z-index: 1;
+}
+.board-row.muuri-item-releasing {
+  z-index: 2;
+}
+.board-row.muuri-item-dragging {
+  z-index: 3;
+  cursor: move;
+}
+.board-row-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.board-row-header {
+  position: relative;
+  height: 50px;
+  line-height: 50px;
+  overflow: hidden;
+  padding: 0 20px;
+  text-align: center;
+  background: #333;
+  color: #fff;
+  border-radius: 5px 5px 0 0;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+@media (max-width: 600px) {
+  .board-column-header {
+    text-indent: -1000px;
+  }
+}
+.board-row-content-wrapper {
+  position: relative;
+  padding: 8px;
+  background: #f0f0f0;
+  height: calc(100vh - 90px);
+  overflow-y: auto;
+  border-radius: 0 0 5px 5px;
+}
+.board-row-content {
+  position: relative;
+  min-height: 100%;
+}
+.board-item {
+  position: absolute;
+  width: calc(100% - 16px);
+  margin: 8px;
+}
+.board-item.muuri-item-releasing {
+  z-index: 9998;
+}
+.board-item.muuri-item-dragging {
+  z-index: 9999;
+  cursor: move;
+}
+.board-item.muuri-item-hidden {
+  z-index: 0;
+}
+.board-item-content {
+  position: relative;
+  padding: 20px;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 17px;
+  cursor: pointer;
+  -webkit-box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+  box-shadow: 0px 1px 3px 0 rgba(0,0,0,0.2);
+}
+@media (max-width: 600px) {
+  .board-item-content {
+    text-align: center;
+  }
+  .board-item-content span {
+    display: none;
+  }
+} */
+</style>
 <body>
-    
+  <!-- left clinics column (unchanged) -->
+  <div class="clinics-board" aria-label="Clinics column">
+        {% for clinic in clinics %}
+        <!-- item now has data-major for filtering -->
+        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}">
+            <div class="clinic-card {{ clinic.department }}"
+                 style="background-color: {{ clinic.department.color }};">
+                <p class="clinic-title">{{ clinic.title }}</p>
+
+                <div class="clinic-capacity" aria-label="capacity">
+                  <span class="min-capacity">{{ clinic.total_min|default:0 }}</span>
+                  –
+                  <span class="max-capacity">{{ clinic.total_max|default:0 }}</span>
+                </div>
+
+                <!-- New: inner grid for student items for this clinic -->
+                <div class="clinic-inner" data-clinic-id="{{ clinic.id }}">
+                    <!-- If you have pre-assigned students for this clinic, render them here as .student-item -->
+                    {% for student in clinic.assigned_students.all %}
+                    <div class="student-item" data-banner="{{ student.banner_id }}" data-major="{{ student.major }}">
+                      <div class="student-card">
+                        <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
+                        <div class="student-meta">{% if student.j_or_s %}{{ student.j_or_s }}{% endif %}{% if student.banner_id %} • {{ student.banner_id }}{% endif %}</div>
+                      </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+  <!-- main content stays between columns -->
+  <div class="main-content">
+    <div id="filter-controls">
+      <!-- select will be populated by clinic_ops.js -->
+      <label for="major-filter">Filter by major:</label>
+      <select id="major-filter">
+        <option value="all">All</option>
+      </select>
+    </div>
+
+    <div class="drag-container"></div>
+    <p>Workspace / details go here</p>
+  </div>
+
+  <!-- NEW: Students column on the right -->
+  <div class="students-board" aria-label="Students board">
+    <div class="students-board-header">
+      <strong>Students</strong>
+    </div>
+    <div class="students-board-inner">
+      {% for student in students %}
+      <div class="student-item" data-banner="{{ student.banner_id }}" data-major="{{ student.major }}">
+        <div class="student-card">
+          <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
+          <div class="student-meta">
+            {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
+            {% if student.banner_id %}&nbsp;•&nbsp;{{ student.banner_id }}{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2/web-animations.min.js"></script>
+<script src="{% static 'js/clinic_ops.js' %}"></script>
 </html>
