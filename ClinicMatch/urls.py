@@ -20,4 +20,5 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('ClinicMatchApp.urls')),
+    path('', include('social_django.urls', namespace='social'))
 ]

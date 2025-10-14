@@ -2,6 +2,11 @@ from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import m2m_changed
 from sortedm2m.fields import SortedManyToManyField
+from social_django.models import UserSocialAuth
+
+from django.contrib.auth import get_user_model
+
+CustomUser = get_user_model()
 
 # Models are Stored here.
 
@@ -61,6 +66,7 @@ class Professor(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 class Student(models.Model):
+    userAuth = models.OneToOneField(UserSocialAuth, on_delete=models.CASCADE, null=True, blank=True) #Connects to the UserSocialAuth object created by the social auth library.
     CHOICES = [ #Predefining the choices for students to ensure consistency.
         ('J', 'Junior'),
         ('S', 'Senior'),
