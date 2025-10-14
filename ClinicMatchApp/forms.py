@@ -47,16 +47,16 @@ def get_ClinicNumbersFormset(extra=None):
 
 
 class StudentForm(forms.ModelForm):
-    firstChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    secondChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    thirdChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    fourthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    fifthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    sixthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    seventhChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
-    eighthChoice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    first_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    second_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    third_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    fourth_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    fifth_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    sixth_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    seventh_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
+    eighth_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
     class Meta:
         model = Student
-        fields = ['first_name', 'last_name', 'email', 'bannerID', 'j_or_s', 'major', 'firstChoice', 'secondChoice', 'thirdChoice', 'fourthChoice', 'fifthChoice', 'sixthChoice', 'seventhChoice', 'eighthChoice'] #Use all fields from the model except choices, we'll handle that manually
+        fields = ['first_name', 'last_name', 'email', 'banner_id', 'j_or_s', 'major', 'first_choice', 'second_choice', 'third_choice', 'fourth_choice', 'fifth_choice', 'sixth_choice', 'seventh_choice', 'eighth_choice'] #Use all fields from the model except choices, we'll handle that manually
     
 

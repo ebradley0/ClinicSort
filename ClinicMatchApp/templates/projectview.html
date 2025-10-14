@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,28 @@
 </head>
 
 <style>
+
+.body {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 20px;
+  flex-direction: row;
+  
+}
+
 .grid {
   position: relative;
+  width: 60vw;
+  background-color: aquamarine;
+}
+
+
+
+.select-grid {
+
+  position: relative;
+  width: 38vw;
+  background-color: lightgrey;
 }
 .item {
   display: flex;
@@ -40,27 +61,6 @@
   size: 50px;
 }
 
-.clinic-card.ME {
-    background-color: lightblue;
-}
-.clinic-card.ECE {
-    background-color: yellow;
-}
-.clinic-card.EXE {
-    background-color: turquoise;
-
-}
-.clinic-card.BME {
-    background-color: lightgreen;
-}
-.clinic-card.ChE {
-    background-color: plum;
-
-}
-.clinic-card.CE {
-    background-color: lightcoral;
-}
-
 .clinic-title {
     font-weight: bold;
     font-size: 20px;
@@ -77,7 +77,7 @@
 
 </style>
 
-<body>
+<body class="body">
 
 <!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
 TITLE
@@ -88,7 +88,8 @@ TITLE
     <div class="item">
         
         <button class="remove-button" type="button">x</button>
-            <div class="clinic-card {{clinic.department}}">
+            <div class="clinic-card {{clinic.department}}" 
+                 style="background-color: {{clinic.department.color}}">
 
                 <p class="clinic-title">{{clinic.title}}</p>
                 <p>{{clinic.description}}</p>
@@ -100,6 +101,23 @@ TITLE
 </div>
 
 <!-- End Grid -->
+ NEW GRID
+
+<!-- Starting Selection Grid-->
+<form method="GET" id="submission-form">
+    {% csrf_token %}
+    <button type="button" id="submit-button">Submit Selections</button>
+  <div class="select-grid" >
+  <div class="item">
+    <div class="item-content">
+      <p>Drop Clinics Here to Select Them</p>
+    </div>
+  </div>
+</div>
+</form>
+
+
+
 
     
 </body>
@@ -125,5 +143,6 @@ TITLE
     });
     
 </script>
+<script src="{% static 'js/projectView.js' %}"></script>
 
 </html>

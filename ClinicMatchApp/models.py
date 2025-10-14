@@ -2,6 +2,7 @@ from django.db import models
 from django.forms import ValidationError
 from django.db.models.signals import m2m_changed
 from sortedm2m.fields import SortedManyToManyField
+from colorfield.fields import ColorField
 from social_django.models import UserSocialAuth
 
 from django.contrib.auth import get_user_model
@@ -20,6 +21,7 @@ CustomUser = get_user_model()
 #######################################
 class Major(models.Model):
     major = models.CharField()
+    color = ColorField(default='#FFFFFF') #Color associated with the major, used for visualizations
 
     def __str__(self): #This defines how the models items will be displayed, think of it like toString. Without this it will just say 'model' Object (n) where n is the number assigned to it internally
         return self.major
@@ -33,7 +35,7 @@ class Clinic(models.Model):
     min = models.PositiveIntegerField(null=True, blank=True) # Minimum number of students required for the clinic to run
     max = models.PositiveIntegerField(null=True, blank=True) # Maximum number of students that can be accepted into the clinic
     links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
-    requestedStudents = models.CharField(null=True, blank=True) # CSV of requested students
+    requested_students = models.CharField(null=True, blank=True) # CSV of requested students
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
@@ -60,7 +62,8 @@ class Professor(models.Model):
     last_name = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     email = models.CharField()
-    currentClinic = SortedManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
+    crn = models.PositiveIntegerField(null=True, blank=True)
+    current_clinic = SortedManyToManyField(Clinic, related_name="Active_Clinic", null=True, blank=True) # Connect to a clinic objects
     prev_clinics = SortedManyToManyField(Clinic, related_name="Previous_Clinics", null=True, blank=True) # Connects to clinic objects that previously were ran. When a clinic is done for the semester, it is moved to here.
     prof_reviews = SortedManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)
     def __str__(self):
@@ -74,12 +77,12 @@ class Student(models.Model):
     first_name = models.CharField()
     last_name = models.CharField()
     email = models.CharField()
-    bannerID = models.FloatField()
+    banner_id = models.PositiveIntegerField()
     j_or_s = models.CharField(choices=CHOICES)
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
 
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
-    assignedClinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
+    assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
 
 
 

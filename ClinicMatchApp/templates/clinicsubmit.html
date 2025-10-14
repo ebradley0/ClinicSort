@@ -20,7 +20,6 @@ select[disabled] {
     <h1>Clinic Submission</h1>
     <form method="POST">
         {% csrf_token %}
-        <button type="submit">Submit</button>
 
             {{form}}
 
@@ -30,10 +29,10 @@ select[disabled] {
             </div>
 
              
-            </div>
 
-            <button id="add_numForm" class="add-button" type="submit">+</button>
+            <!-- <button id="add_numForm" class="add-button" type="submit">+</button> -->
         
+        <button type="submit">Submit</button>
     
     </form>
    

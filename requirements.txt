@@ -6,6 +6,7 @@ charset-normalizer==3.4.2
 cryptography==46.0.2
 defusedxml==0.7.1
 Django==5.2.6
+django-colorfield==0.14.0
 django-sortedm2m==4.0.0
 google-api-core==2.25.1
 google-api-python-client==2.177.0
@@ -16,6 +17,7 @@ googleapis-common-protos==1.70.0
 httplib2==0.22.0
 idna==3.10
 oauthlib==3.3.1
+pillow==11.3.0
 proto-plus==1.26.1
 protobuf==6.31.1
 pyasn1==0.6.1
