@@ -25,10 +25,13 @@
 
 
 
+
+
 .select-grid {
 
   position: relative;
-  width: 38vw;
+  width: 400px;
+  min-height: 400px;
   background-color: lightgrey;
 }
 .item {
@@ -107,13 +110,8 @@ TITLE
 <form method="GET" id="submission-form">
     {% csrf_token %}
     <button type="button" id="submit-button">Submit Selections</button>
-  <div class="select-grid" >
-  <div class="item">
-    <div class="item-content">
-      <p>Drop Clinics Here to Select Them</p>
-    </div>
+  <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
   </div>
-</div>
 </form>
 
 
@@ -130,7 +128,6 @@ TITLE
 <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2/web-animations.min.js"></script>
 <script>
-    var grid = new Muuri('.grid', {dragEnabled: true});
 
     // Remove button functionality, triggering grid remove
     document.addEventListener('DOMContentLoaded', function(){

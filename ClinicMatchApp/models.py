@@ -74,12 +74,12 @@ class Student(models.Model):
         ('J', 'Junior'),
         ('S', 'Senior'),
     ]
-    first_name = models.CharField()
-    last_name = models.CharField()
-    email = models.CharField()
-    banner_id = models.PositiveIntegerField()
-    j_or_s = models.CharField(choices=CHOICES)
-    major = models.ForeignKey(Major, on_delete=models.CASCADE)
+    first_name = models.CharField(null=True)
+    last_name = models.CharField(null=True)
+    email = models.CharField(null=True)
+    banner_id = models.PositiveIntegerField(null=True)
+    j_or_s = models.CharField(choices=CHOICES, null=True, blank=True, max_length=1) #Junior or Senior
+    major = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
 
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)

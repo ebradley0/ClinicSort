@@ -1,14 +1,16 @@
 var grid = new Muuri('.grid', {
   dragEnabled: true,
-  dragContainer: document.body,
-  dragSort: function () {return [grid, selectGrid];}
-});
+  dragContainer: document.body,}
+);
 
 var selectGrid = new Muuri('.select-grid', {
   dragEnabled: true,
   dragContainer: document.body,
   dragSort: function () {return [grid, selectGrid];}
 });
+
+
+grid._settings.dragSort = function () { return [grid, selectGrid]; };
 
 
 

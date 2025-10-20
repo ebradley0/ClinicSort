@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Student, Clinic, Major, ClinicNumberHandler, Professor, Review
+from social_django.models import UserSocialAuth
 
 #Registering various models so admin can access them. This is useful for debugging
 admin.site.register(Student)
@@ -21,7 +22,6 @@ class ClinicNumberHandlerInline(admin.TabularInline): # Creating a table for the
 class ClinicAdmin(admin.ModelAdmin):
     inlines = [ClinicNumberHandlerInline] #Creating a table to display the various requested numbers for each major
 admin.site.register(Clinic, ClinicAdmin) #Register it now that we've made out adjustments
-
 
 
 admin.site.register(Major)

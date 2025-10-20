@@ -8,7 +8,7 @@ from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.shortcuts import render
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
-from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm
+from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm, StudentProfileForm
 from .models import Student as StudentModel
 from django.db.models.fields import NOT_PROVIDED
 from django.http import HttpResponse
@@ -18,10 +18,18 @@ from dotenv import load_dotenv
 # Create your views here.
 
 def index(request):
+    context = {}
+    try:
+        user = request.user
+    except:
+        user = None
+    if user and user.is_authenticated:
+        #Since they're logged in, let them view the profile and Project View buttons
+        context['logged_in'] = True
     load_dotenv()  # Load environment variables from a .env file if present
     print("HOME PAGE REQUESTED")
     print(os.getenv("GOOGLE_OAUTH2_KEY"))
-    return render(request, 'index.html')
+    return render(request, 'index.html', context=context)
 
 
 def clinicView(request):
@@ -560,3 +568,28 @@ def loadStudentsFromCSV(request):
         "errors": errors[:10],
     }
     return HttpResponse(f"Import summary: {summary}")
+
+
+
+def profileView(request):
+    user = request.user
+    profile_object = StudentModel.objects.get(email=user.email, first_name=user.first_name, last_name=user.last_name)
+
+    if request.method == "POST":
+        form = StudentProfileForm(request.POST, instance=profile_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
+        if form.is_valid():
+            form.save()
+        return render(request, "index.html", {})
+    else:
+        profile_form = StudentProfileForm(instance=profile_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
+        context = {"user": request.user,
+                "profile": profile_object,
+                "profileForm": profile_form,
+                }
+        return render(request, "profile.html", context=context)
+
+
+def logoutView(request):
+    from django.contrib.auth import logout #Imported here just for cleanliness, shouldn't be needed outside of this function
+    logout(request)
+    return render(request, "index.html", {})

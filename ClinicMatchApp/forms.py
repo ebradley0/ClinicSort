@@ -45,6 +45,11 @@ def get_ClinicNumbersFormset(extra=None):
         can_delete=False,
     )
 
+class StudentProfileForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ['banner_id', 'j_or_s', 'major'] 
+
 
 class StudentForm(forms.ModelForm):
     first_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
