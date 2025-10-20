@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import dotenv
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,9 +29,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+dotenv.load_dotenv()  # Load environment variables from a .env file if present
 GOOGLE_OAUTH2_KEY = os.getenv("GOOGLE_OAUTH2_KEY")
 GOOGLE_OAUTH2_SECRET = os.getenv("GOOGLE_OAUTH2_SECRET")
+
+
 
 
 # Application definition
@@ -63,7 +66,15 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_OAUTH2_KEY
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_OAUTH2_SECRET
 
+SOCIAL_AUTH_USER_FIELDS = ["username", "email", "first_name", "last_name"]
+SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = []
+
+LOGIN_URL = "/login/google-oauth2/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 SOCIAL_AUTH_URL_NAMESPACE = "social"
 SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.social_details",
@@ -76,7 +87,6 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.user.create_user",
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
-    "_main.pipeline.add_default_group",
 )
 
 SOCIAL_AUTH_USER_FIELDS = ["username", "email", "first_name", "last_name"]

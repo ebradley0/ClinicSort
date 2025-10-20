@@ -1,6 +1,7 @@
 from multiprocessing import context
 import random
 import re
+import os
 import time
 from re import S
 from django.db.models import Sum
@@ -13,11 +14,13 @@ from django.db.models.fields import NOT_PROVIDED
 from django.http import HttpResponse
 import csv
 import io
-
+from dotenv import load_dotenv
 # Create your views here.
 
 def index(request):
+    load_dotenv()  # Load environment variables from a .env file if present
     print("HOME PAGE REQUESTED")
+    print(os.getenv("GOOGLE_OAUTH2_KEY"))
     return render(request, 'index.html')
 
 
