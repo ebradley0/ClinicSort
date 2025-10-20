@@ -2,203 +2,174 @@ var dragContainer = document.body;
 var clinicsBoard;
 var studentsBoard;
 var clinicGrids = [];
-var __isDragging = false; // <-- new flag
 
-// helper sizing functions (use per-element stored originWidth captured at dragStart)
-function fixDragSizing(el) {
-  if (!el) return;
-  // measure the visible inner card if present
-  var card = el.querySelector('.student-card') || el;
-  var rect = card.getBoundingClientRect();
-
-  // prefer originWidth stored at dragStart (clamped), fallback to container closest width
-  var originWidth = el.__originWidth || null;
-  if (!originWidth) {
-    var container = el.closest('.students-board-inner, .clinic-inner, .students-board, .clinics-board');
-    if (container) originWidth = Math.max(0, Math.floor(container.getBoundingClientRect().width - 12));
-  }
-
-  var measuredW = Math.round(rect.width);
-  if (originWidth && originWidth < measuredW) measuredW = originWidth;
-
-  var w = measuredW + 'px';
-  var h = Math.round(rect.height) + 'px';
-
-  // defensive: ensure no global var pollution
-  document.documentElement.style.removeProperty('--muuri-drag-w');
-  document.documentElement.style.removeProperty('--muuri-drag-h');
-  document.body.style.removeProperty('--muuri-drag-w');
-  document.body.style.removeProperty('--muuri-drag-h');
-
-  // set per-element vars + inline fallbacks on the outer element
-  el.style.setProperty('--muuri-drag-w', w);
-  el.style.setProperty('--muuri-drag-h', h);
-  el.style.setProperty('width', w, 'important');
-  el.style.setProperty('min-width', w, 'important');
-  el.style.setProperty('max-width', w, 'important');
-  el.style.setProperty('height', h, 'important');
-  el.style.setProperty('min-height', h, 'important');
-  el.style.setProperty('max-height', h, 'important');
-
-  // ALSO apply explicit pixel width to the inner card to prevent child CSS from stretching it
-  if (card && card !== el) {
-    card.style.setProperty('width', w, 'important');
-    card.style.setProperty('min-width', w, 'important');
-    card.style.setProperty('max-width', w, 'important');
-    card.style.boxSizing = 'border-box';
-  }
-
-  el.style.setProperty('will-change', 'transform', 'important');
-  el.style.setProperty('z-index', '999999', 'important');
-  el.classList.add('muuri-fixed-drag');
-}
-
-function clearDragSizing(el) {
-  if (!el) return;
-  var card = el.querySelector('.student-card') || el;
-
-  el.style.removeProperty('--muuri-drag-w');
-  el.style.removeProperty('--muuri-drag-h');
-
-  el.style.removeProperty('width');
-  el.style.removeProperty('min-width');
-  el.style.removeProperty('max-width');
-  el.style.removeProperty('height');
-  el.style.removeProperty('min-height');
-  el.style.removeProperty('max-height');
-
-  el.style.removeProperty('will-change');
-  el.style.removeProperty('z-index');
-
-  el.classList.remove('muuri-fixed-drag');
-
-  // clear card overrides
-  if (card && card !== el) {
-    card.style.removeProperty('width');
-    card.style.removeProperty('min-width');
-    card.style.removeProperty('max-width');
-    card.style.boxSizing = '';
-  }
-
-  // defensive cleanup of any leftover global vars
-  document.documentElement.style.removeProperty('--muuri-drag-w');
-  document.documentElement.style.removeProperty('--muuri-drag-h');
-  document.body.style.removeProperty('--muuri-drag-w');
-  document.body.style.removeProperty('--muuri-drag-h');
-}
-
-// init sequence - ensure boards exist before attaching handlers
 window.addEventListener('load', function () {
 
-  // initialize studentsBoard first
+  // 1. Set each clinic .item to 1000px width BEFORE Muuri initializes
+  document.querySelectorAll('.clinics-board .item').forEach(function (item) {
+    item.style.width = '1000px';     // ✅ full width of the board
+    item.style.height = '200px';     // match .clinic-container height
+  });
+
+  // 2. Initialize the students board
   studentsBoard = new Muuri('.students-board-inner', {
     items: '.student-item',
     dragEnabled: true,
     dragHandle: ".student-card",
     dragContainer: dragContainer,
-    layout: { fillGaps: false, rounding: true, horizontal: false },
-    dragSort: function () { return clinicGrids; }
-  });
-
-  // attach studentsBoard drag handlers (capture origin width before Muuri moves element)
-  studentsBoard.on('dragStart', function (item) {
-    __isDragging = true; // <-- set dragging flag
-    var el = item.getElement();
-    // store origin container width before Muuri detaches/moves the element
-    var parent = el.parentElement;
-    if (parent) {
-      el.__originWidth = Math.max(0, Math.floor(parent.getBoundingClientRect().width - 12));
+    dragScroll: true,
+    dragAutoScroll: {
+      targets: (item) => {
+        return [
+          { element: window, priority: 0 },
+          { element: item.getGrid().getElement().parentNode, priority: 1 },
+        ]
+      }
+    },
+    layout: {
+      fillGaps: false,
+      rounding: true,
+      horizontal: false
+    },
+    dragSort: function () {
+      return clinicGrids;
     }
-    // allow Muuri to apply its initial transform, then lock sizes
-    setTimeout(function () { fixDragSizing(el); }, 0);
-  });
-  studentsBoard.on('dragReleaseEnd', function (item) {
-    var el = item.getElement();
-    clearDragSizing(el);
-    __isDragging = false; // <-- clear dragging flag
-    studentsBoard.refreshItems().layout();
   });
 
-  // initialize clinicsBoard (containers of clinics)
+  // 3. Initialize the clinics board
   clinicsBoard = new Muuri('.clinics-board', {
     items: '.item',
     dragEnabled: false,
-    layout: { fillGaps: false, rounding: true, horizontal: false }
+    layout: {
+      fillGaps: false,
+      rounding: true,
+      horizontal: false
+    }
   });
 
-  // initialize each clinic-inner as its own Muuri grid
+  // 4. Initialize each .clinic-inner as a Muuri grid
   document.querySelectorAll('.clinic-inner').forEach(function (el) {
-    // create grid for this clinic inner
     var grid = new Muuri(el, {
       items: '.student-item',
       dragEnabled: true,
       dragHandle: ".student-card",
       dragContainer: dragContainer,
-      layout: { fillGaps: false, rounding: true, horizontal: false },
+      layout: {
+        horizontal: true,
+        fillGaps: true,
+        width: 1000
+      },
       dragSort: function () {
-        return [studentsBoard].concat(clinicGrids.filter(function(g){ return g !== grid; }));
-      }
+        return [studentsBoard].concat(clinicGrids.filter(function (g) {
+          return g !== grid;
+        }));
+      },
+      dragAutoScroll: {
+        targets: (item) => {
+          return [
+            { element: window, priority: 0 },
+            { element: item.getGrid().getElement().parentNode, priority: 1 },
+          ]
+        }
+      },
     });
 
-    // push to clinicGrids BEFORE attaching handlers so dragSort can return full list
     clinicGrids.push(grid);
+  });
 
-    // attach handlers safely (grid should be defined here)
-    grid.on('dragStart', function (item) {
-      __isDragging = true; // <-- set dragging flag
-      var el = item.getElement();
-      var parent = el.parentElement;
-      if (parent) {
-        el.__originWidth = Math.max(0, Math.floor(parent.getBoundingClientRect().width - 12));
+  // 5. Force layout after all items are sized
+  clinicsBoard.refreshItems();
+  clinicsBoard.layout();
+  clinicGrids.forEach(grid => {
+    grid.refreshItems();
+    grid.layout();
+  });
+
+  // 6. Student info button click handler
+  document.querySelectorAll('.student-item .info').forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      event.stopPropagation();
+
+      const studentItem = button.closest('.student-item');
+      const studentId = studentItem?.dataset?.studentId;
+
+      if (!studentId) {
+        console.warn("No student ID found");
+        return;
       }
-      setTimeout(function () { fixDragSizing(el); }, 0);
-    });
-    grid.on('dragReleaseEnd', function (item) {
-      var el = item.getElement();
-      clearDragSizing(el);
-      __isDragging = false; // <-- clear dragging flag
-      grid.refreshItems().layout();
-    });
 
-    grid.on('receive', function (data) {
-      var el = data.item.getElement();
-      // ensure correct classes
-      el.classList.remove('item');
-      el.classList.add('student-item');
-      // clear any originWidth so future drags recompute correctly
-      delete el.__originWidth;
-      grid.refreshItems().layout();
-      studentsBoard.refreshItems().layout(true);
-      clinicsBoard.refreshItems().layout(true);
+      fetch(`/api/student/${studentId}/`)
+        .then(response => {
+          if (!response.ok) throw new Error("Failed to load student info");
+          return response.json();
+        })
+        .then(data => {
+          const detailsPane = document.getElementById('details-pane');
+          if (!detailsPane) return;
+
+          detailsPane.innerHTML = `
+            <h2>${data.name}</h2>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Banner ID:</strong> ${data.banner_id}</p>
+            <p><strong>Status:</strong> ${data.status === 'J' ? 'Junior' : 'Senior'}</p>
+            <p><strong>Major:</strong> ${data.major}</p>
+            <p><strong>Initial Assigned Clinic:</strong> ${data.clinic}</p>
+            <p><strong>Preferences:</strong> ${data.choices.join('<br>')}</p>
+          `;
+
+          detailsPane.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+          console.error("Error loading student info:", error);
+        });
     });
   });
 
-  // final layout pass
-  clinicGrids.forEach(function (g) { g.refreshItems().layout(true); });
-  studentsBoard.refreshItems().layout(true);
-  clinicsBoard.refreshItems().layout(true);
+  // Automatically assign students with an assigned_clinic on load
+  document.querySelectorAll('.student-item').forEach(studentEl => {
+    const studentId = studentEl.dataset.studentId;
 
-  requestAnimationFrame(function () {
-    clinicGrids.forEach(function (g) { g.refreshItems().layout(); });
-    studentsBoard.refreshItems().layout();
-    clinicsBoard.refreshItems().layout();
-    setTimeout(function () {
-      clinicGrids.forEach(function (g) { g.refreshItems().layout(); });
-      studentsBoard.refreshItems().layout();
-      clinicsBoard.refreshItems().layout();
-    }, 120);
+    fetch(`/api/student/${studentId}/`)
+      .then(res => {
+        if (!res.ok) throw new Error('Student fetch failed');
+        return res.json();
+      })
+      .then(data => {
+        if (!data.assigned_clinic) return;
+
+        // Find the .clinic-inner that matches the assigned clinic
+        const matchingClinicContainer = Array.from(document.querySelectorAll('.clinic-container'))
+          .find(container => container.querySelector('.clinic-title')?.textContent.trim() === data.assigned_clinic);
+
+        if (!matchingClinicContainer) {
+          console.warn(`Clinic "${data.assigned_clinic}" not found in DOM`);
+          return;
+        }
+
+        const targetGridEl = matchingClinicContainer.querySelector('.clinic-inner');
+        const targetGrid = clinicGrids.find(grid => grid.getElement() === targetGridEl);
+
+        if (!targetGrid) {
+          console.warn(`Muuri grid not found for clinic "${data.assigned_clinic}"`);
+          return;
+        }
+
+        // Remove from current Muuri grid (studentsBoard)
+        const item = studentsBoard.getItem(studentEl);
+        if (!item) {
+          console.warn(`Item not found in studentsBoard for student ID ${studentId}`);
+          return;
+        }
+
+        // Move the item to the target grid (e.g., to the end)
+        studentsBoard.move(item, targetGrid, -1);
+
+        // Then refresh layouts
+        targetGrid.refreshItems();
+        targetGrid.layout();
+
+      })
+      .catch(err => console.error('Error assigning student:', err));
   });
 
-  // expose for debugging
-  window.clinicGrids = clinicGrids;
-  window.studentsBoard = studentsBoard;
-  window.clinicsBoard = clinicsBoard;
-});
-
-// prevent resize-driven reflows while dragging
-window.addEventListener('resize', function () {
-  if (__isDragging) return; // skip layout while a drag is active
-  clinicGrids.forEach(function (g) { g.refreshItems().layout(); });
-  studentsBoard && studentsBoard.refreshItems().layout();
-  clinicsBoard && clinicsBoard.refreshItems().layout();
 });

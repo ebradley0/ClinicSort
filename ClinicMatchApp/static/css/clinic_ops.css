@@ -1,72 +1,30 @@
-/* clinic_ops.css */
-/* html, body {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  font-family: Helvetica, Arial, sans-serif;
-}
-body {
-  margin: 0;
-  padding: 20px 10px;
-}
-.drag-container {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 1000;
-}
-
-.clinics-board {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.clinic-container {
-  position: relative;
-  width: 150px;
-  height: 50px;
-  padding: 5px;
-  box-sizing: border-box;
-}
-.clinic-card {
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  border-radius: 6px;
-} */
-
-
 .drag-container {
   position: relative;
 }
+
+/* Let Muuri control positioning */
 .item {
-  /* let Muuri control positioning */
   position: absolute;
-  margin: 0;               /* remove flow margins that cause diagonal offsets */
+  margin: 0;
   will-change: transform;
+
+  /* ✅ FIX: Explicitly set item size for Muuri */
+  width: 1000px;
+  height: 200px;
 }
 
-/* Ensure the item container has the intended size (no positioning) */
+/* Clinic container inside Muuri item */
 .clinic-container {
-  display: block;          /* don't use flex here for the outer wrapper */
-  width: 200px;            /* fixed size so Muuri can pack reliably (adjust as needed) */
-  height: 120px;
-  margin: 0;               /* spacing handled inside card or by Muuri placement */
+  display: block;
+  width: 1000px;          /* ✅ FIX: match .item width */
+  height: 200px;          /* ✅ FIX: match .item height */
+  box-sizing: border-box;
+  margin: 0;
   z-index: 1;
   background: transparent;
   color: black;
 }
+
 .item.muuri-item-dragging {
   z-index: 3;
 }
@@ -76,89 +34,68 @@ body {
 .item.muuri-item-hidden {
   z-index: 0;
 }
+
+/* Inner card */
 .clinic-card {
+  display: block;         /* ✅ FIX: ensure it's block */
+  width: 100%;            /* Fill .clinic-container */
+  height: 100%;           /* Fill .clinic-container */
   padding: 12px;
   box-sizing: border-box;
-  width: 100%;
-  height: 100%;
   border-radius: 6px;
+  border:#333 solid 2px;
 }
 
+/* Clinic title */
 .clinic-title {
-    font-weight: bold;
-    font-size: 20px;
-}
-.remove-button {
-    background-color: red;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 5px 10px;
-    align-self: flex-end;
+  font-weight: bold;
+  font-size: 20px;
 }
 
-/* ensure the page doesn't scroll; left and right panes scroll independently */
+/* Remove button */
+.remove-button {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  align-self: flex-end;
+}
+
+/* Global layout */
 html, body {
   height: 100%;
   margin: 0;
 }
-body {
-  overflow: hidden; /* prevents the page (workspace) from scrolling */
-}
 
-/* left-side vertical column */
+/* Clinics column */
 .clinics-board {
   position: fixed;
   left: 0;
   top: 0;
-  width: 320px;
-  /* allow Muuri to set the actual element height, but constrain it to viewport */
-  height: auto;
+  width: 1000px;               /* Fixed width */
   max-height: 100vh;
-  padding: 10px 10px 40px 10px; /* extra bottom padding so last item isn't flush to edge */
+  height: auto;
+  padding: 10px 10px 40px 10px;
   box-sizing: border-box;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   background: #f7f7f7;
   z-index: 1000;
 }
 
-/* ensure items are measured & positioned by Muuri */
-.item {
-  position: absolute;
-  margin: 0;
-  will-change: transform;
-}
-
-/* keep items full column width and vertical gaps via Muuri layout */
-.clinic-container {
-  width: 100%;
-  height: auto;
-  box-sizing: border-box;
-  /* remove top/bottom margins that would interfere with layout calculation */
-  margin: 0;
-}
-
-/* inner card styling */
-.clinic-card {
-  width: 100%;
-  height: 100%;
-  padding: 12px;
-  box-sizing: border-box;
-  border-radius: 6px;
-}
-
-/* content area to the right of the left column */
+/* Main content to the right of clinics column */
 .main-content {
-  margin-left: 320px;    /* left clinics column width */
-  margin-right: 460px;   /* match students column width + gap */
+  margin-left: 1000px;    /* Equal to .clinics-board width */
+  margin-right: 120px;    /* Adjust based on .students-board width + margin */
   padding: 20px;
   box-sizing: border-box;
   height: 100vh;
   overflow: auto;
 }
 
+/* Capacity styling */
 .clinic-capacity {
   margin-top: 8px;
   font-size: 0.9rem;
@@ -172,22 +109,20 @@ body {
   font-weight: 600;
 }
 
-/* Students board (fixed bottom-right) — increased size */
+/* Students board on right side */
 .students-board {
   position: fixed;
   right: 16px;
   top: 16px;
   bottom: 16px;
-  width: 420px;           /* adjust larger as requested */
+  width: 120px;
   max-height: calc(100vh - 32px);
   background: #ffffff;
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 10px 30px rgba(0,0,0,0.12);
   border-radius: 10px;
   z-index: 1100;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .students-board-header {
@@ -205,27 +140,33 @@ body {
   box-sizing: border-box;
 }
 
-/* student item/card sizing — slightly larger */
-.student-item {
-  position: absolute;
-  width: auto;      /* ensure natural size */
-  height: 72px;
-  margin: 6px;
-  box-sizing: border-box;
-}
-
+/* Student card */
 .student-card {
   width: 100%;
   height: 100%;
   padding: 10px 14px;
   box-sizing: border-box;
   border-radius: 8px;
+  border-color: black;
   background: #f7fafc;
   display: flex;
   flex-direction: column;
   justify-content: center;
   font-size: 0.95rem;
 }
+
+.student-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  white-space: normal;     /* ✅ Allow wrapping */
+  word-wrap: break-word;   /* ✅ Allow breaking long names */
+  overflow: visible;       /* ✅ Show wrapped content */
+  height: auto;            /* ✅ Allow vertical expansion */
+}
+
 
 .student-name {
   font-weight: 600;
@@ -236,41 +177,44 @@ body {
   color: rgba(0,0,0,0.6);
 }
 
-/* clinic inner student area (Muuri grid per clinic) */
+/* Clinic student area (Muuri horizontal grid) */
 .clinic-inner {
-  position: relative;         /* Muuri requires a positioned parent */
-  width: 100%;
-  max-height: 220px;         /* adjust as desired */
-  min-height: 80px;
-  box-sizing: border-box;
+  /* display: flex; */
+  position: relative;          /* ✅ Required for Muuri */
+  min-width:800px;
+  max-width:950px;
+  height: 100px;
   margin-top: 10px;
   padding: 8px;
-  overflow-y: auto;          /* scroll students inside clinic */
-  background: rgba(255,255,255,0.03);
+  box-sizing: border-box;
+  overflow-x: auto;
+  white-space: nowrap;
   border-radius: 6px;
   border: 1px dashed rgba(0,0,0,0.04);
 }
 
-/* student-item already defined; ensure it fits clinic area */
+/* Student item (inside clinic or students board) */
 .student-item {
-  position: absolute;        /* Muuri will manage placement */
-  width: calc(100% - 12px);
-  height: 56px;
+  position: absolute;          /* Let Muuri handle layout */
+  width: 100px;
+  height: 80px;
   margin: 6px;
   box-sizing: border-box;
+  border: 2px solid #333;
+  border-color: black;
 }
 
-/* keep responsive: shrink right panel on small screens */
+/* Responsive tweak */
 @media (max-width: 900px) {
   .students-board {
-    width: 280px;
+    width: 120px;
     right: 12px;
     bottom: 12px;
     max-height: 45vh;
   }
 }
 
-/* ensure dragged muuri items are visually on top (global) */
+/* Drag styling */
 .muuri-item-dragging,
 .item.muuri-item-dragging,
 .student-item.muuri-item-dragging {
@@ -278,39 +222,31 @@ body {
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
 
-/* optional: make release still above others */
 .muuri-item-releasing {
   z-index: 999998 !important;
 }
 
-/* Apply measured pixel sizing ONLY to the dragged element (per-element vars) */
-.muuri-fixed-drag,
-.muuri-item-dragging.muuri-fixed-drag {
-  box-sizing: border-box !important;
-  width: var(--muuri-drag-w) !important;
-  min-width: var(--muuri-drag-w) !important;
-  max-width: var(--muuri-drag-w) !important;
-  height: var(--muuri-drag-h) !important;
-  min-height: var(--muuri-drag-h) !important;
-  max-height: var(--muuri-drag-h) !important;
-  display: block !important;
-  transition: none !important;
-}
-
-/* ensure inner contents fill the item but don't force global sizing */
-.student-card, .student-item .student-card {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* keep dragged element visually above everything */
-.muuri-item-dragging {
-  z-index: 999999 !important;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-}
-
-/* ensure inner card doesn't expand parent while dragging */
+/* Ensure inner content fills container */
 .student-card, .clinic-card {
   box-sizing: border-box;
   width: 100%;
+}
+
+/* Fix width while dragging */
+.student-item.muuri-item-dragging,
+.student-item.muuri-item-releasing {
+  width: 100px !important;
+}
+
+.info {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #007bff; /* Or your preferred color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 5px;
+  cursor: pointer;
+  z-index: 10;
 }

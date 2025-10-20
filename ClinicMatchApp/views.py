@@ -3,14 +3,14 @@ import random
 import re
 import time
 from re import S
-from django.db.models import Sum
+from django.db.models import Sum, Prefetch
 from django.db.models.functions import Coalesce
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
 from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm
 from .models import Student as StudentModel
 from django.db.models.fields import NOT_PROVIDED
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import csv
 import io
 
@@ -93,22 +93,22 @@ def clinicManagementHomepage(request):
     return render(request, "clinicmanagement.html", context=context)
 
 def clinicManagementView(request, title='all'):
-    # get base queryset (apply your existing filtering by title/major if present)
-    clinics_qs = Clinic.objects.all()
+    # Get all clinics and prefetch assigned students
+    clinics_qs = Clinic.objects.prefetch_related(
+        Prefetch('Assigned_Output', queryset=StudentModel.objects.all(), to_attr='assigned_students')
+    )
 
-    # Fast path: try to annotate using a known related name (change 'positions' to your real relation if known)
+    # Annotate clinic totals (as you already had)
     try:
         clinics = clinics_qs.annotate(
             total_min=Coalesce(Sum('positions__min_capacity'), 0),
             total_max=Coalesce(Sum('positions__max_capacity'), 0),
         )
     except Exception:
-        # Fallback: compute totals in Python by inspecting reverse relations
         clinics = list(clinics_qs)
         for c in clinics:
             total_min = 0
             total_max = 0
-            # iterate reverse one-to-many relations (auto_created reverse relations)
             for rel in c._meta.get_fields():
                 if getattr(rel, 'auto_created', False) and getattr(rel, 'one_to_many', False):
                     accessor = rel.get_accessor_name()
@@ -117,7 +117,6 @@ def clinicManagementView(request, title='all'):
                     except Exception:
                         continue
                     for obj in rel_qs:
-                        # support several common field names for per-position min/max
                         min_val = 0
                         max_val = 0
                         for min_attr in ('min_capacity', 'min_students', 'min', 'min_size'):
@@ -133,16 +132,36 @@ def clinicManagementView(request, title='all'):
             c.total_min = total_min
             c.total_max = total_max
 
-    # ensure students are included for template rendering
-    students = StudentModel.objects.all()[:200]  # limit if needed
+    # Student filtering by major (using title)
+    if title != 'all':
+        unassigned_students = StudentModel.objects.filter(
+            assigned_clinic__isnull=True,
+            major__major=title  # Match Major.major to the title
+        )
+    else:
+        unassigned_students = StudentModel.objects.filter(assigned_clinic__isnull=True)
+
     context = {
         'clinics': clinics,
-        'students': students,
+        'unassigned_students': unassigned_students,
         'title': title,
     }
     return render(request, "clinicmanagementview.html", context=context)
 
 
+def student_detail_api(request, student_id):
+    student = get_object_or_404(StudentModel, pk=student_id)
+    return JsonResponse({
+        'id': student.id,
+        'name': student.first_name + ' ' + student.last_name,
+        'major': str(student.major),
+        'email': student.email,
+        'banner_id': student.banner_id,
+        'j_or_s': student.j_or_s,
+        'choices': [clinic.title for clinic in student.choices.all()],
+        'assigned_clinic': str(student.assigned_clinic.title) if student.assigned_clinic else None,
+        # Add more fields as needed
+    })
 
 
 

@@ -12,6 +12,7 @@ urlpatterns = [
     path("projectView/", views.projectView, name="projectView" ),
     path("clinicManagementView/", views.clinicManagementHomepage, name="clinicManagementView"), # for testing, will change later
     path("clinicManagementView/all/", views.clinicManagementView, {'title': 'all'}, name="clinicManagementView_all"),
+    path('api/student/<int:student_id>/', views.student_detail_api, name='student-detail-api'),
 ]
 """ 
 for major in Major.objects.all():
