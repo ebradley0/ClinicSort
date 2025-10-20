@@ -3,6 +3,11 @@ from django.forms import ValidationError
 from django.db.models.signals import m2m_changed
 from sortedm2m.fields import SortedManyToManyField
 from colorfield.fields import ColorField
+from social_django.models import UserSocialAuth
+
+from django.contrib.auth import get_user_model
+
+CustomUser = get_user_model()
 
 # Models are Stored here.
 
@@ -64,16 +69,17 @@ class Professor(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 class Student(models.Model):
+    userAuth = models.OneToOneField(UserSocialAuth, on_delete=models.CASCADE, null=True, blank=True) #Connects to the UserSocialAuth object created by the social auth library.
     CHOICES = [ #Predefining the choices for students to ensure consistency.
         ('J', 'Junior'),
         ('S', 'Senior'),
     ]
-    first_name = models.CharField()
-    last_name = models.CharField()
-    email = models.CharField()
-    banner_id = models.PositiveIntegerField()
-    j_or_s = models.CharField(choices=CHOICES)
-    major = models.ForeignKey(Major, on_delete=models.CASCADE)
+    first_name = models.CharField(null=True)
+    last_name = models.CharField(null=True)
+    email = models.CharField(null=True)
+    banner_id = models.PositiveIntegerField(null=True)
+    j_or_s = models.CharField(choices=CHOICES, null=True, blank=True, max_length=1) #Junior or Senior
+    major = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
 
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)

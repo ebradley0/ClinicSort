@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,38 @@
 </head>
 
 <style>
+
+.body {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 20px;
+  flex-direction: row;
+  
+}
+
 .grid {
   position: relative;
+  width: 60vw;
+  background-color: aquamarine;
+}
+
+
+
+
+
+.select-grid {
+
+  position: relative;
+  width: 400px;
+  min-height: 400px;
+  background-color: lightgrey;
 }
 .item {
   display: flex;
     flex-direction: column;
   position: absolute;
-  width: 20vw;
-  height: 20vh;
+  width: 300px;
+  height: 300px;
   margin: 5px;
   z-index: 1;
   background: #343434;
@@ -51,11 +75,12 @@
     border-radius: 5px;
     padding: 5px 10px;
     align-self: flex-end;
+    cursor: pointer;
 }
 
 </style>
 
-<body>
+<body class="body">
 
 <!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
 TITLE
@@ -67,7 +92,7 @@ TITLE
         
         <button class="remove-button" type="button">x</button>
             <div class="clinic-card {{clinic.department}}" 
-                 style="background-color: {{clinic.department.color}};">
+                 style="background-color: {{clinic.department.color}}">
 
                 <p class="clinic-title">{{clinic.title}}</p>
                 <p>{{clinic.description}}</p>
@@ -79,6 +104,18 @@ TITLE
 </div>
 
 <!-- End Grid -->
+ NEW GRID
+
+<!-- Starting Selection Grid-->
+<form method="GET" id="submission-form">
+    {% csrf_token %}
+    <button type="button" id="submit-button">Submit Selections</button>
+  <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
+  </div>
+</form>
+
+
+
 
     
 </body>
@@ -91,7 +128,18 @@ TITLE
 <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2/web-animations.min.js"></script>
 <script>
-    var grid = new Muuri('.grid', {dragEnabled: true});
+
+    // Remove button functionality, triggering grid remove
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('.remove-button').forEach(function(button){
+       button.addEventListener('click', function(){
+            item = grid.getItem(button.closest('.item'));
+            grid.remove(item, {removeElements: true});
+       })
+    })
+    });
+    
 </script>
+<script src="{% static 'js/projectView.js' %}"></script>
 
 </html>

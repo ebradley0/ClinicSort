@@ -5,10 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
+<style>
+ a{
+    text-decoration: none;
+}
+
+    /* From uiverse.io by @portseif */
+.button {
+  align-items: center;
+  background-color: transparent;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  font-family: ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  text-decoration: none;
+  text-transform: uppercase;
+  outline: 0;
+  border: 0;
+  padding: 1rem;
+}
+
+.button:before {
+  background-color: #000000;
+  content: "";
+  display: inline-block;
+  height: 1px;
+  margin-right: 10px;
+  transition: all .42s cubic-bezier(.25,.8,.25,1);
+  width: 0;
+}
+
+.button:hover:before {
+  background-color: #000000;
+  width: 3rem;
+}
+</style>
 <body>
 
     <h1>Welcome to ClinicMatch</h1>
     <p>This is the homepage.</p>
+
+    
+
+    {% if logged_in %}
+    <a href="{% url 'projectView' %}" class="button">Project View</a>
+    <a href="{% url 'profile' %}" class="button">Profile</a>
+    <a href="{% url 'logout' %}" class="button">Logout</a>
+    {%else%}
+    <a href="{% url "social:begin" "google-oauth2" %}" class="button">Google</a>
+    {%endif%}
+
+    
     
 </body>
 </html>

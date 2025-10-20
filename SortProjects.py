@@ -55,8 +55,7 @@ class Project:
         self.current_met_students = 0
         self.project_ID = 0
         self.manager_last_names[0] = f'=HYPERLINK("mailto:{self.email}", "{self.manager_last_names[0].strip()}")'  # Make the first manager a mailto link
-        print("Loaded project:", self.project_name)
-        print("Max students for operation:", self.max_students_for_operation)
+        
     def __str__(self):
         return f"{self.project_name} ({self.department}) - {self.project_description}"
     
