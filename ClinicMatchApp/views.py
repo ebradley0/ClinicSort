@@ -9,6 +9,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
 from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm, StudentProfileForm
+from social_django.models import UserSocialAuth
 from .models import Student as StudentModel
 from django.db.models.fields import NOT_PROVIDED
 from django.http import HttpResponse, JsonResponse
@@ -94,9 +95,38 @@ def studentView(request):
         return render(request, 'studentsubmit.html', context)
     
 def projectView(request):
-    context = {}
-    context['clinics'] = Clinic.objects.all()
-    return render(request, "projectview.html", context=context)
+    user  = request.user
+    user = UserSocialAuth.objects.get(user=user)
+    studentObject = StudentModel.objects.filter(userAuth=user).first()
+    selected_clinics = studentObject.choices.all() 
+    if request.method == "GET":
+        clinics = []
+        for clinic in Clinic.objects.all():
+            if clinic in selected_clinics:
+                continue
+            clinics.append(clinic)
+        
+        print("PROJECT VIEW REQUESTED")
+        context = {}
+        context['clinics'] = clinics
+        context['selected_clinics'] = selected_clinics
+        return render(request, "projectview.html", context=context)
+    elif request.method == "POST":
+        print(request.POST)
+        clinicSelections = request.POST.getlist('clinic_name')
+        studentObject.choices.clear()
+        for clinic in clinicSelections: #Go through their choices in order, adding it to choices
+            print("Clinic: ", clinic)
+            clinic_object = Clinic.objects.get(title=clinic.strip())
+            studentObject.choices.add(clinic_object)
+        studentObject.save() # Save the instance
+        selected_clinics = studentObject.choices.all()
+        clinics = [] 
+        for clinic in Clinic.objects.all(): #Only display clinics not selected in the clinic array. Selected clinics should auto populate into selection grid. This can probably be a helper function.
+            if clinic in selected_clinics:
+                continue
+            clinics.append(clinic)
+        return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics})
 
 def clinicManagementHomepage(request):
     context = {}
@@ -592,13 +622,18 @@ def loadStudentsFromCSV(request):
 
 def profileView(request):
     user = request.user
-    profile_object = StudentModel.objects.get(email=user.email, first_name=user.first_name, last_name=user.last_name)
+    user = UserSocialAuth.objects.get(user=user)
+    profile_object = StudentModel.objects.get(userAuth=user)
 
     if request.method == "POST":
         form = StudentProfileForm(request.POST, instance=profile_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
+        context = {"user": request.user,
+                "profile": profile_object,
+                "profileForm": form,
+                }
         if form.is_valid():
             form.save()
-        return render(request, "index.html", {})
+        return render(request, "profile.html", context=context)
     else:
         profile_form = StudentProfileForm(instance=profile_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
         context = {"user": request.user,

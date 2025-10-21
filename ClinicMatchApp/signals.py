@@ -3,6 +3,7 @@ from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.core.signals import request_started
 from .models import Student, Professor
+from social_django.models import UserSocialAuth
 
 
 
@@ -14,7 +15,12 @@ from .models import Student, Professor
 def userAuthenticated_handler(sender, request, user, **kwargs):
     print("USER LOGGED IN SIGNAL FIRED")
     print(user)
-    created, updated = Student.objects.get_or_create(first_name=user.first_name,
+    if not user.email: #If the user is manually created then skip this process, this is mostly used for dev and won't be in production
+        print("User has no email associated, cannot create Student object.")
+        return
+    UserAuthObject = UserSocialAuth.objects.get(user=user) # Get the Social auth object from social_django. This is made and managed automatically on login
+    
+    created, updated = Student.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
                                                     last_name=user.last_name,
                                                     email=user.email)
     if created:

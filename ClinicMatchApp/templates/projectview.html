@@ -11,7 +11,7 @@
 
 .body {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   margin: 20px;
   flex-direction: row;
   
@@ -19,7 +19,7 @@
 
 .grid {
   position: relative;
-  width: 60vw;
+  width: 65vw;
   background-color: aquamarine;
 }
 
@@ -32,6 +32,7 @@
   position: relative;
   width: 400px;
   min-height: 400px;
+  max-height: 3300px;
   background-color: lightgrey;
 }
 .item {
@@ -83,12 +84,12 @@
 <body class="body">
 
 <!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
-TITLE
 <div class="grid">
     
     <!-- Each item must be of class item -->
     {% for clinic in clinics %}
     <div class="item">
+      <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
         
         <button class="remove-button" type="button">x</button>
             <div class="clinic-card {{clinic.department}}" 
@@ -104,13 +105,23 @@ TITLE
 </div>
 
 <!-- End Grid -->
- NEW GRID
 
 <!-- Starting Selection Grid-->
-<form method="GET" id="submission-form">
+<form method="POST" id="submission-form">
     {% csrf_token %}
-    <button type="button" id="submit-button">Submit Selections</button>
+    <button id="submit-button" type="submit">Submit</button>
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
+    {%for clinic in selected_clinics %}
+    <div class="item">
+      <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->     
+        <button class="remove-button" type="button">x</button>
+            <div class="clinic-card {{clinic.department}}" 
+                 style="background-color: {{clinic.department.color}}">
+                <p class="clinic-title">{{clinic.title}}</p>
+                <p>{{clinic.description}}</p>
+            </div>
+    </div>
+    {%endfor%}
   </div>
 </form>
 
@@ -131,9 +142,9 @@ TITLE
 
     // Remove button functionality, triggering grid remove
     document.addEventListener('DOMContentLoaded', function(){
-      document.querySelectorAll('.remove-button').forEach(function(button){
+      document.querySelectorAll('remove-button').forEach(function(button){
        button.addEventListener('click', function(){
-            item = grid.getItem(button.closest('.item'));
+            item = grid.getItem(button.closest('item'));
             grid.remove(item, {removeElements: true});
        })
     })
