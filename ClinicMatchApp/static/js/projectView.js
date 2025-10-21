@@ -5,6 +5,8 @@ var grid = new Muuri('.grid', {
   let allowedGrids = [grid];
   if (selectGrid.getItems().length < 8) {
     allowedGrids.push(selectGrid);
+  } else {
+    allowedGrids.pop(selectGrid);
   }
   return allowedGrids;  
   },
