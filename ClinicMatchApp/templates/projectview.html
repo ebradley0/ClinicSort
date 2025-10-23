@@ -141,14 +141,7 @@
 <script>
 
     // Remove button functionality, triggering grid remove
-    document.addEventListener('DOMContentLoaded', function(){
-      document.querySelectorAll('remove-button').forEach(function(button){
-       button.addEventListener('click', function(){
-            item = grid.getItem(button.closest('item'));
-            grid.remove(item, {removeElements: true});
-       })
-    })
-    });
+    
     
 </script>
 <script src="{% static 'js/projectView.js' %}"></script>
