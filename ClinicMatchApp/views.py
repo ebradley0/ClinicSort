@@ -187,6 +187,12 @@ def clinicManagementView(request, title='all'):
                     clinic.total_min = int(clinic.min or 0)
                     clinic.total_max = int(clinic.max or 0)
 
+        # Filter assigned_students by major if title != 'all'
+        if title != 'all':
+            clinic.assigned_students = [
+                student for student in clinic.assigned_students
+                if student.major.major.lower() == title.lower()
+            ]
 
     # Filter unassigned students by selected major
     if title != 'all':
