@@ -36,6 +36,7 @@ class Clinic(models.Model):
     max = models.PositiveIntegerField(null=True, blank=True) # Maximum number of students that can be accepted into the clinic
     links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
     requested_students = models.CharField(null=True, blank=True) # CSV of requested students
+    current_students = SortedManyToManyField('Student', related_name="current_students_in_clinic", null=True, blank=True) #Connects to student objects
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
@@ -85,6 +86,9 @@ class Student(models.Model):
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
     initial_assignment = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Initial_Assignments', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.major})"
 
 
 

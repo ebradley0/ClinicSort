@@ -16,6 +16,7 @@ urlpatterns = [
     path("logout/", views.logoutView, name="logout"),
     path('api/student/<int:student_id>/', views.student_detail_api, name='student-detail-api'),
     path('api/update-student-assignments/', views.update_student_assignments, name='update_student_assignments'),
+    path('MatchingProcess/', views.runMatchingAlgorithm, name='runMatchingAlgorithm'),
 ]
 """ 
 for major in Major.objects.all():

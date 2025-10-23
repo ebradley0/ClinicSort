@@ -321,14 +321,15 @@ def loadProjectsFromCSV(request):
         self.current_eet_students = 0
         self.current_met_students = 0
         self.project_ID = 0"""
-
+    project_count = 0
     for project in projects:
+       
         primaryManager = project.manager_last_names[0] 
         primaryManagerEmail = project.email
 
         
         clinic = Clinic(
-            title=project.project_name,
+            title=project.project_name.strip(),
             department= Major.objects.get(major=project.department) if Major.objects.filter(major=project.department).exists() else None,
             description=project.project_description,
             links= project.project_url_links,
@@ -400,13 +401,15 @@ import SortStudents
 def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
-        major = Major.objects.get(major=student.major) if Major.objects.filter(major=student.major).exists() else None
+        print(student.first_name, student.last_name, student.major, student.year)
+        major = Major.objects.get(major=student.major.upper().strip())
+        year = student.year[0].upper() # Mapping to J or S
         studentObj = StudentModel(
             first_name=student.first_name,
             last_name=student.last_name,
             email=student.email,
             banner_id=random.randint(100000000, 999999999), #Generating a random banner ID since we dont have that data
-            j_or_s=student.year,
+            j_or_s=year,
             major=major,
         )
         studentObj.save()
@@ -463,258 +466,7 @@ def loadStudentsFromCSV(request):
 
     return render(request, 'index.html', {})
 
-'''def loadStudentsFromCSV(request):
-    Students = SortStudents.get_student_data()
-    for student in Students:
-        # studentObj = SortStudents.Student(row) ... studentObj.save()
-        # avoid double-wrapping if `student` is already a SortStudents.Student
-        if isinstance(student, SortStudents.Student):
-            studentObj = student
-        else:
-            studentObj = SortStudents.Student(student)
 
-        # Build kwargs from parsed Student object (keep only known fields)
-        student_kwargs = {}
-        for fld in ("email", "first_name", "last_name", "year", "linkedin", "resume", "major"):
-            val = getattr(studentObj, fld, None)
-            if val not in (None, ""):
-                student_kwargs[fld] = val
-
-        # Try to resolve major to a Major instance if your Student model uses a FK
-        try:
-            student_model_field = StudentModel._meta.get_field("major")
-            major_is_fk = getattr(student_model_field, "many_to_one", False)
-        except Exception:
-            major_is_fk = False
-
-        if major_is_fk and getattr(studentObj, "major", None):
-            try:
-                major_obj = Major.objects.get(major=studentObj.major)
-            except Major.DoesNotExist:
-                major_obj = None
-            student_kwargs["major"] = major_obj
-
-        # keep only concrete fields present on model
-        allowed_fields = {
-            f.name for f in StudentModel._meta.get_fields()
-            if getattr(f, "concrete", False) and not getattr(f, "many_to_many", False)
-        }
-        filtered_kwargs = {k: v for k, v in student_kwargs.items() if k in allowed_fields}
-
-        # --- ensure banner_id exists: try extract numeric suffix from email, else generate random unique id ---
-        if 'banner_id' in allowed_fields and 'banner_id' not in filtered_kwargs:
-            for _ in range(10):
-                candidate = random.randint(1000000, 9999999)
-                if not StudentModel.objects.filter(banner_id=candidate).exists():
-                    banner_val = candidate
-                    break
-            # last-resort deterministic fallback
-            if banner_val is None:
-                banner_val = int(time.time()) % 10000000
-            filtered_kwargs['banner_id'] = banner_val
-        # --- end banner_id handling ---
-
-        # --- derive j_or_s (Junior/Senior) fallback from year if present ---
-        # only set if student model expects 'j_or_s' but CSV did not provide it
-        if 'j_or_s' not in filtered_kwargs:
-            j_or_s_val = None
-            # prefer an explicit attribute if SortStudents set it
-            if getattr(studentObj, 'j_or_s', None):
-                j_or_s_val = studentObj.j_or_s
-            # fall back to year parsing: look for "senior"/"junior" or digit year
-            elif getattr(studentObj, 'year', None):
-                yr = str(studentObj.year).strip().lower()
-                if 'senior' in yr or yr.startswith('s') or yr in ('4','4th'):
-                    j_or_s_val = 'S'
-                elif 'junior' in yr or yr.startswith('j') or yr in ('3','3rd'):
-                    j_or_s_val = 'J'
-                else:
-                    # numeric fallback (treat >=4 as Senior)
-                    try:
-                        n = int(yr)
-                        j_or_s_val = 'S' if n >= 4 else 'J'
-                    except Exception:
-                        j_or_s_val = None
-            if j_or_s_val is not None and 'j_or_s' in allowed_fields:
-                filtered_kwargs['j_or_s'] = j_or_s_val
-        # --- end j_or_s derivation ---
-
-        # required field check (same as earlier)
-        required_fields = []
-        from django.db.models.fields import NOT_PROVIDED
-        for f in StudentModel._meta.get_fields():
-            if not getattr(f, "concrete", False) or getattr(f, "many_to_many", False) or getattr(f, "auto_created", False):
-                continue
-            if getattr(f, "primary_key", False):
-                continue
-            # field is required if null is False and no default provided
-            if not getattr(f, "null", False) and getattr(f, "default", NOT_PROVIDED) is NOT_PROVIDED:
-                required_fields.append(f.name)
-
-        missing = [name for name in required_fields if name not in filtered_kwargs]
-
-        # Try to derive a banner_id from email (local-part) if banner_id is required
-        if "banner_id" in missing:
-            email_val = filtered_kwargs.get("email") or getattr(studentObj, "email", None)
-            if email_val and "@" in email_val:
-                filtered_kwargs["banner_id"] = email_val.split("@", 1)[0]
-                missing.remove("banner_id")
-
-        # If required fields remain missing, skip this student and log for review
-        if missing:
-            print(f"Skipping student import — missing required fields: {missing} — parsed: {getattr(studentObj,'email',None)}")
-            continue
-
-        # Try create and handle DB errors gracefully
-        try:
-            StudentModel.objects.create(**filtered_kwargs)
-        except Exception as e:
-            print("Failed to create Student:", e, "data:", filtered_kwargs)
-            continue
-
-    return render(request, 'index.html', {})'''
-
-'''def loadStudentsFromCSV(request):
-    # Adjust this path or file source to match your current implementation
-    csv_path = '/Users/r0n0than/Documents/ClinicSort/ClinicSort/Student Clinic Request (Responses) - Form.csv'
-
-    created = 0
-    skipped = 0
-    errors = []
-    skipped_examples = []
-
-    try:
-        with open(csv_path, newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            rows = list(reader)
-    except Exception as e:
-        return HttpResponse(f"Failed to open CSV: {e}", status=500)
-
-    # if there's a header row, skip it (adjust as needed)
-    if rows and any(cell.lower().startswith('timestamp') or cell.lower().startswith('email') for cell in rows[0]):
-        rows = rows[1:]
-
-    for i, row in enumerate(rows, start=1):
-        try:
-            # If your code already wraps rows into SortStudents.Student, keep that.
-            studentObj = SortStudents.Student(row)
-
-            # Build kwargs as before
-            student_kwargs = {}
-            for fld in ("email", "first_name", "last_name", "year", "linkedin", "resume", "major"):
-                val = getattr(studentObj, fld, None)
-                if val not in (None, ""):
-                    student_kwargs[fld] = val
-
-            # resolve major -> Major instance if needed (same logic you used)
-            try:
-                student_model_field = StudentModel._meta.get_field("major")
-                major_is_fk = getattr(student_model_field, "many_to_one", False)
-            except Exception:
-                major_is_fk = False
-
-            if major_is_fk and getattr(studentObj, "major", None):
-                try:
-                    major_obj = Major.objects.get(major=studentObj.major)
-                except Major.DoesNotExist:
-                    major_obj = None
-                student_kwargs["major"] = major_obj
-
-            # keep only concrete fields present on model
-            allowed_fields = {
-                f.name for f in StudentModel._meta.get_fields()
-                if getattr(f, "concrete", False) and not getattr(f, "many_to_many", False)
-            }
-            filtered_kwargs = {k: v for k, v in student_kwargs.items() if k in allowed_fields}
-
-            # --- ensure banner_id exists: try extract numeric suffix from email, else generate random unique id ---
-            if 'banner_id' in allowed_fields and 'banner_id' not in filtered_kwargs:
-                banner_val = None
-                email_val = filtered_kwargs.get("email") or getattr(studentObj, "email", None)
-                if email_val and "@" in email_val:
-                    local = email_val.split("@", 1)[0]
-                    m = re.search(r"(\d+)$", local)
-                    if m:
-                        try:
-                            banner_val = int(m.group(1))
-                        except Exception:
-                            banner_val = None
-                # generate a random numeric banner_id if extraction failed
-                if banner_val is None:
-                    # try a few times to avoid collisions
-                    for _ in range(10):
-                        candidate = random.randint(1000000, 9999999)
-                        if not StudentModel.objects.filter(banner_id=candidate).exists():
-                            banner_val = candidate
-                            break
-                    # last-resort deterministic fallback
-                    if banner_val is None:
-                        banner_val = int(time.time()) % 10000000
-                filtered_kwargs['banner_id'] = banner_val
-            # --- end banner_id handling ---
-
-            # --- derive j_or_s (Junior/Senior) fallback from year if present ---
-            # only set if student model expects 'j_or_s' but CSV did not provide it
-            if 'j_or_s' not in filtered_kwargs:
-                j_or_s_val = None
-                # prefer an explicit attribute if SortStudents set it
-                if getattr(studentObj, 'j_or_s', None):
-                    j_or_s_val = studentObj.j_or_s
-                # fall back to year parsing: look for "senior"/"junior" or digit year
-                elif getattr(studentObj, 'year', None):
-                    yr = str(studentObj.year).strip().lower()
-                    if 'senior' in yr or yr.startswith('s') or yr in ('4','4th'):
-                        j_or_s_val = 'S'
-                    elif 'junior' in yr or yr.startswith('j') or yr in ('3','3rd'):
-                        j_or_s_val = 'J'
-                    else:
-                        # numeric fallback (treat >=4 as Senior)
-                        try:
-                            n = int(yr)
-                            j_or_s_val = 'S' if n >= 4 else 'J'
-                        except Exception:
-                            j_or_s_val = None
-                if j_or_s_val is not None and 'j_or_s' in allowed_fields:
-                    filtered_kwargs['j_or_s'] = j_or_s_val
-            # --- end j_or_s derivation ---
-
-            # required field check (same as earlier)
-            required_fields = []
-            from django.db.models.fields import NOT_PROVIDED
-            for f in StudentModel._meta.get_fields():
-                if not getattr(f, "concrete", False) or getattr(f, "many_to_many", False) or getattr(f, "auto_created", False):
-                    continue
-                if getattr(f, "primary_key", False):
-                    continue
-                if not getattr(f, "null", False) and getattr(f, "default", NOT_PROVIDED) is NOT_PROVIDED:
-                    required_fields.append(f.name)
-            missing = [name for name in required_fields if name not in filtered_kwargs]
-
-            if missing:
-                skipped += 1
-                if len(skipped_examples) < 5:
-                    skipped_examples.append({"row_index": i, "missing": missing, "parsed": {k: getattr(studentObj, k, None) for k in ("email","first_name","last_name")}})
-                continue
-
-            # create
-            try:
-                StudentModel.objects.create(**filtered_kwargs)
-                created += 1
-            except Exception as e:
-                errors.append({"row": i, "error": str(e), "data": filtered_kwargs})
-        except Exception as e:
-            errors.append({"row": i, "error": str(e)})
-            skipped += 1
-
-    summary = {
-        "total_rows": len(rows),
-        "created": created,
-        "skipped": skipped,
-        "errors_count": len(errors),
-        "skipped_examples": skipped_examples[:5],
-        "errors": errors[:10],
-    }
-    return HttpResponse(f"Import summary: {summary}")'''
 
 
 
@@ -740,6 +492,79 @@ def profileView(request):
                 }
         return render(request, "profile.html", context=context)
 
+
+
+def runMatchingAlgorithm(request):
+
+
+
+    students = StudentModel.objects.all()
+    clinics = Clinic.objects.all()
+
+    #Clearing all assignments
+    for student in students:
+        student.assigned_clinic = None
+    for clinic in clinics:
+        clinic.current_students.clear()
+
+    juniors = []
+    seniors = []
+    for student in students:
+        match student.j_or_s:
+            case 'J':
+                juniors.append(student)
+            case 'S':
+                seniors.append(student)
+    #Doing requested student matching
+
+    for clinic in clinics:
+        requested_students = clinic.requested_students.split(',')
+        if requested_students is not []:
+            for student in students:
+                
+                student_ref = student.email.split('@')[0].strip().lower()
+                for requested_student in requested_students:
+                    if student_ref == requested_student.strip().lower():
+                        student.assigned_clinic = clinic
+                        #Removing from juniors and seniors
+                        match student.j_or_s:
+                            case 'J':
+                                juniors = [j for j in juniors if j.id != student.id]
+                            case 'S':
+                                seniors = [s for s in seniors if s.id != student.id]
+                        clinic.current_students.add(student)
+                        student.save()
+    for student in seniors:
+        matchStudent(student)
+    for student in juniors:
+        matchStudent(student)
+    return render(request, "index.html", {})
+
+
+
+
+def matchStudent(student):
+    for choice in student.choices.all(): #Going through their choices
+            clinic = choice
+            clinicNumberHandlers = clinic.numberHandler.all()
+            for handler in clinicNumberHandlers:
+                if handler.general:
+                    if clinic.current_students.count() < handler.max:
+                        student.assigned_clinic = clinic
+                        clinic.current_students.add(student)
+                        clinic.save()
+                        student.save()
+                        break
+                else:
+                    if student.major == handler.major:
+                        if clinic.current_students.count() < handler.max:
+                            student.assigned_clinic = clinic
+                            clinic.current_students.add(student)
+                            clinic.save()
+                            student.save()
+                            break
+
+        
 
 def logoutView(request):
     from django.contrib.auth import logout #Imported here just for cleanliness, shouldn't be needed outside of this function
