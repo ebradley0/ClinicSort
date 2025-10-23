@@ -134,50 +134,71 @@ def clinicManagementHomepage(request):
     return render(request, "clinicmanagement.html", context=context)
 
 def clinicManagementView(request, title='all'):
-    # Get all clinics and prefetch assigned students
+    """
+    Clinic management view that:
+    - Loads all clinics with assigned students.
+    - Determines if a clinic is 'general' (has a general number handler).
+    - Calculates the min/max capacity based on general or per-major settings.
+    """
+
+    # Prefetch assigned students for each clinic
     clinics_qs = Clinic.objects.prefetch_related(
-        Prefetch('Assigned_Output', queryset=StudentModel.objects.all(), to_attr='assigned_students')
+        Prefetch(
+            'Assigned_Output',
+            queryset=StudentModel.objects.all(),
+            to_attr='assigned_students'
+        ),
+        'numberHandler__major'  # prefetch major info for number handlers
     )
 
-    # Annotate clinic totals (as you already had)
-    try:
-        clinics = clinics_qs.annotate(
-            total_min=Coalesce(Sum('positions__min_capacity'), 0),
-            total_max=Coalesce(Sum('positions__max_capacity'), 0),
-        )
-    except Exception:
-        clinics = list(clinics_qs)
-        for c in clinics:
-            total_min = 0
-            total_max = 0
-            for rel in c._meta.get_fields():
-                if getattr(rel, 'auto_created', False) and getattr(rel, 'one_to_many', False):
-                    accessor = rel.get_accessor_name()
-                    try:
-                        rel_qs = getattr(c, accessor).all()
-                    except Exception:
-                        continue
-                    for obj in rel_qs:
-                        min_val = 0
-                        max_val = 0
-                        for min_attr in ('min_capacity', 'min_students', 'min', 'min_size'):
-                            if hasattr(obj, min_attr):
-                                min_val = getattr(obj, min_attr) or 0
-                                break
-                        for max_attr in ('max_capacity', 'max_students', 'max', 'max_size'):
-                            if hasattr(obj, max_attr):
-                                max_val = getattr(obj, max_attr) or 0
-                                break
-                        total_min += min_val
-                        total_max += max_val
-            c.total_min = total_min
-            c.total_max = total_max
+    clinics = list(clinics_qs)
 
-    # Student filtering by major (using title)
+    for clinic in clinics:
+        handlers = clinic.numberHandler.all()
+        general_handler = next((h for h in handlers if h.general), None)
+        clinic.is_general = general_handler is not None
+
+        if clinic.is_general:
+            # General clinics always use the general handler or fallback to clinic's own
+            clinic.total_min = int(general_handler.min or clinic.min or 0)
+            clinic.total_max = int(general_handler.max or clinic.max or 0)
+
+        else:
+            # If a specific major filter is applied
+            if title != 'all':
+                # Find handler for that major
+                major_handler = next(
+                    (h for h in handlers if str(h.major.major).lower() == str(title).lower()), 
+                    None
+                )
+                if major_handler:
+                    clinic.total_min = int(major_handler.min or 0)
+                    clinic.total_max = int(major_handler.max or 0)
+                else:
+                    # Fallback: if no matching major handler exists
+                    clinic.total_min = int(clinic.min or 0)
+                    clinic.total_max = int(clinic.max or 0)
+            else:
+                # When viewing all majors, sum across handlers
+                clinic.total_min = sum(int(h.min or 0) for h in handlers)
+                clinic.total_max = sum(int(h.max or 0) for h in handlers)
+
+                if clinic.total_min == 0 and clinic.total_max == 0:
+                    clinic.total_min = int(clinic.min or 0)
+                    clinic.total_max = int(clinic.max or 0)
+
+        # Filter assigned_students by major if title != 'all'
+        if title != 'all':
+            clinic.assigned_students = [
+                student for student in clinic.assigned_students
+                if student.major.major.lower() == title.lower()
+            ]
+
+    # Filter unassigned students by selected major
     if title != 'all':
         unassigned_students = StudentModel.objects.filter(
             assigned_clinic__isnull=True,
-            major__major=title  # Match Major.major to the title
+            major__major=title
         )
     else:
         unassigned_students = StudentModel.objects.filter(assigned_clinic__isnull=True)
@@ -186,8 +207,11 @@ def clinicManagementView(request, title='all'):
         'clinics': clinics,
         'unassigned_students': unassigned_students,
         'title': title,
+        'majors': Major.objects.all(),
     }
+
     return render(request, "clinicmanagementview.html", context=context)
+
 
 
 def student_detail_api(request, student_id):
@@ -201,10 +225,45 @@ def student_detail_api(request, student_id):
         'j_or_s': student.j_or_s,
         'choices': [clinic.title for clinic in student.choices.all()],
         'assigned_clinic': str(student.assigned_clinic.title) if student.assigned_clinic else None,
+        'initial_assignment': str(student.initial_assignment.title) if student.initial_assignment else None,
         # Add more fields as needed
     })
 
 
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
+import json
+
+@require_POST
+@csrf_exempt  # You can remove this if you want CSRF protection and handle tokens on frontend
+def update_student_assignments(request):
+    try:
+        data = json.loads(request.body)
+        assignments = data.get('assignments', [])
+
+        for assignment in assignments:
+            student_id = assignment.get('student_id')
+            clinic_id = assignment.get('clinic_id')
+
+            if not student_id or not clinic_id:
+                continue
+
+            try:
+                student = StudentModel.objects.get(pk=student_id)
+                clinic = Clinic.objects.get(pk=clinic_id)
+                student.assigned_clinic = clinic
+                student.save()
+            except StudentModel.DoesNotExist:
+                continue
+            except Clinic.DoesNotExist:
+                continue
+
+        return JsonResponse({'status': 'success'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 
@@ -292,6 +351,14 @@ def loadProjectsFromCSV(request):
             clinic.general = True
             clinic.min = project.min_students_required
             clinic.max = project.max_students_for_operation
+            numberHandler = ClinicNumberHandler()
+            numberHandler.clinic = clinic
+            numberHandler.general = True
+            numberHandler.major = Major.objects.get(major="ME")  #Assigning a default major since the field is required, but it won't be used since general is true
+            numberHandler.min = project.min_students_required
+            numberHandler.max = project.max_students_for_operation
+            numberHandler.save()
+            clinic.save()
             
         else:
             clinic.general = False
@@ -334,7 +401,7 @@ def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
         major = Major.objects.get(major=student.major) if Major.objects.filter(major=student.major).exists() else None
-        studentObj = SortStudents.Student(
+        studentObj = StudentModel(
             first_name=student.first_name,
             last_name=student.last_name,
             email=student.email,
@@ -343,16 +410,60 @@ def loadStudentsFromCSV(request):
             major=major,
         )
         studentObj.save()
+        # choices = []
+        # for choice in student.choices:
+        #     if Clinic.objects.filter(title=choice).exists():
+        #         choices.append(Clinic.objects.get(title=choice).id)
         choices = []
-        for choice in student.choices:
-            if Clinic.objects.filter(title=choice).exists():
-                choices.append(Clinic.objects.get(title=choice).id)
-        studentObj.choices.set(choices)
+        # projectName = student.project_1.split(" - ", 1)
+        # if student.project_1 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_2.split(" - ", 1)
+        # if student.project_2 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_3.split(" - ", 1)
+        # if student.project_3 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_4.split(" - ", 1)
+        # if student.project_4 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_5.split(" - ", 1)
+        # if student.project_5 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_6.split(" - ", 1)
+        # if student.project_6 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_7.split(" - ", 1)
+        # if student.project_7 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_8.split(" - ", 1)
+        # if student.project_8 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        choices = []
+        for i in range(1, 9):
+            project_attr = getattr(student, f"project_{i}", None)
+            if not project_attr:
+                continue
+
+            parts = project_attr.split(" - ", 1)
+            if len(parts) > 1:
+                title = parts[1].strip()
+                clinic = Clinic.objects.filter(title__iexact=title).first()
+                if clinic:
+                    choices.append(clinic)
+                else:
+                    print(f"⚠️ Clinic not found for '{title}'")
+            else:
+                print(f"⚠️ Malformed project entry: '{project_attr}'")
+
+        # Deduplicate before saving
+        studentObj.choices.set(set(choices))
         studentObj.save()
+
 
     return render(request, 'index.html', {})
 
-def loadStudentsFromCSV(request):
+'''def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
         # studentObj = SortStudents.Student(row) ... studentObj.save()
@@ -392,27 +503,14 @@ def loadStudentsFromCSV(request):
 
         # --- ensure banner_id exists: try extract numeric suffix from email, else generate random unique id ---
         if 'banner_id' in allowed_fields and 'banner_id' not in filtered_kwargs:
-            banner_val = None
-            email_val = filtered_kwargs.get("email") or getattr(studentObj, "email", None)
-            if email_val and "@" in email_val:
-                local = email_val.split("@", 1)[0]
-                m = re.search(r"(\d+)$", local)
-                if m:
-                    try:
-                        banner_val = int(m.group(1))
-                    except Exception:
-                        banner_val = None
-            # generate a random numeric banner_id if extraction failed
+            for _ in range(10):
+                candidate = random.randint(1000000, 9999999)
+                if not StudentModel.objects.filter(banner_id=candidate).exists():
+                    banner_val = candidate
+                    break
+            # last-resort deterministic fallback
             if banner_val is None:
-                # try a few times to avoid collisions
-                for _ in range(10):
-                    candidate = random.randint(1000000, 9999999)
-                    if not StudentModel.objects.filter(banner_id=candidate).exists():
-                        banner_val = candidate
-                        break
-                # last-resort deterministic fallback
-                if banner_val is None:
-                    banner_val = int(time.time()) % 10000000
+                banner_val = int(time.time()) % 10000000
             filtered_kwargs['banner_id'] = banner_val
         # --- end banner_id handling ---
 
@@ -474,9 +572,9 @@ def loadStudentsFromCSV(request):
             print("Failed to create Student:", e, "data:", filtered_kwargs)
             continue
 
-    return render(request, 'index.html', {})
+    return render(request, 'index.html', {})'''
 
-def loadStudentsFromCSV(request):
+'''def loadStudentsFromCSV(request):
     # Adjust this path or file source to match your current implementation
     csv_path = '/Users/r0n0than/Documents/ClinicSort/ClinicSort/Student Clinic Request (Responses) - Form.csv'
 
@@ -616,7 +714,7 @@ def loadStudentsFromCSV(request):
         "skipped_examples": skipped_examples[:5],
         "errors": errors[:10],
     }
-    return HttpResponse(f"Import summary: {summary}")
+    return HttpResponse(f"Import summary: {summary}")'''
 
 
 

@@ -4,6 +4,8 @@ from django.dispatch import receiver
 from django.core.signals import request_started
 from .models import Student, Professor
 from social_django.models import UserSocialAuth
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 
@@ -18,8 +20,13 @@ def userAuthenticated_handler(sender, request, user, **kwargs):
     if not user.email: #If the user is manually created then skip this process, this is mostly used for dev and won't be in production
         print("User has no email associated, cannot create Student object.")
         return
-    UserAuthObject = UserSocialAuth.objects.get(user=user) # Get the Social auth object from social_django. This is made and managed automatically on login
     
+    # This is to allow admin panel access. Contact IRT to figure out a better way to do this later.
+    try:
+        UserAuthObject = UserSocialAuth.objects.get(user=user)
+    except ObjectDoesNotExist:
+        print(f"No UserSocialAuth found for {user.username} — probably a local/admin login. Skipping student sync.")
+        return
     created, updated = Student.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
                                                     last_name=user.last_name,
                                                     email=user.email)

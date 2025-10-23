@@ -170,10 +170,11 @@ html, body {
 
 .student-name {
   font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .student-meta {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: rgba(0,0,0,0.6);
 }
 

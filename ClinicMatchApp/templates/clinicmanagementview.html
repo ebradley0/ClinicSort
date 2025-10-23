@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Management</title>
+    <title>Clinic Management {{ title }}</title>
     <link rel="stylesheet" href="{% static 'css/clinic_ops.css' %}">
 </head>
 <style>
@@ -15,7 +15,7 @@
   <div class="clinics-board" aria-label="Clinics column">
         {% for clinic in clinics %}
         <!-- item now has data-major for filtering -->
-        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}">
+        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}" data-total-max="{{ clinic.total_max|default:0 }}" data-total-min="{{ clinic.total_min|default:0 }}">
             <div class="clinic-card {{ clinic.department }}"
                  style="background-color: {{ clinic.department.color }};">
                 <p class="clinic-title">{{ clinic.title }}</p>
@@ -24,6 +24,9 @@
                   <span class="min-capacity">{{ clinic.total_min|default:0 }}</span>
                   –
                   <span class="max-capacity">{{ clinic.total_max|default:0 }}</span>
+                    {% if clinic.is_general %}
+                      <span>(General)</span>
+                    {% endif %}
                 </div>
 
                 <!-- New: inner grid for student items for this clinic -->
@@ -53,11 +56,22 @@
   <!-- main content stays between columns -->
   <div class="main-content">
     <div id="filter-controls">
-      <!-- select will be populated by clinic_ops.js -->
       <label for="major-filter">Filter by major:</label>
       <select id="major-filter">
         <option value="all">All</option>
+        {% for major in majors %}
+        <option value="{{ major.major }}">{{ major.major }}</option>
+        {% endfor %}
       </select>
+      <label for="accepting-major">
+        <input type="checkbox" id="accepting-major" />
+        Show only clinics accepting selected major
+      </label>
+      <label for="show-full">
+        <input type="checkbox" id="show-empty" />
+        Show only clinics with fewer than min students
+      </label>
+      <button id="save-assignments">Save Assignments</button>
     </div>
 
     <div class="drag-container"></div>
