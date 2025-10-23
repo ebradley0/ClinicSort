@@ -212,7 +212,33 @@ def clinicManagementView(request, title='all'):
 
     return render(request, "clinicmanagementview.html", context=context)
 
+def profileView(request):
+    user = request.user
+    user = UserSocialAuth.objects.get(user=user)
+    profile_object = StudentModel.objects.get(userAuth=user)
 
+    if request.method == "POST":
+        form = StudentProfileForm(request.POST, instance=profile_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
+        context = {"user": request.user,
+                "profile": profile_object,
+                "profileForm": form,
+                }
+        if form.is_valid():
+            form.save()
+        return render(request, "profile.html", context=context)
+    else:
+        profile_form = StudentProfileForm(instance=profile_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
+        context = {"user": request.user,
+                "profile": profile_object,
+                "profileForm": profile_form,
+                }
+        return render(request, "profile.html", context=context)
+
+
+def logoutView(request):
+    from django.contrib.auth import logout #Imported here just for cleanliness, shouldn't be needed outside of this function
+    logout(request)
+    return render(request, "index.html", {})
 
 def student_detail_api(request, student_id):
     student = get_object_or_404(StudentModel, pk=student_id)
@@ -413,35 +439,6 @@ def loadStudentsFromCSV(request):
             major=major,
         )
         studentObj.save()
-        # choices = []
-        # for choice in student.choices:
-        #     if Clinic.objects.filter(title=choice).exists():
-        #         choices.append(Clinic.objects.get(title=choice).id)
-        choices = []
-        # projectName = student.project_1.split(" - ", 1)
-        # if student.project_1 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_2.split(" - ", 1)
-        # if student.project_2 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_3.split(" - ", 1)
-        # if student.project_3 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_4.split(" - ", 1)
-        # if student.project_4 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_5.split(" - ", 1)
-        # if student.project_5 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_6.split(" - ", 1)
-        # if student.project_6 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_7.split(" - ", 1)
-        # if student.project_7 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
-        # projectName = student.project_8.split(" - ", 1)
-        # if student.project_8 and Clinic.objects.filter(title=projectName).exists():
-        #     choices.append(Clinic.objects.get(title=projectName))
         choices = []
         for i in range(1, 9):
             project_attr = getattr(student, f"project_{i}", None)

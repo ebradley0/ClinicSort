@@ -10,6 +10,8 @@
     {{ user.first_name }} {{ user.last_name }} <br>
     {{ user.email }} <br>
     <br>
+    {{ profile.assigned_clinic }} <br>
+    <br>
     <form method="POST">
         {% csrf_token %}
         {{ profileForm.as_p }}
