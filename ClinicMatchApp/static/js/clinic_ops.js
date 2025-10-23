@@ -111,9 +111,9 @@ window.addEventListener('load', function () {
             <h2>${data.name}</h2>
             <p><strong>Email:</strong> ${data.email}</p>
             <p><strong>Banner ID:</strong> ${data.banner_id}</p>
-            <p><strong>Status:</strong> ${data.status === 'J' ? 'Junior' : 'Senior'}</p>
+            <p><strong>Status:</strong> ${data.j_or_s === 'J' ? 'Junior' : 'Senior'}</p>
             <p><strong>Major:</strong> ${data.major}</p>
-            <p><strong>Initial Assigned Clinic:</strong> ${data.clinic}</p>
+            <p><strong>Initial Assigned Clinic:</strong> ${data.initial_assignment}</p>
             <p><strong>Preferences:</strong> ${data.choices.join('<br>')}</p>
           `;
 
@@ -125,51 +125,126 @@ window.addEventListener('load', function () {
     });
   });
 
-  // Automatically assign students with an assigned_clinic on load
-  document.querySelectorAll('.student-item').forEach(studentEl => {
-    const studentId = studentEl.dataset.studentId;
+  // 7. Filter controls: major dropdown + accepting checkbox + show-empty checkbox
+  const majorFilter = document.getElementById('major-filter');
+  const acceptingMajorCheckbox = document.getElementById('accepting-major');
+  const showEmptyCheckbox = document.getElementById('show-empty');
 
-    fetch(`/api/student/${studentId}/`)
-      .then(res => {
-        if (!res.ok) throw new Error('Student fetch failed');
-        return res.json();
+  function filterClinics() {
+    const selectedMajor = (majorFilter.value || '').toLowerCase();
+    const onlyAccepting = acceptingMajorCheckbox.checked;
+    const showEmptyOnly = showEmptyCheckbox?.checked;
+
+    clinicsBoard.filter(function (item) {
+      const clinicEl = item.getElement();
+      const clinicMajor = (clinicEl.dataset.major || '').toLowerCase();
+      const totalMax = parseInt(clinicEl.dataset.totalMax, 10) || 0;
+      const totalMin = parseInt(clinicEl.dataset.totalMin, 10) || 0;
+
+      // Count assigned students inside this clinic's .clinic-inner by matching clinic id
+      const clinicId = clinicEl.dataset.clinicId;
+      const clinicInner = document.querySelector(`.clinic-inner[data-clinic-id="${clinicId}"]`);
+      const assignedCount = clinicInner ? clinicInner.querySelectorAll('.student-item').length : 0;
+
+      // Filter by major dropdown:
+      const passesMajorFilter = (selectedMajor === '' || selectedMajor === 'all') || (clinicMajor === selectedMajor);
+
+      // Filter by accepting checkbox (totalMax > 0):
+      const passesAcceptingFilter = !onlyAccepting || (totalMax > 0);
+
+      // Filter by show-empty checkbox (assignedCount < totalMin):
+      const passesShowEmptyFilter = !showEmptyOnly || (assignedCount < totalMin);
+
+      // Must satisfy all active filters
+      return passesMajorFilter && passesAcceptingFilter && passesShowEmptyFilter;
+    });
+  }
+
+  // Attach listeners to filter controls
+  if (majorFilter) {
+    majorFilter.addEventListener('change', filterClinics);
+  }
+  if (acceptingMajorCheckbox) {
+    acceptingMajorCheckbox.addEventListener('change', filterClinics);
+  }
+  if (showEmptyCheckbox) {
+    showEmptyCheckbox.addEventListener('change', filterClinics);
+  }
+
+  // Initial filter on page load
+  filterClinics();
+
+  const saveAssignmentsBtn = document.getElementById('save-assignments');
+
+  if (saveAssignmentsBtn) {
+    saveAssignmentsBtn.addEventListener('click', function () {
+      // Prepare an array to hold student-to-clinic assignments
+      const assignments = [];
+
+      // For each clinic container, get clinic id and student ids inside it
+      document.querySelectorAll('.clinic-container.item').forEach(clinicEl => {
+        const clinicId = clinicEl.dataset.clinicId;
+        const clinicInner = clinicEl.querySelector('.clinic-inner');
+
+        if (!clinicInner) return;
+
+        // Find all student items inside this clinic
+        clinicInner.querySelectorAll('.student-item').forEach(studentEl => {
+          const studentId = studentEl.dataset.studentId;
+
+          if (studentId && clinicId) {
+            assignments.push({
+              student_id: studentId,
+              clinic_id: clinicId
+            });
+          }
+        });
+      });
+
+      // Optional: disable button to prevent multiple clicks while saving
+      saveAssignmentsBtn.disabled = true;
+
+      // Send assignments to backend via fetch POST request
+      fetch('/api/update-student-assignments/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken') // assuming you have CSRF token function
+        },
+        body: JSON.stringify({ assignments })
+      })
+      .then(response => {
+        console.log(response);
+        if (!response.ok) throw new Error('Failed to save assignments');
+        return response.json();
       })
       .then(data => {
-        if (!data.assigned_clinic) return;
-
-        // Find the .clinic-inner that matches the assigned clinic
-        const matchingClinicContainer = Array.from(document.querySelectorAll('.clinic-container'))
-          .find(container => container.querySelector('.clinic-title')?.textContent.trim() === data.assigned_clinic);
-
-        if (!matchingClinicContainer) {
-          console.warn(`Clinic "${data.assigned_clinic}" not found in DOM`);
-          return;
-        }
-
-        const targetGridEl = matchingClinicContainer.querySelector('.clinic-inner');
-        const targetGrid = clinicGrids.find(grid => grid.getElement() === targetGridEl);
-
-        if (!targetGrid) {
-          console.warn(`Muuri grid not found for clinic "${data.assigned_clinic}"`);
-          return;
-        }
-
-        // Remove from current Muuri grid (studentsBoard)
-        const item = studentsBoard.getItem(studentEl);
-        if (!item) {
-          console.warn(`Item not found in studentsBoard for student ID ${studentId}`);
-          return;
-        }
-
-        // Move the item to the target grid (e.g., to the end)
-        studentsBoard.move(item, targetGrid, -1);
-
-        // Then refresh layouts
-        targetGrid.refreshItems();
-        targetGrid.layout();
-
+        alert('Assignments saved successfully!');
       })
-      .catch(err => console.error('Error assigning student:', err));
-  });
+      .catch(error => {
+        console.error('Error saving assignments:', error);
+        alert('Error saving assignments.');
+      })
+      .finally(() => {
+        saveAssignmentsBtn.disabled = false;
+      });
+    });
+  }
 
+  // Helper function to get CSRF token from cookie (common Django approach)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i=0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length+1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
 });
