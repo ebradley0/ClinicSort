@@ -351,6 +351,14 @@ def loadProjectsFromCSV(request):
             clinic.general = True
             clinic.min = project.min_students_required
             clinic.max = project.max_students_for_operation
+            numberHandler = ClinicNumberHandler()
+            numberHandler.clinic = clinic
+            numberHandler.general = True
+            numberHandler.major = Major.objects.get(major="ME")  #Assigning a default major since the field is required, but it won't be used since general is true
+            numberHandler.min = project.min_students_required
+            numberHandler.max = project.max_students_for_operation
+            numberHandler.save()
+            clinic.save()
             
         else:
             clinic.general = False
