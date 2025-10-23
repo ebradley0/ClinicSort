@@ -52,6 +52,7 @@ class ClinicNumberHandler(models.Model): #Used for dynamically select numbers fo
     max = models.PositiveIntegerField(null=True, blank=True)
     class Meta:
         unique_together = ('clinic', 'major') #Ensure that each clinic can only have one entry per major
+
 class Review(models.Model):
     professor = models.ForeignKey('Professor', on_delete=models.CASCADE, related_name='reviews') # Connect each review to a professor object
     review_text = models.TextField(max_length=500) # Limit the maximum number of characters to 500.
@@ -83,6 +84,7 @@ class Student(models.Model):
 
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
+    initial_assignment = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Initial_Assignments', null=True, blank=True)
 
 
 
