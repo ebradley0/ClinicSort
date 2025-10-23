@@ -401,7 +401,7 @@ def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
         major = Major.objects.get(major=student.major) if Major.objects.filter(major=student.major).exists() else None
-        studentObj = SortStudents.Student(
+        studentObj = StudentModel(
             first_name=student.first_name,
             last_name=student.last_name,
             email=student.email,
@@ -410,16 +410,60 @@ def loadStudentsFromCSV(request):
             major=major,
         )
         studentObj.save()
+        # choices = []
+        # for choice in student.choices:
+        #     if Clinic.objects.filter(title=choice).exists():
+        #         choices.append(Clinic.objects.get(title=choice).id)
         choices = []
-        for choice in student.choices:
-            if Clinic.objects.filter(title=choice).exists():
-                choices.append(Clinic.objects.get(title=choice).id)
-        studentObj.choices.set(choices)
+        # projectName = student.project_1.split(" - ", 1)
+        # if student.project_1 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_2.split(" - ", 1)
+        # if student.project_2 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_3.split(" - ", 1)
+        # if student.project_3 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_4.split(" - ", 1)
+        # if student.project_4 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_5.split(" - ", 1)
+        # if student.project_5 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_6.split(" - ", 1)
+        # if student.project_6 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_7.split(" - ", 1)
+        # if student.project_7 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        # projectName = student.project_8.split(" - ", 1)
+        # if student.project_8 and Clinic.objects.filter(title=projectName).exists():
+        #     choices.append(Clinic.objects.get(title=projectName))
+        choices = []
+        for i in range(1, 9):
+            project_attr = getattr(student, f"project_{i}", None)
+            if not project_attr:
+                continue
+
+            parts = project_attr.split(" - ", 1)
+            if len(parts) > 1:
+                title = parts[1].strip()
+                clinic = Clinic.objects.filter(title__iexact=title).first()
+                if clinic:
+                    choices.append(clinic)
+                else:
+                    print(f"⚠️ Clinic not found for '{title}'")
+            else:
+                print(f"⚠️ Malformed project entry: '{project_attr}'")
+
+        # Deduplicate before saving
+        studentObj.choices.set(set(choices))
         studentObj.save()
+
 
     return render(request, 'index.html', {})
 
-def loadStudentsFromCSV(request):
+'''def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
         # studentObj = SortStudents.Student(row) ... studentObj.save()
@@ -459,27 +503,14 @@ def loadStudentsFromCSV(request):
 
         # --- ensure banner_id exists: try extract numeric suffix from email, else generate random unique id ---
         if 'banner_id' in allowed_fields and 'banner_id' not in filtered_kwargs:
-            banner_val = None
-            email_val = filtered_kwargs.get("email") or getattr(studentObj, "email", None)
-            if email_val and "@" in email_val:
-                local = email_val.split("@", 1)[0]
-                m = re.search(r"(\d+)$", local)
-                if m:
-                    try:
-                        banner_val = int(m.group(1))
-                    except Exception:
-                        banner_val = None
-            # generate a random numeric banner_id if extraction failed
+            for _ in range(10):
+                candidate = random.randint(1000000, 9999999)
+                if not StudentModel.objects.filter(banner_id=candidate).exists():
+                    banner_val = candidate
+                    break
+            # last-resort deterministic fallback
             if banner_val is None:
-                # try a few times to avoid collisions
-                for _ in range(10):
-                    candidate = random.randint(1000000, 9999999)
-                    if not StudentModel.objects.filter(banner_id=candidate).exists():
-                        banner_val = candidate
-                        break
-                # last-resort deterministic fallback
-                if banner_val is None:
-                    banner_val = int(time.time()) % 10000000
+                banner_val = int(time.time()) % 10000000
             filtered_kwargs['banner_id'] = banner_val
         # --- end banner_id handling ---
 
@@ -541,9 +572,9 @@ def loadStudentsFromCSV(request):
             print("Failed to create Student:", e, "data:", filtered_kwargs)
             continue
 
-    return render(request, 'index.html', {})
+    return render(request, 'index.html', {})'''
 
-def loadStudentsFromCSV(request):
+'''def loadStudentsFromCSV(request):
     # Adjust this path or file source to match your current implementation
     csv_path = '/Users/r0n0than/Documents/ClinicSort/ClinicSort/Student Clinic Request (Responses) - Form.csv'
 
@@ -683,7 +714,7 @@ def loadStudentsFromCSV(request):
         "skipped_examples": skipped_examples[:5],
         "errors": errors[:10],
     }
-    return HttpResponse(f"Import summary: {summary}")
+    return HttpResponse(f"Import summary: {summary}")'''
 
 
 
