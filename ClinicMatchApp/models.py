@@ -37,11 +37,18 @@ class Clinic(models.Model):
     links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
     requested_students = models.CharField(null=True, blank=True) # CSV of requested students
     current_students = SortedManyToManyField('Student', related_name="current_students_in_clinic", null=True, blank=True) #Connects to student objects
+    image = models.FileField(null=True, blank=True)
+    links = models.JSONField(default=list, blank=True, null=True)
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
     def __str__(self):
         return f"{self.title} ({self.department})"
+    
+    def links_list(self): #Helper function to convert the list of links into something the Django HTML can iterate through
+        if self.links:
+            return [link.strip() for link in self.links.split(',')]
+        return []
         
                 
 

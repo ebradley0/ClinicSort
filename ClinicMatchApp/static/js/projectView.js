@@ -10,6 +10,10 @@ var grid = new Muuri('.grid', {
   }
   return allowedGrids;  
   },
+  dragStartPredicate: {
+    distance: 10, // only start drag if mouse moves 10px
+    delay: 0
+  }
   
   
 });
@@ -20,14 +24,24 @@ var selectGrid = new Muuri('.select-grid', {
   dragSort: function () {return [grid, selectGrid];},
 });
 
-document.addEventListener('DOMContentLoaded', function(){
-      document.querySelectorAll('.remove-button').forEach(function(button){
-       button.addEventListener('click', function(){
-            item = grid.getItem(button.closest('.item'));
-            grid.remove(item, {removeElements: true});
-       })
-    })
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("DOM LOADED")
+  document.querySelectorAll('.item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      console.log("ITEM CLICKED");
+      const preview = item.querySelector('.itemContents');
+      const details = item.querySelector('.clinicDetails');
+      preview.classList.toggle('hidden');
+      
+      details.classList.toggle('hidden');
     });
+  });
+});
+
+
+
+
+  
 
 
 

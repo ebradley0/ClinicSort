@@ -94,22 +94,44 @@ def studentView(request):
         context['form'] = form
         return render(request, 'studentsubmit.html', context)
     
+
+import re
+def extract_hyperlink_content(value):
+    """
+    Extracts the visible text from an Excel-style HYPERLINK formula.
+    Example: =HYPERLINK("mailto:test@example.com", "John Doe") → 'John Doe'
+    """
+    if not isinstance(value, str):
+        return value
+    match = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', value)
+    return match.group(1) if match else value
+
+for clinic in Clinic.objects.all():
+    for manager in clinic.clinic_mgmt.all():
+        manager.last_name = extract_hyperlink_content(manager.last_name)
+        manager.save()
+
+
+
 def projectView(request):
     user  = request.user
     user = UserSocialAuth.objects.get(user=user)
     studentObject = StudentModel.objects.filter(userAuth=user).first()
     selected_clinics = studentObject.choices.all() 
+    majors = Major.objects.all()
     if request.method == "GET":
         clinics = []
         for clinic in Clinic.objects.all():
             if clinic in selected_clinics:
                 continue
             clinics.append(clinic)
+            
         
         print("PROJECT VIEW REQUESTED")
         context = {}
         context['clinics'] = clinics
         context['selected_clinics'] = selected_clinics
+        context['majors'] = majors
         return render(request, "projectview.html", context=context)
     elif request.method == "POST":
         print(request.POST)
@@ -126,7 +148,7 @@ def projectView(request):
             if clinic in selected_clinics:
                 continue
             clinics.append(clinic)
-        return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics})
+        return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics, 'majors': Major.objects.all()})
 
 def clinicManagementHomepage(request):
     context = {}
@@ -349,28 +371,48 @@ def loadProjectsFromCSV(request):
         self.project_ID = 0"""
     project_count = 0
     for project in projects:
-       
+        
         primaryManager = project.manager_last_names[0] 
+        primaryManager = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', primaryManager).group(1)
         primaryManagerEmail = project.email
-
+        links = []
+        for link in project.project_url_links:
+            print(link)
+            link = re.match(r'=HYPERLINK\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)', link)
+            if link  != None:
+                link = link.group(1)
+                links.append(link)
         
         clinic = Clinic(
             title=project.project_name.strip(),
             department= Major.objects.get(major=project.department) if Major.objects.filter(major=project.department).exists() else None,
             description=project.project_description,
-            links= project.project_url_links,
+            links= ','.join(links),
             requested_students= project.student_requests,
         )
+        clinic.save()
         professor, created = Professor.objects.get_or_create(
             last_name=primaryManager,
-            email=primaryManagerEmail,
-        )
-        clinic.save()
+            email=primaryManagerEmail,)
+        
         if created:
-            professor.save()
-            clinic.clinic_mgmt.add(professor)
+                professor.save()
+                clinic.clinic_mgmt.add(professor)
         else:
-            clinic.clinic_mgmt.add(professor)
+                clinic.clinic_mgmt.add(professor)
+        clinic.save()
+        
+        for professorEntry in project.manager_last_names[1:]:
+                
+                professor, created = Professor.objects.get_or_create(
+                last_name=professorEntry,
+                email="None",
+            )
+                if created:
+                    professor.save()
+                    clinic.clinic_mgmt.add(professor)
+                else:
+                    clinic.clinic_mgmt.add(professor)
 
         #Handling The ClinicNumberHandler entries for each major
 

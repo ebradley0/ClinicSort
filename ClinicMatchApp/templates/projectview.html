@@ -11,16 +11,19 @@
 
 .body {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin: 20px;
   flex-direction: row;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
   
 }
 
 .grid {
   position: relative;
+  justify-content: center;
+  align-items: center;
   width: 65vw;
-  background-color: aquamarine;
+  background-color: rgb(73, 53, 34);
 }
 
 
@@ -28,7 +31,7 @@
 
 
 .select-grid {
-
+  
   position: relative;
   width: 400px;
   min-height: 400px;
@@ -37,14 +40,17 @@
 }
 .item {
   display: flex;
-    flex-direction: column;
+  flex-direction: column;
   position: absolute;
-  width: 300px;
-  height: 300px;
+  justify-content: flex-start;
+  width: 350px;
+  height: 350px;
   margin: 5px;
   z-index: 1;
-  background: #343434;
+  gap: 0px;
   color: black;
+  align-items: center;
+  background: {{clinic.department_color}};
 }
 .item.muuri-item-dragging {
   z-index: 3;
@@ -61,13 +67,17 @@
   height: 100%;
 }
 .clinic-card {
-  padding: 10px;
-  size: 50px;
+ /* Emptied for formatting */
 }
 
 .clinic-title {
     font-weight: bold;
+    margin-left: 5%;
+    width: 90%;
     font-size: 20px;
+    line-height: 1.2rem;
+    min-height: 2.4rem;
+    max-height: 2.4rem;
 }
 .remove-button {
     background-color: red;
@@ -79,25 +89,137 @@
     cursor: pointer;
 }
 
+.imageSlot
+{
+  width:90%;
+ 
+  height:160px;
+  
+  background-color: grey;
+  align-self: center;
+}
+.generalRequest{
+  width: 100%;
+  background: gray;
+  height: 48px;
+  font-size: 24px;
+  justify-content: center; 
+  align-items: center;
+  text-align: center;  
+  position: absolute;
+  bottom: 0;
+
+}
+.managers{
+  top: 75%;
+  justify-content: center;
+  align-self: flex-start;
+  flex-direction: row;
+  padding-left: 5%;
+}
+.itemContents
+{
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-direction: column;
+}
+.specificRequestHolder{
+  display: flex;
+  width: 100%;
+  height:48px;
+  font-size: 24px;
+  flex-direction: row;
+  position:absolute;
+  bottom: 0;
+}
+.specificRequest 
+{
+  display: flex;
+  background-color: white;
+  flex: 1;
+  height: 48px;
+  justify-content: center; 
+  text-align: center;
+  align-items: center;
+  bottom: 0;
+}
+.clinicDetails
+{
+  display: hidden;
+  width: 100%;
+  align-items: center;
+  flex-direction: column;
+}
+
+.hidden{
+  display: none;
+}
+
+.linkList{
+  display: flex;
+  flex-direction: row;
+}
+
 </style>
 
 <body class="body">
 
+  
+
 <!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
 <div class="grid">
+
+  
     
     <!-- Each item must be of class item -->
     {% for clinic in clinics %}
-    <div class="item">
+    <div class="item" style="background-color: {{clinic.department.color}}">
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
-        
-        <button class="remove-button" type="button">x</button>
-            <div class="clinic-card {{clinic.department}}" 
-                 style="background-color: {{clinic.department.color}}">
-
+            <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
-                <p>{{clinic.description}}</p>
+                {%if clinic.image%}
+                <img src="{{clinic.image.url}}" class="imageSlot">
+                {%else%}
+                <p class="imageSlot" >No image provided</p>
+                {%endif%}
+                <div class="managers">           
+                  {%for manager in clinic.clinic_mgmt.all%}
+                  <a href = "mailto:{{manager.email}}">{{manager.last_name}}</a> {%if not forloop.last%} | {%endif%}
+                  {%endfor%}
+                  <br>
+                </div>
+                {%if clinic.numberHandler.first.general == True %}
+                <div class="generalRequest">  General: {{clinic.numberHandler.first.max}} </div>
+                {%else%}
+                <div class="specificRequestHolder">
+                {%for major in majors%}
+                
+                {%for handler in clinic.numberHandler.all %}
+                {% if major.major == handler.major.major %}
+                <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{handler.max}} </div>
+                {%else%}
+                {%endif%}
+                {%endfor%}
+                
+                {%endfor%}
+                
+                  
+                  
+                </div>
+                
+                {%endif%}
 
+            </div>
+            <div class="clinicDetails hidden itemContents">
+                <p class="clinic-title">{{clinic.title}}</p>
+                {%for link in clinic.links_list%}
+                <div class="linkList">
+                    <a href="{{link}}"> [{{forloop.counter}}] </a>
+                </div>
+                
+                {%endfor%}
+                
             </div>
     </div>
     {% endfor %}
@@ -112,14 +234,45 @@
     <button id="submit-button" type="submit">Submit</button>
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
     {%for clinic in selected_clinics %}
-    <div class="item">
-      <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->     
-        <button class="remove-button" type="button">x</button>
-            <div class="clinic-card {{clinic.department}}" 
-                 style="background-color: {{clinic.department.color}}">
+    <div class="item" style="background-color: {{clinic.department.color}}">
+      <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
+            <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
-                <p>{{clinic.description}}</p>
+                {%if clinic.image%}
+                <img src="{{clinic.image.url}}" class="imageSlot">
+
+                {%else%}
+                <p class="imageSlot" >No image provided</p>
+                {%endif%}
+                <div class="managers">           
+                  {%for manager in clinic.clinic_mgmt.all%}
+                  <a href = "mailto:{{manager.email}}">{{manager.last_name}}</a> {%if not forloop.last%} | {%endif%}
+                  {%endfor%}
+                  <br>
+                </div>
+                {%if clinic.numberHandler.first.general == True %}
+                <div class="generalRequest">  General: {{clinic.numberHandler.first.max}} </div>
+                {%else%}
+                <div class="specificRequestHolder">
+                {%for major in majors%}
+                
+                {%for handler in clinic.numberHandler.all %}
+                {% if major.major == handler.major.major %}
+                <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{handler.max}} </div>
+                {%else%}
+                {%endif%}
+                {%endfor%}
+                
+                {%endfor%}
+                
+                  
+                  
+                </div>
+                
+                {%endif%}
+
             </div>
+            
     </div>
     {%endfor%}
   </div>
