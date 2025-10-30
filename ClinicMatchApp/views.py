@@ -277,6 +277,14 @@ def student_detail_api(request, student_id):
         # Add more fields as needed
     })
 
+def major_api(request, major_id):
+    major = get_object_or_404(Major, pk=major_id)
+    return JsonResponse({
+        'id': major.id,
+        'major': major.major,
+        'color': major.color,
+    })
+
 
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now

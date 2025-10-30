@@ -17,6 +17,7 @@ urlpatterns = [
     path('api/student/<int:student_id>/', views.student_detail_api, name='student-detail-api'),
     path('api/update-student-assignments/', views.update_student_assignments, name='update_student_assignments'),
     path('MatchingProcess/', views.runMatchingAlgorithm, name='runMatchingAlgorithm'),
+    path('api/major/<int:major_id>/', views.major_api, name='major-api'),
 ]
 """ 
 for major in Major.objects.all():
