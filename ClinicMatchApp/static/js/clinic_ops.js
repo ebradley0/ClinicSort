@@ -138,8 +138,10 @@ window.addEventListener('load', function () {
     clinicsBoard.filter(function (item) {
       const clinicEl = item.getElement();
       const clinicMajor = (clinicEl.dataset.major || '').toLowerCase();
-      const totalMax = parseInt(clinicEl.dataset.totalMax, 10) || 0;
-      const totalMin = parseInt(clinicEl.dataset.totalMin, 10) || 0;
+      const clinicGeneral = clinicEl.dataset.isGeneral === 'True';
+      const clinicTotal = Number(clinicEl.dataset.total);
+      const totalMax = Number(clinicEl.dataset.totalMax);
+      const totalMin = Number(clinicEl.dataset.totalMin);
 
       // Count assigned students inside this clinic's .clinic-inner by matching clinic id
       const clinicId = clinicEl.dataset.clinicId;
@@ -153,7 +155,13 @@ window.addEventListener('load', function () {
       const passesAcceptingFilter = !onlyAccepting || (totalMax > 0);
 
       // Filter by show-empty checkbox (assignedCount < totalMin):
-      const passesShowEmptyFilter = !showEmptyOnly || (assignedCount < totalMin);
+      const passesShowEmptyFilter = 
+        !showEmptyOnly ||
+        (clinicGeneral
+          ? Number.isFinite(clinicTotal) &&
+            Number.isFinite(totalMin) &&
+            clinicTotal < totalMin
+          : assignedCount < totalMin);
 
       // Must satisfy all active filters
       return passesMajorFilter && passesAcceptingFilter && passesShowEmptyFilter;

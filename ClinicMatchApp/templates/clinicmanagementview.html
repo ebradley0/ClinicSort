@@ -15,7 +15,7 @@
   <div class="clinics-board" aria-label="Clinics column">
         {% for clinic in clinics %}
         <!-- item now has data-major for filtering -->
-        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}" data-total-max="{{ clinic.total_max|default:0 }}" data-total-min="{{ clinic.total_min|default:0 }}">
+        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}" data-is-general="{{ clinic.is_general }}" data-total="{{ clinic.current_students.count|default_if_none:0 }}" data-total-max="{{ clinic.total_max|default:0 }}" data-total-min="{{ clinic.total_min|default:0 }}">
             <div class="clinic-card {{ clinic.department }}"
                  style="background-color: {{ clinic.department.color }};">
                 <p class="clinic-title">{{ clinic.title }}</p>
@@ -26,6 +26,7 @@
                   <span class="max-capacity">{{ clinic.total_max|default:0 }}</span>
                     {% if clinic.is_general %}
                       <span>(General)</span>
+                      <span>{{ clinic.current_students.count }}</span>
                     {% endif %}
                 </div>
 
@@ -41,7 +42,7 @@
                         <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
                         <div class="student-meta">
                           {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
-                          {% if student.banner_id %}&nbsp;•&nbsp;{{ student.banner_id }}{% endif %}
+                          {% if student.email %}&nbsp;•&nbsp;{{ student.email|cut:"rowan.edu"|cut:"students."|cut:"@" }}{% endif %}
                         </div>
                       </div>
                       <button class="info" aria-label="More info about {{ student.first_name }} {{ student.last_name }}">i</button>
@@ -55,7 +56,9 @@
 
   <!-- main content stays between columns -->
   <div class="main-content">
+    <h1>Clinic Management - {{ title }}</h1>
     <div id="filter-controls">
+      <h3>Filters:</h3>
       <label for="major-filter">Filter by major:</label>
       <select id="major-filter">
         <option value="all">All</option>
@@ -63,14 +66,17 @@
         <option value="{{ major.major }}">{{ major.major }}</option>
         {% endfor %}
       </select>
+      <br />
       <label for="accepting-major">
         <input type="checkbox" id="accepting-major" />
         Show only clinics accepting selected major
       </label>
+      <br />
       <label for="show-full">
         <input type="checkbox" id="show-empty" />
         Show only clinics with fewer than min students
       </label>
+      <br />
       <button id="save-assignments">Save Assignments</button>
     </div>
 
@@ -92,7 +98,7 @@
           <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
           <div class="student-meta">
             {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
-            {% if student.banner_id %}&nbsp;•&nbsp;{{ student.banner_id }}{% endif %}
+            {% if student.email %}&nbsp;•&nbsp;{{ student.email|cut:"rowan.edu"|cut:"students."|cut:"@" }}{% endif %}
           </div>
         </div>
         <button class="info" aria-label="More info about {{ student.first_name }} {{ student.last_name }}">i</button>
