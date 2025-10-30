@@ -32,7 +32,11 @@ ALLOWED_HOSTS = []
 dotenv.load_dotenv()  # Load environment variables from a .env file if present
 GOOGLE_OAUTH2_KEY = os.getenv("GOOGLE_OAUTH2_KEY")
 GOOGLE_OAUTH2_SECRET = os.getenv("GOOGLE_OAUTH2_SECRET")
-
+POSTGRES_HOST = os.getenv("POSTGRES_HOST")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT")
+POSTGRES_USER = os.getenv("POSTGRES_USER")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
+POSTGRES_DB = os.getenv("POSTGRES_DB")
 
 
 
@@ -117,9 +121,13 @@ WSGI_APPLICATION = 'ClinicMatch.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "HOST": POSTGRES_HOST,
+        "PORT": POSTGRES_PORT,
+        "USER": POSTGRES_USER,
+        "PASSWORD": POSTGRES_PASSWORD,
+        "NAME": POSTGRES_DB,
     }
 }
 
