@@ -106,11 +106,6 @@ def extract_hyperlink_content(value):
     match = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', value)
     return match.group(1) if match else value
 
-for clinic in Clinic.objects.all():
-    for manager in clinic.clinic_mgmt.all():
-        manager.last_name = extract_hyperlink_content(manager.last_name)
-        manager.save()
-
 
 
 def projectView(request):
