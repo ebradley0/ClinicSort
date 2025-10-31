@@ -230,13 +230,108 @@ window.addEventListener('load', function () {
       .then(data => {
         alert('Assignments saved successfully!');
       })
+      .then(data => {
+        fetch('/api/mapStudentsToClinics/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken') // assuming you have CSRF token function
+          },
+          body: JSON.stringify({ assignments })
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to map students to clinics');
+          return response.json();
+        })
+        .then(data => {
+          console.log('Students mapped to clinics successfully');
+        })
+        .catch(error => {
+          console.error('Error mapping students to clinics:', error);
+        });
+      })
       .catch(error => {
         console.error('Error saving assignments:', error);
         alert('Error saving assignments.');
       })
       .finally(() => {
         saveAssignmentsBtn.disabled = false;
+        location.reload();
       });
+    });
+  }
+
+  //RESET ASSIGNMENTS BUTTON HANDLER
+  const resetAssignmentsBtn = document.getElementById('reset-assignments');
+
+  if (resetAssignmentsBtn) {
+    resetAssignmentsBtn.addEventListener('click', async function () {
+      if (!confirm('Are you sure you want to reset all assignments to their initial state?')) {
+        return;
+      }
+
+      // Build normalized assignments: use numbers for IDs, null for no assignment
+      const initial_assignments = [];
+      document.querySelectorAll('.student-item').forEach(studentEl => {
+        const studentIdStr = studentEl.dataset.studentId;
+        const initialClinicIdStr = studentEl.dataset.initialAssignment;
+
+        if (!studentIdStr) return;
+
+        const student_id = Number.isFinite(Number(studentIdStr)) ? parseInt(studentIdStr, 10) : studentIdStr;
+        let clinic_id = null;
+        if (initialClinicIdStr !== undefined && initialClinicIdStr !== 'null' && initialClinicIdStr !== '') {
+          // convert numeric string to integer if possible, otherwise keep raw
+          clinic_id = Number.isFinite(Number(initialClinicIdStr)) ? parseInt(initialClinicIdStr, 10) : initialClinicIdStr;
+        }
+
+        initial_assignments.push({
+          student_id,
+          clinic_id
+        });
+      });
+
+      try {
+        // 1) Reset assignments on backend
+        const resp = await fetch('/api/update-student-assignments/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ assignments: initial_assignments })
+        });
+
+        if (!resp.ok) throw new Error('Failed to reset assignments');
+
+        alert('Assignments have been reset to initial state.');
+
+        // 2) Optionally call mapStudentsToClinics with the same payload (use initial_assignments)
+        try {
+          const mapResp = await fetch('/api/mapStudentsToClinics/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ assignments: initial_assignments })
+          });
+          if (!mapResp.ok) {
+            console.warn('mapStudentsToClinics returned non-ok status', mapResp.status);
+          } else {
+            console.log('Students mapped to clinics successfully');
+          }
+        } catch (mapErr) {
+          console.warn('Error mapping students to clinics:', mapErr);
+        }
+
+      } catch (error) {
+        console.error('Error resetting assignments:', error);
+        alert('Error resetting assignments.');
+      } finally {
+        // Reload to reflect server state (or replace with a more targeted UI update)
+        location.reload();
+      }
     });
   }
 

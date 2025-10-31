@@ -320,51 +320,100 @@ def major_api(request, major_id):
         'color': major.color,
     })
 
+def mapStudentsToClinics(request):
+    students = StudentModel.objects.all()
+    clinics = Clinic.objects.all()
+    student_clinic_map = {}
+
+    for clinic in clinics:
+        clinic.current_students.clear()  # Clear current students for each clinic
+        clinic.save()
+    try:
+        for student in students:
+            assigned_clinic = student.assigned_clinic
+            if assigned_clinic:
+                assigned_clinic.current_students.add(student)
+                assigned_clinic.save()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        print("Error mapping students to clinics:", str(e))
+        return JsonResponse({'error': str(e)}, status=500) 
+
 
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
+from django.db import transaction
 import json
 
 @require_POST
-@csrf_exempt  # You can remove this if you want CSRF protection and handle tokens on frontend
+@csrf_exempt
 def update_student_assignments(request):
+    """
+    Accepts JSON: { "assignments": [ { "student_id": <id>, "clinic_id": <id|null> }, ... ] }
+    Updates student.assigned_clinic (allows clinic_id null to unassign).
+    Returns summary of updates and any errors.
+    """
     try:
         data = json.loads(request.body)
-        assignments = data.get('assignments', [])
-
-        for assignment in assignments:
-            student_id = assignment.get('student_id')
-            clinic_id = assignment.get('clinic_id')
-
-            if not student_id or not clinic_id:
-                continue
-
-            try:
-                student = StudentModel.objects.get(pk=student_id)
-                clinic = Clinic.objects.get(pk=clinic_id)
-                student.assigned_clinic = clinic
-                student.save()
-            except StudentModel.DoesNotExist:
-                continue
-            except Clinic.DoesNotExist:
-                continue
-
-        return JsonResponse({'status': 'success'})
-
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
 
+    assignments = data.get('assignments', [])
+    if not isinstance(assignments, (list, tuple)):
+        return JsonResponse({'error': 'assignments must be a list'}, status=400)
 
+    results = {'updated': [], 'skipped': [], 'errors': []}
 
+    # Use a transaction so either all succeed or none (optional)
+    with transaction.atomic():
+        for a in assignments:
+            try:
+                student_id = a.get('student_id')
+                clinic_id = a.get('clinic_id', None)
 
+                if student_id is None:
+                    results['skipped'].append({'reason': 'missing student_id', 'assignment': a})
+                    continue
 
+                # Try to coerce numeric strings to ints
+                try:
+                    student_pk = int(student_id)
+                except (ValueError, TypeError):
+                    student_pk = student_id
 
+                student = StudentModel.objects.get(pk=student_pk)
 
+                # Handle unassign (null / None / "null")
+                if clinic_id is None or clinic_id == 'null' or clinic_id == '':
+                    student.assigned_clinic = None
+                    student.save()
+                    results['updated'].append({'student_id': student.id, 'clinic_id': None})
+                    continue
 
+                # Coerce clinic id
+                try:
+                    clinic_pk = int(clinic_id)
+                except (ValueError, TypeError):
+                    clinic_pk = clinic_id
 
+                clinic = Clinic.objects.get(pk=clinic_pk)
+                student.assigned_clinic = clinic
+                student.save()
 
+                results['updated'].append({'student_id': student.id, 'clinic_id': clinic.id})
+
+            except StudentModel.DoesNotExist:
+                results['errors'].append({'assignment': a, 'error': 'Student does not exist'})
+                continue
+            except Clinic.DoesNotExist:
+                results['errors'].append({'assignment': a, 'error': 'Clinic does not exist'})
+                continue
+            except Exception as e:
+                # catch unexpected errors but keep processing
+                results['errors'].append({'assignment': a, 'error': str(e)})
+                continue
+
+    return JsonResponse(results)
 # TESTING STUFF
 import SortProjects
 

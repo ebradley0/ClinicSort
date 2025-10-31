@@ -29,7 +29,7 @@
           Show only clinics accepting selected major
         </label>
         <br />
-        <label for="show-full">
+        <label for="show-empty">
           <input type="checkbox" id="show-empty" />
           Show only clinics with fewer than min students
         </label>
@@ -45,6 +45,7 @@
         {% endfor %}
       </div>
       <button class="save-button" id="save-assignments">Save Assignments</button>
+      <button class="reset-button" id="reset-assignments">Reset Assignments</button>
     </div>
   </div>
   </div>
@@ -109,7 +110,7 @@
     </div>
     <div class="students-board-inner">
       {% for student in unassigned_students %}
-      <div class="student-item" data-student-id="{{ student.id }}" data-banner="{{ student.banner_id }}" data-major="{{ student.major }}" style="background-color: {{ student.major.color }};">
+      <div class="student-item" data-student-id="{{ student.id }}" data-banner="{{ student.banner_id }}" data-major="{{ student.major }}" data-initial-assignment="{{ student.initial_assignment.id }}" style="background-color: {{ student.major.color }};">
         <div class="student-card" style="background-color: {{ student.major.color }};">
           <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
           <div class="student-meta">
