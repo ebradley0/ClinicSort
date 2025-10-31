@@ -264,16 +264,51 @@ def logoutView(request):
 
 def student_detail_api(request, student_id):
     student = get_object_or_404(StudentModel, pk=student_id)
+
+    # Prepare student email representations for matching
+    student_email = (student.email or "").strip().lower()
+    student_ref = student_email.split('@')[0] if student_email else ""
+
+    requested_by = []
+    # Find clinics that mention this student in their requested_students field
+    for clinic in Clinic.objects.all():
+        rs = clinic.requested_students
+
+        if not rs:
+            continue
+
+        # Normalize requested_students into a list of strings
+        if isinstance(rs, (list, tuple)):
+            candidates = [str(x).strip().lower() for x in rs if x]
+        else:
+            # If stored as a comma-separated string
+            candidates = [s.strip().lower() for s in str(rs).split(',') if s.strip()]
+
+        # Check whether any candidate matches either the local-part or full email
+        matched = False
+        for cand in candidates:
+            # Remove any mailto: prefix if present
+            cand_norm = cand.replace('mailto:', '').strip().lower()
+            if cand_norm == student_ref or cand_norm == student_email:
+                matched = True
+                break
+
+        if matched:
+            requested_by.append(
+                clinic.title
+            )
+
     return JsonResponse({
         'id': student.id,
-        'name': student.first_name + ' ' + student.last_name,
-        'major': str(student.major),
+        'name': (student.first_name or '') + ' ' + (student.last_name or ''),
+        'major': str(student.major) if student.major else None,
         'email': student.email,
         'banner_id': student.banner_id,
         'j_or_s': student.j_or_s,
         'choices': [clinic.title for clinic in student.choices.all()],
         'assigned_clinic': str(student.assigned_clinic.title) if student.assigned_clinic else None,
         'initial_assignment': str(student.initial_assignment.title) if student.initial_assignment else None,
+        'requested_by': requested_by if requested_by else [],
         # Add more fields as needed
     })
 

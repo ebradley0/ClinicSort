@@ -115,6 +115,7 @@ window.addEventListener('load', function () {
             <p><strong>Major:</strong> ${data.major}</p>
             <p><strong>Initial Assigned Clinic:</strong> ${data.initial_assignment}</p>
             <p><strong>Preferences:</strong> ${data.choices.join('<br>')}</p>
+            <p><strong>Requested For:</strong> ${data.requested_by.join('<br>')}</p>
           `;
 
           detailsPane.scrollIntoView({ behavior: 'smooth' });

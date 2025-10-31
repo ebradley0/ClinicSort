@@ -1,28 +1,222 @@
+/* Clinic Operations CSS */
+
+/* Header bar */
+.header-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background-color: white;
+  border-bottom: 2px solid #333;
+  color: black;
+  display: flex;
+  z-index: 1200;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.primary-header {
+  position: absolute;
+  top:0;
+  left:0;
+  height:100%;
+  text-align: center;
+  width: 1152px;
+}
+.title {
+  position:fixed;
+  top:10px;
+  left:20px;
+  font-size:48px;
+  font-weight:bold;
+}
+.subtitle {
+  position: fixed;
+  top: 75px;
+  left: 20px;
+  font-size: 18px;
+  color: #555;
+}
+.clinic-title-descriptor {
+  position: absolute;
+  bottom: 5px;
+  left: 20px;
+  font-size: 20px;
+  font-weight: normal;
+  color: #555;
+}
+.clinic-assigned-descriptor {
+  position: absolute;
+  bottom: 5px;
+  left: 350px;
+  font-size: 20px;
+  font-weight: normal;
+  color: #555;
+}
+.filters {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  max-width: 320px;
+  max-height:140px;
+  text-align: left;
+  z-index: 1200;
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.save-button {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  z-index: 1200;
+  background-color: #bc1803;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.secondary-header {
+  position: absolute;
+  top: 0;
+  left: 1172px;
+  width: calc(100% - 1172px);
+  height: 100%;
+  font-size: 24px;
+  font-weight: normal;
+  color: #555;
+  z-index: 1200;
+}
+.student-details-descriptor {
+  position: absolute;
+  bottom: 5px;
+  left: 0px;
+  font-size: 20px;
+  font-weight: normal;
+  color: #555;
+}
+.links {
+  position: absolute;
+  right: 20px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
 .drag-container {
   position: relative;
 }
-
 /* Let Muuri control positioning */
 .item {
   position: absolute;
   margin: 0;
   will-change: transform;
-
-  /* ✅ FIX: Explicitly set item size for Muuri */
   width: 1000px;
   height: 200px;
 }
 
+/* Clinic stuff */
+/* Clinics column */
+.clinics-board {
+  position: fixed;
+  left: 0;
+  top: 0;
+  margin-top:200px;
+  bottom: 0;
+  width: 1000px;               /* Fixed width */
+  max-height: calc(100vh - 200px);
+  height: auto;
+  padding: 10px 10px 40px 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: #f7f7f7;
+  z-index: 1000;
+}
 /* Clinic container inside Muuri item */
 .clinic-container {
   display: block;
-  width: 1000px;          /* ✅ FIX: match .item width */
-  height: 200px;          /* ✅ FIX: match .item height */
+  width: 1000px;          
+  height: 200px;         
   box-sizing: border-box;
   margin: 0;
   z-index: 1;
   background: transparent;
   color: black;
+}
+/* Inner card */
+.clinic-card {
+  display: block;         
+  width: 100%;           
+  height: 100%;         
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border:#333 solid 2px;
+}
+/* Clinic info section */
+.clinic-info {
+  position:absolute;
+  top:0;
+  left:0;
+  width: 330px;
+  display: block;
+}
+/* Clinic title */
+.clinic-title {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  margin: 0;
+  font-weight: bold;
+  font-size: 20px;
+  word-wrap: break-word;
+}
+/* Capacity styling */
+.clinic-capacity {
+  position:absolute;
+  top: 50px;
+  left:12px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.85);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.clinic-managers {
+  position:absolute;
+  top: 90px;
+  left:12px;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: rgba(0,0,0,0.85);
+}
+.clinic-capacity .min-capacity,
+.clinic-capacity .max-capacity,
+.clinic-managers {
+  font-weight: 600;
+}
+/* Clinic student area (Muuri horizontal grid) */
+.clinic-inner {
+  /* display: flex; */
+  position: absolute;          /* ✅ Required for Muuri */
+  left: 350px;
+  top:0px;
+  min-width:600px;
+  max-width:600px;
+  height: 200px;
+  margin-top: 10px;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-radius: 6px;
+  border: 1px dashed rgba(0,0,0,0.04);
 }
 
 .item.muuri-item-dragging {
@@ -35,88 +229,32 @@
   z-index: 0;
 }
 
-/* Inner card */
-.clinic-card {
-  display: block;         /* ✅ FIX: ensure it's block */
-  width: 100%;            /* Fill .clinic-container */
-  height: 100%;           /* Fill .clinic-container */
-  padding: 12px;
-  box-sizing: border-box;
-  border-radius: 6px;
-  border:#333 solid 2px;
-}
-
-/* Clinic title */
-.clinic-title {
-  font-weight: bold;
-  font-size: 20px;
-}
-
-/* Remove button */
-.remove-button {
-  background-color: red;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 5px 10px;
-  align-self: flex-end;
-}
-
 /* Global layout */
 html, body {
   height: 100%;
   margin: 0;
 }
 
-/* Clinics column */
-.clinics-board {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 1000px;               /* Fixed width */
-  max-height: 100vh;
-  height: auto;
-  padding: 10px 10px 40px 10px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  background: #f7f7f7;
-  z-index: 1000;
-}
-
 /* Main content to the right of clinics column */
 .main-content {
-  margin-left: 1000px;    /* Equal to .clinics-board width */
-  margin-right: 120px;    /* Adjust based on .students-board width + margin */
+  position:fixed;
+  margin-left:1152px;
+  margin-top: 200px;
   padding: 20px;
   box-sizing: border-box;
   height: 100vh;
   overflow: auto;
 }
 
-/* Capacity styling */
-.clinic-capacity {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: rgba(0,0,0,0.85);
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-.clinic-capacity .min-capacity,
-.clinic-capacity .max-capacity {
-  font-weight: 600;
-}
 
-/* Students board on right side */
+/* Student board stuff */
 .students-board {
   position: fixed;
-  right: 16px;
-  top: 16px;
+  left: 1016px;
+  top: 216px;
   bottom: 16px;
   width: 120px;
-  max-height: calc(100vh - 32px);
+  max-height: calc(100vh - 232px);
   background: #ffffff;
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 10px 30px rgba(0,0,0,0.12);
@@ -124,14 +262,12 @@ html, body {
   z-index: 1100;
   overflow-y: auto;
 }
-
 .students-board-header {
   padding: 8px 12px;
   border-bottom: 1px solid rgba(0,0,0,0.06);
   background: rgba(0,0,0,0.02);
   font-size: 0.95rem;
 }
-
 .students-board-inner {
   position: relative;
   flex: 1 1 auto;
@@ -154,46 +290,25 @@ html, body {
   justify-content: center;
   font-size: 0.95rem;
 }
-
 .student-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
 
-  white-space: normal;     /* ✅ Allow wrapping */
-  word-wrap: break-word;   /* ✅ Allow breaking long names */
-  overflow: visible;       /* ✅ Show wrapped content */
-  height: auto;            /* ✅ Allow vertical expansion */
+  white-space: normal;     
+  word-wrap: break-word;  
+  overflow: visible;     
+  height: auto;         
 }
-
-
 .student-name {
   font-weight: 600;
   font-size: 0.85rem;
 }
-
 .student-meta {
   font-size: 0.68rem;
   color: rgba(0,0,0,0.6);
 }
-
-/* Clinic student area (Muuri horizontal grid) */
-.clinic-inner {
-  /* display: flex; */
-  position: relative;          /* ✅ Required for Muuri */
-  min-width:800px;
-  max-width:950px;
-  height: 100px;
-  margin-top: 10px;
-  padding: 8px;
-  box-sizing: border-box;
-  overflow-x: auto;
-  white-space: nowrap;
-  border-radius: 6px;
-  border: 1px dashed rgba(0,0,0,0.04);
-}
-
 /* Student item (inside clinic or students board) */
 .student-item {
   position: absolute;          /* Let Muuri handle layout */
@@ -204,7 +319,20 @@ html, body {
   border: 2px solid #333;
   border-color: black;
 }
+.info { /* Info button on student cards */
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #007bff; 
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 5px;
+  cursor: pointer;
+  z-index: 10;
+}
 
+/* Muuri stuff */
 /* Responsive tweak */
 @media (max-width: 900px) {
   .students-board {
@@ -214,7 +342,6 @@ html, body {
     max-height: 45vh;
   }
 }
-
 /* Drag styling */
 .muuri-item-dragging,
 .item.muuri-item-dragging,
@@ -222,32 +349,16 @@ html, body {
   z-index: 999999 !important;
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
 }
-
 .muuri-item-releasing {
   z-index: 999998 !important;
 }
-
 /* Ensure inner content fills container */
 .student-card, .clinic-card {
   box-sizing: border-box;
   width: 100%;
 }
-
 /* Fix width while dragging */
 .student-item.muuri-item-dragging,
 .student-item.muuri-item-releasing {
   width: 100px !important;
-}
-
-.info {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  background-color: #007bff; /* Or your preferred color */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 3px 5px;
-  cursor: pointer;
-  z-index: 10;
 }
