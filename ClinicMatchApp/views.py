@@ -617,3 +617,22 @@ def logoutView(request):
     from django.contrib.auth import logout #Imported here just for cleanliness, shouldn't be needed outside of this function
     logout(request)
     return render(request, "index.html", {})
+
+def createMajor(request):
+    me= Major(major="ME", color="#C9DAF8")
+    me.save()
+    ece= Major(major="ECE", color="#FCE5CD")
+    ece.save()
+    che= Major(major="CHE", color="#D9D2E9")
+    che.save()
+    cee= Major(major="CEE", color="#D9EAD3")
+    cee.save()
+    exe= Major(major="EXE", color="#80F2EB")
+    exe.save()
+    bme= Major(major="BME", color="#E6B8AF")
+    bme.save()
+    eet= Major(major="EET", color="#F9CB9C")
+    eet.save()
+    met= Major(major="MET", color="#A4C2F4")
+    met.save()
+    return render(request, "index.html", {})
