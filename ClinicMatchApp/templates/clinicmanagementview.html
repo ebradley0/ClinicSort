@@ -73,9 +73,7 @@
                     Managed by:
                     <br><br>
                       {% for manager in clinic.clinic_mgmt.all %}
-                        <span>| </span>
-                        <a href="mailto:{{manager.email}}">{{ manager.first_name }} {{ manager.last_name }}</a>
-                        <span> |</span>
+                        <a href="mailto:{{manager.email}}">{{ manager.first_name }} {{ manager.last_name }}</a> {%if not forloop.last%} | {%endif%}
                       {% endfor %}
                   </div>
                 </div>
