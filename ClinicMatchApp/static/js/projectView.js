@@ -39,6 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+const infoButton = document.getElementById("infoButton");
+const infoPopOut = document.getElementById("legendPopup");
+
+
+infoButton.addEventListener('click', () =>{
+  console.log("info toggled");
+  
+  infoButton.classList.toggle('show');
+  
+
+  infoPopOut.classList.toggle('show');
+
+});
+
+
 
 
   

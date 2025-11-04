@@ -10,20 +10,41 @@
 <style>
 
 .body {
-  display: flex;
-  justify-content: space-evenly;
-  margin: 20px;
-  flex-direction: row;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
   
+ margin: 0px;
+ gap: 0px;
+ padding: 0px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  margin: 0px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+
 }
 
 .grid {
   position: relative;
   justify-content: center;
   align-items: center;
-  width: 65vw;
+  width: 1550px;
   background-color: rgb(73, 53, 34);
+  
+}
+
+.gridWrapper{
+  height: calc(100% - 70px);
+  margin-left: 20px;
+  margin-top: 101px;
+  margin-bottom: 0px;
+  overflow-y: auto;
 }
 
 
@@ -31,20 +52,28 @@
 
 
 .select-grid {
-  
   position: relative;
-  width: 400px;
+  margin-left: auto;
+  margin-right: 20px;
+  width: 310px;
   min-height: 400px;
-  max-height: 3300px;
+ 
   background-color: lightgrey;
+  justify-content: center;
+}
+
+.select-gridWrapper {
+    height: calc(100vh - 70px - 51px - 50px); /*Subtracting the elements above it to  make it match the other grid*/
+    overflow-y: auto;
 }
 .item {
   display: flex;
   flex-direction: column;
   position: absolute;
   justify-content: flex-start;
-  width: 350px;
-  height: 350px;
+  border-radius: 4px;
+  width: 300px;
+  height: 400px;
   margin: 5px;
   z-index: 1;
   gap: 0px;
@@ -99,6 +128,7 @@
   align-self: center;
 }
 .generalRequest{
+  display: flex;
   width: 100%;
   background: gray;
   height: 48px;
@@ -247,13 +277,120 @@
   outline: none;
 }
 
+.header {
+  display: flex;
+  background-color: rgb(73, 53, 34);
+  width: 100%;
+  height: 50px;
+  padding: 5px;
+  margin: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  margin-right: 20px;
+  font-weight: 600;
+  color: white;
+  left: 20px;
+
+}
+
+.header > :last-child { /* Selects the last element, in this case the right most*/
+  margin-right: 30px;
+}
+
+.header > :first-child{
+  margin-left: 10px;
+}
+
+.clinicSelection{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.infoButton {
+  position: relative;
+  display: inline-block;
+  content: 'i';
+}
+
+.infoButton.show {
+  background-color: red;
+  transition: color 0.2s ease;
+  content: 'X';
+}
+
+  .popup {
+    position: absolute;
+    top: 40px; 
+    right: 0%;
+    background: rgb(232, 175, 70);
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 12px 12px rgba(0,0,0,0.2);
+    display: none;
+    width: 300px;
+    height: 400px;
+    z-index: 25;
+    color: black;
+    font-weight: 100;
+  }
+
+  .popup.show {
+    display: block;
+  }
+
 </style>
 
 <body class="body">
 
+
+<div class="header">
+<p>Clinic Selection Form</p> 
+
+<div>
+  <p>{{user.email}} 
+  <button id="infoButton" class="infoButton"> I </button></p>
+    <div class="popup" id="legendPopup">
+                    <div class="itemContents">
+                    <p class="clinic-title">Clinic Title</p>
+
+                    <img src="" class="imageSlot" alt="Clinic image">
+
+                    <div class="managers">
+                      <a href="mailto:manager1@example.com">Manager 1</a> |
+                      <a href="mailto:manager2@example.com">Manager 2</a>
+                      <br>
+                    </div>
+
+                    <br>
+                    <br>
+                    (Click Card for more info...)
+
+                    <div class="specificRequestHolder">
+                      {% for major in majors %}
+                      <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{major}} </div>
+                      {%endfor%}
+                    </div>
+                  </div>
+      </div>
+      </p>
+</div>
+
+
+
+
+</div>
+
   
 
 <!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
+ <div class="main">
+
+<div class="gridWrapper"> 
 <div class="grid">
 
   
@@ -303,8 +440,13 @@
                 <div class="linkList">
                     <a href="{{link}}"> [{{forloop.counter}}] </a>
                 </div>
+
+                
                 
                 {%endfor%}
+                <div>
+                  {{clinic.description}}
+                </div>
                 
             </div>
     </div>
@@ -312,16 +454,25 @@
 
 </div>
 
+</div>
+
 <!-- End Grid -->
 
 <!-- Starting Selection Grid-->
-<form method="POST" id="submission-form">
+
+
+
+<form method="POST" id="submission-form" class="clinicSelection">
     {% csrf_token %}
+    <div>
+      <p>Top  8 Clinic Choices</p>
+    </div>
     <button id="submit-button" type="submit" class="pushable">
         <span class="shadow"></span>
         <span class="edge"></span>
         <span class="front"> Submit</span>
     </button>
+<div class="select-gridWrapper">
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
     {%for clinic in selected_clinics %}
     <div class="item" style="background-color: {{clinic.department.color}}">
@@ -368,10 +519,12 @@
   </div>
 </form>
 
+</div>
 
 
 
-    
+
+ </div>
 </body>
 
 
