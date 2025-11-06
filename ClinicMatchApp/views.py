@@ -40,6 +40,7 @@ def clinicView(request):
         context = {}
         form = ClinicForm()
         context['form'] = form
+        context['majors'] = Major.objects.all()        # <-- add this line
         ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
         formset = ClinicNumbersFormset(initial=major_dict) #Populate the formset with a major field for each major in the database
         

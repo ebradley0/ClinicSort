@@ -71,6 +71,15 @@ function updateLinkPreview() {
     });
 }
 
+function updateDescriptionPreview() {
+    const descriptionInput = document.getElementById('id_description');
+    const descriptionPreview = document.getElementById('clinic-description');
+    
+    descriptionPreview.textContent = descriptionInput.value || 'Clinic Description';
+}
+
+document.getElementById('id_description').addEventListener('input', updateDescriptionPreview);
+
 document.getElementById('id_links').addEventListener('input', updateLinkPreview);
 
 document.getElementById('id_image').addEventListener('change', updateImagePreview);
