@@ -478,7 +478,7 @@ def loadProjectsFromCSV(request):
         
         clinic = Clinic(
             title=project.project_name.strip(),
-            department= Major.objects.get(major=project.department) if Major.objects.filter(major=project.department).exists() else None,
+            department= Major.objects.get(major=project.department.upper()) if Major.objects.filter(major=project.department).exists() else None,
             description=project.project_description,
             links= ','.join(links),
             requested_students= project.student_requests,
@@ -562,24 +562,61 @@ import SortStudents
 def loadStudentsFromCSV(request):
     Students = SortStudents.get_student_data()
     for student in Students:
-        print(student.first_name, student.last_name, student.major, student.year)
-        major = Major.objects.get(major=student.major.upper().strip())
-        year = student.year[0].upper() # Mapping to J or S
+        print("Row:", student.first_name, student.last_name, "raw major:", repr(student.major))
+        # Defensive normalization
+        raw_major = (student.major or "").strip()
+        major_token = raw_major.upper()
+
+        # default
+        alt_major = False
+
+        # Map special cases (EET→ECE, MET→ME)
+        if major_token == "EET":
+            mapped_major_code = "ECE"
+            alt_major = True
+        elif major_token == "MET":
+            mapped_major_code = "ME"
+            alt_major = True
+        else:
+            # Use the token as-is for lookup (ME, ECE, CHE, etc.)
+            mapped_major_code = major_token
+
+        # Try to find a Major row robustly (case-insensitive)
+        major_obj = Major.objects.filter(major__iexact=mapped_major_code).first()
+        if not major_obj:
+            # Fallback: if mapped didn't match, try original token
+            major_obj = Major.objects.filter(major__iexact=raw_major).first()
+
+        if not major_obj:
+            # Still no major found — print warning and skip or decide fallback policy
+            print(f"⚠️ Major not found for student {student.first_name} {student.last_name}: "
+                  f"raw='{raw_major}', mapped='{mapped_major_code}'")
+            # Option A: continue (skip this student)
+            # continue
+            # Option B: set major_obj to None and allow student.major null in DB
+            major_obj = None
+
+        year = (student.year or "J")[0].upper()  # default to J if missing
         studentObj = StudentModel(
             first_name=student.first_name,
             last_name=student.last_name,
             email=student.email,
-            banner_id=random.randint(100000000, 999999999), #Generating a random banner ID since we dont have that data
+            banner_id=random.randint(100000000, 999999999),
             j_or_s=year,
-            major=major,
+            major=major_obj,
+            alternative_major=alt_major,
         )
+        # Debug print before save
+        print("Saving student:", studentObj.first_name, studentObj.last_name,
+              "major:", getattr(major_obj, 'major', None), "alternative_major:", alt_major)
         studentObj.save()
+
+        # choices handling (unchanged)
         choices = []
         for i in range(1, 9):
             project_attr = getattr(student, f"project_{i}", None)
             if not project_attr:
                 continue
-
             parts = project_attr.split(" - ", 1)
             if len(parts) > 1:
                 title = parts[1].strip()
@@ -591,7 +628,6 @@ def loadStudentsFromCSV(request):
             else:
                 print(f"⚠️ Malformed project entry: '{project_attr}'")
 
-        # Deduplicate before saving
         studentObj.choices.set(set(choices))
         studentObj.save()
 
@@ -716,8 +752,8 @@ def createMajor(request):
     exe.save()
     bme= Major(major="BME", color="#E6B8AF")
     bme.save()
-    eet= Major(major="EET", color="#F9CB9C")
-    eet.save()
-    met= Major(major="MET", color="#A4C2F4")
-    met.save()
+    # eet= Major(major="EET", color="#F9CB9C")
+    # eet.save()
+    # met= Major(major="MET", color="#A4C2F4")
+    # met.save()
     return render(request, "index.html", {})

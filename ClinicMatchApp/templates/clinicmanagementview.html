@@ -85,8 +85,19 @@
                         data-student-id="{{ student.id }}"
                         data-banner="{{ student.banner_id }}"
                         data-major="{{ student.major }}"
-                        style="background-color: {{ student.major.color }};">
-                      <div class="student-card" style="background-color: {{ student.major.color }};">
+                        {% if student.alternative_major %} 
+                          style="--color: {{ student.major.color }} + 255; background-color: linear-gradient(to left, red 50%, yellow 50%, blue 50%);" 
+                        {% else %} 
+                          style="--color: {{ student.major.color }};" 
+                        {% endif %}
+                      >
+                      <div class="student-card" 
+                        {% if student.alternative_major %} 
+                          style="--color: {{ student.major.color }} + 255; background-color: linear-gradient(to left, red 50%, yellow 50%, blue 50%);" 
+                        {% else %} 
+                          style="--color: {{ student.major.color }};" 
+                        {% endif %}
+                      >
                         <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
                         <div class="student-meta">
                           {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
@@ -109,8 +120,23 @@
     </div>
     <div class="students-board-inner">
       {% for student in unassigned_students %}
-      <div class="student-item" data-student-id="{{ student.id }}" data-banner="{{ student.banner_id }}" data-major="{{ student.major }}" data-initial-assignment="{{ student.initial_assignment.id }}" style="background-color: {{ student.major.color }};">
-        <div class="student-card" style="background-color: {{ student.major.color }};">
+      <div class="student-item"
+        data-student-id="{{ student.id }}"
+        data-banner="{{ student.banner_id }}"
+        data-major="{{ student.major }}"
+        {% if student.alternative_major %} 
+          style="--color: {{ student.major.color }} + 255; background-color: linear-gradient(to left, red 50%, yellow 50%, blue 50%);" 
+        {% else %} 
+          style="--color: {{ student.major.color }};" 
+        {% endif %}
+      >
+        <div class="student-card" 
+          {% if student.alternative_major %} 
+            style="--color: {{ student.major.color }} + 255; background-color: linear-gradient(to left, red 50%, yellow 50%, blue 50%);" 
+          {% else %} 
+            style="--color: {{ student.major.color }};" 
+          {% endif %}
+        >
           <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
           <div class="student-meta">
             {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}

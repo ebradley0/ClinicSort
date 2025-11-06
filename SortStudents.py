@@ -63,10 +63,10 @@ with open(csvPath, 'r', encoding='utf-8') as csvfile:
         Students = []
         for row in reader:
             if len(row) > 1:  # Ensure the row is not empty
-                if row[4] == "EET":
-                    row[4] = "ECE"  # Change EET to ECE
-                if row[4] == "MET":
-                    row[4] = "ME"  # Change MET to ME
+                # if row[4] == "EET":
+                #     row[4] = "ECE"  # Change EET to ECE
+                # if row[4] == "MET":
+                #     row[4] = "ME"  # Change MET to ME
                 Students.append(Student(row))
 
 #Student class with fields for Timestamp	Email Address	First Name:	Last Name:	Major:	Year:	Project 1:	I have _________ on the above project before.	Project 2:	I have _________ on the above project before.	Project 3:	I have _________ on the above project before.	Project 4:	I have _________ on the above project before.	Project 5:	I have _________ on the above project before.	Project 6:	I have _________ on the above project before.	Project 7:	I have _________ on the above project before.	Project 8:	I have _________ on the above project before.	Electronic Signature:	Resume:	LinkedIn

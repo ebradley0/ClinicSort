@@ -315,6 +315,7 @@ html, body {
   word-wrap: break-word;  
   overflow: visible;     
   height: auto;         
+  background: var(--color, #ffffff);
 }
 .student-name {
   font-weight: 600;
@@ -333,6 +334,7 @@ html, body {
   box-sizing: border-box;
   border: 2px solid #333;
   border-color: black;
+  background: var(--color, #ffffff);
 }
 .info { /* Info button on student cards */
   position: absolute;

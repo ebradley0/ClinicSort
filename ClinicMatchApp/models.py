@@ -93,6 +93,7 @@ class Student(models.Model):
     choices = SortedManyToManyField(Clinic, related_name='Students_top_8_Choices')
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
     initial_assignment = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Initial_Assignments', null=True, blank=True)
+    alternative_major = models.BooleanField(default=False) #Used to handle majors like MET/EET who's students are treated as a different major but need to be differentiated in the database
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.major})"
