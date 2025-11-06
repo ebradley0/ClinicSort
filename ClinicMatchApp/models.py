@@ -37,7 +37,7 @@ class Clinic(models.Model):
     links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
     requested_students = models.CharField(null=True, blank=True) # CSV of requested students
     current_students = SortedManyToManyField('Student', related_name="current_students_in_clinic", null=True, blank=True) #Connects to student objects
-    image = models.FileField(null=True, blank=True)
+    image = models.FileField(null=True, blank=True, upload_to="clinicImages/")
     links = models.JSONField(default=list, blank=True, null=True)
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
