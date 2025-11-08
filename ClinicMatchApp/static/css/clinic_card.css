@@ -105,7 +105,7 @@
 }
 .specificRequest {
   display: flex;
-  background-color: white;
+  background-color: var(--color, white);
   flex: 1;
   height: 48px;
   justify-content: center;

@@ -171,6 +171,7 @@
   box-sizing: border-box;
   border-radius: 6px;
   border:#333 solid 2px;
+  background: var(--color, #ffffff);
 }
 /* Clinic info section */
 .clinic-info {

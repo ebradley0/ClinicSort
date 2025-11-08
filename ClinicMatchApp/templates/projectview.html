@@ -39,7 +39,7 @@
 
                     <div class="specificRequestHolder">
                       {% for major in majors %}
-                      <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{major}} </div>
+                      <div class="specificRequest" style="--color: {{major.color}};"> {{major}} </div>
                       {%endfor%}
                     </div>
                   </div>
@@ -64,7 +64,7 @@
     
     <!-- Each item must be of class item -->
     {% for clinic in clinics %}
-    <div class="item" style="background-color: {{clinic.department.color}}">
+    <div class="item" style="--clinic-color: {{clinic.department.color}}">
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
@@ -87,7 +87,7 @@
                 
                 {%for handler in clinic.numberHandler.all %}
                 {% if major.major == handler.major.major %}
-                <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{handler.max}} </div>
+                <div class="specificRequest" style="--color: {{major.color}};"> {{handler.max}} </div>
                 {%else%}
                 {%endif%}
                 {%endfor%}
@@ -142,7 +142,7 @@
 <div class="select-gridWrapper">
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
     {%for clinic in selected_clinics %}
-    <div class="item" style="background-color: {{clinic.department.color}}">
+    <div class="item" style="--clinic-color: {{clinic.department.color}}">
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
@@ -166,7 +166,7 @@
                 
                 {%for handler in clinic.numberHandler.all %}
                 {% if major.major == handler.major.major %}
-                <div class="specificRequest" style="background-color: {{major.color}}; width: ;"> {{handler.max}} </div>
+                <div class="specificRequest" style="--color: {{major.color}};"> {{handler.max}} </div>
                 {%else%}
                 {%endif%}
                 {%endfor%}

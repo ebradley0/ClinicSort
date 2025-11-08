@@ -478,7 +478,7 @@ def loadProjectsFromCSV(request):
         
         clinic = Clinic(
             title=project.project_name.strip(),
-            department= Major.objects.get(major=project.department.upper()) if Major.objects.filter(major=project.department).exists() else None,
+            department= Major.objects.get(major=project.department.upper()) if Major.objects.filter(major=project.department.upper()).exists() else None,
             description=project.project_description,
             links= ','.join(links),
             requested_students= project.student_requests,
