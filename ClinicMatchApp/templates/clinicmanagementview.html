@@ -86,12 +86,18 @@
                         data-banner="{{ student.banner_id }}"
                         data-major="{{ student.major }}"
                         {% if student.alternative_major %} 
-                          style="--color: #333;" 
+                          style="--color: {{ student.major.color }}; background: linear-gradient(to right, var(--color) 0%, #fff 100%);"
                         {% else %} 
                           style="--color: {{ student.major.color }};" 
                         {% endif %}
                       >
-                      <div class="student-card" style="--color: {{ student.major.color }};" >
+                        <div class="student-card" 
+                          {% if student.alternative_major %} 
+                            style="--color: {{ student.major.color }}; background: linear-gradient(to right, var(--color) 0%, #fff 100%);"
+                          {% else %} 
+                            style="--color: {{ student.major.color }};" 
+                          {% endif %}
+                        >
                         <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
                         <div class="student-meta">
                           {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
@@ -119,12 +125,19 @@
         data-banner="{{ student.banner_id }}"
         data-major="{{ student.major }}"
         {% if student.alternative_major %} 
-          style="--color: #333;"
+          style="--color: {{ student.major.color }}; background: linear-gradient(to right, var(--color) 0%, #fff 100%);"
         {% else %} 
           style="--color: {{ student.major.color }};" 
         {% endif %}
       >
-        <div class="student-card" style="--color: {{ student.major.color }};" >
+        <div class="student-card" 
+          {% if student.alternative_major %} 
+            style="--color: {{ student.major.color }}; background: linear-gradient(to right, var(--color) 0%, #fff 100%);"
+          {% else %} 
+            style="--color: {{ student.major.color }};" 
+          {% endif %}
+        >
+        
           <div class="student-name">{{ student.first_name }} {{ student.last_name }}</div>
           <div class="student-meta">
             {% if student.j_or_s %}{{ student.j_or_s }}{% endif %}
