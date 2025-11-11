@@ -363,7 +363,7 @@ def student_detail_api(request, student_id):
         'assigned_clinic': str(student.assigned_clinic.title) if student.assigned_clinic else None,
         'initial_assignment': str(student.initial_assignment.title) if student.initial_assignment else None,
         'requested_by': requested_by if requested_by else [],
-        # Add more fields as needed
+        'alternative_major': student.alternative_major,
     })
 
 def major_api(request, major_id):
