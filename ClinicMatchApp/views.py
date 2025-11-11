@@ -6,8 +6,8 @@ import time
 from re import S
 from django.db.models import Sum, Prefetch
 from django.db.models.functions import Coalesce
-from django.shortcuts import render, get_object_or_404
-from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor
+from django.shortcuts import render, get_object_or_404, redirect
+from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor, Student
 from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm, StudentProfileForm
 from social_django.models import UserSocialAuth
 from .models import Student as StudentModel
@@ -15,10 +15,63 @@ from django.db.models.fields import NOT_PROVIDED
 from django.http import HttpResponse, JsonResponse
 import csv
 import io
+from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
 # Create your views here.
 
+load_dotenv()
+
+def login_check(request): #Runs post login. Import 
+    code = request.session.pop('professor_code', None)
+    user = request.user
+    if not user.email: #If the user is manually created then skip this process, this is mostly used for dev and won't be in production
+        print("User has no email associated, cannot create Student object.")
+        return
+    
+    # This is to allow admin panel access. Contact IRT to figure out a better way to do this later.
+    try:
+        UserAuthObject = UserSocialAuth.objects.get(user=user)
+    except ObjectDoesNotExist:
+        print(f"No UserSocialAuth found for {user.username} — probably a local/admin login. Skipping student sync.")
+        return
+    
+    if code is None:
+        print("Code DNE")
+        #Student login post, return to index
+
+        created, updated = Student.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
+                                                    last_name=user.last_name,
+                                                    email=user.email)
+
+        if created:
+            print("Created new Student object for user:", user)
+        else:
+            print("Found existing Student object for user:", user)
+
+        
+    else:
+
+        if code == os.getenv('PROFESSOR_KEY'):
+            created, updated = Professor.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
+                                                        last_name=user.last_name,
+                                                        email=user.email)
+        else:
+            return
+
+def loginView(request):
+    if request.method == "POST":
+        code = request.POST.get('professor_code')
+        request.session['professor_code'] = code
+        
+        return redirect('social:begin', backend='google-oauth2') # Proceed to the normal social auth screen, now that the code was saved
+        
+
+        pass
+    else:
+        return render(request, 'login.html')
+
 def index(request):
+    login_check(request) # Passing for profile verifcation, this might need to be relocated.
     context = {}
     try:
         user = request.user

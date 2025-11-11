@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.box {
+    width: 20vw;
+    height: 20vh;
+    background-color: bisque;
+    border-radius: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    flex-direction: column;
+    font-size: 24px;
+}
+
+.student-button {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+
+}
+    
+</style>
+<body>
+
+    <div class="box">
+        <form method="post" class="box">
+            {% csrf_token %}
+        Enter Email
+        <input type="text" name="email">
+        Enter Login Code
+        <input type="text" name="professor_code">
+        <button type="submit">Login</button>
+        </form>
+        
+        <a href="{% url 'social:begin' 'google-oauth2' %}"><button class="student-button">I'm a student</button></a>
+        
+    </div>
+    
+</body>
+</html>

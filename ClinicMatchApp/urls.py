@@ -4,7 +4,7 @@ from . import views
 from .models import Major
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("ClinicMatch", views.index, name="index"),
     path("clinicsubmission/", views.clinicView, name="clinicView"),
     path("studentsubmission/", views.studentView, name="studentView"),
     path("loadProjectsFromCSV/", views.loadProjectsFromCSV, name="loadProjectsFromCSV"),
@@ -20,6 +20,10 @@ urlpatterns = [
     path('createMajor/', views.createMajor, name='createMajor'),
     path('api/major/<int:major_id>/', views.major_api, name='major-api'),
     path('api/mapStudentsToClinics/', views.mapStudentsToClinics, name='map_students_to_clinics'),
+    path('login/', views.loginView, name="loginView"),
+    path('login-check/', views.login_check, name=""),
+
+    path('', views.index, name='index' ), #Remove this when migrating to etr, this is just done for testing sake to maintain consistency.
 ]
 """ 
 for major in Major.objects.all():

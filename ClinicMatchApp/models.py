@@ -67,6 +67,7 @@ class Review(models.Model):
     
 
 class Professor(models.Model):
+    userAuth = models.OneToOneField(UserSocialAuth, on_delete=models.CASCADE, null=True, blank=True) #Connects to the UserSocialAuth object created by the social auth library.
     first_name = models.CharField()
     last_name = models.CharField()
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
@@ -77,6 +78,8 @@ class Professor(models.Model):
     prof_reviews = SortedManyToManyField(Review, related_name='prof_review_history', null=True, blank=True)
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
+
+    
 class Student(models.Model):
     userAuth = models.OneToOneField(UserSocialAuth, on_delete=models.CASCADE, null=True, blank=True) #Connects to the UserSocialAuth object created by the social auth library.
     CHOICES = [ #Predefining the choices for students to ensure consistency.

@@ -59,7 +59,7 @@
     <a href="{% url 'logout' %}" class="button">Logout</a>
     
     {%else%}
-    <a href="{% url "social:begin" "google-oauth2" %}" class="button">Google</a>
+    <a href="{% url 'loginView' %}" class="button">Login</a>
 
     {%endif%}
 
