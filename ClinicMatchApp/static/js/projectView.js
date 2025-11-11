@@ -52,9 +52,27 @@ window.addEventListener('load', function() {
     infoPopOut.classList.toggle('show');
 
   });
+
+  // Filtering Functionality, can expand later to include more filters
+  const departmentFilter = document.getElementById("clinic-department-filter");
+
+  function filterClinics() {
+    const selectedDepartment = departmentFilter.value;
+
+    grid.filter(function (item) {
+      const clinicEl = item.getElement();
+      const clinicDepartment = clinicEl.dataset.department;
+
+      const passesDepartmentFilter = (selectedDepartment === 'all' || clinicDepartment === selectedDepartment);
+
+      return passesDepartmentFilter;
+    });
+  }
+  departmentFilter.addEventListener('change', filterClinics);
+
+  // Initial filter application
+  filterClinics();
 })
-
-
 
 
 
