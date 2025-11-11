@@ -18,7 +18,7 @@
 <div class="header">
 <p>Clinic Selection Form</p> 
 
-<div>
+<div class="userInfo" data-user-email="{{student.email}}" data-user-major="{{student.major}}">
   <p>{{user.email}} 
   <button id="infoButton" class="infoButton"> I </button></p>
     <div class="popup" id="legendPopup">
@@ -52,6 +52,8 @@
       <option value="{{ major.major }}">{{ major.major }}</option>
       {% endfor %}
     </select>
+  <label for="show-accepting">Filter by clinics accepting major</label>
+    <input type="checkbox" id="show-accepting" />
 </div>
 
 
@@ -71,7 +73,20 @@
     
     <!-- Each item must be of class item -->
     {% for clinic in clinics %}
-    <div class="item" style="--clinic-color: {{clinic.department.color}}" data-department="{{ clinic.department }}">
+    <div class="item" 
+      style="--clinic-color: {{clinic.department.color}}" 
+      data-department="{{ clinic.department }}" 
+      data-is-general="{{ clinic.numberHandler.first.general }}" 
+      {% if clinic.numberHandler.first.general %} 
+        data-max="{{ clinic.numberHandler.first.max }}"
+      {% else %}
+        {% for handler in clinic.numberHandler.all %}
+          {% if handler.major == student.major %}
+            data-max="{{ handler.max }}"
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>

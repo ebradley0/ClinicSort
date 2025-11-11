@@ -55,20 +55,26 @@ window.addEventListener('load', function() {
 
   // Filtering Functionality, can expand later to include more filters
   const departmentFilter = document.getElementById("clinic-department-filter");
+  const showAcceptingCheckbox = document.getElementById("show-accepting");
 
   function filterClinics() {
     const selectedDepartment = departmentFilter.value;
+    const showAccepting = showAcceptingCheckbox.checked;
+    
 
     grid.filter(function (item) {
       const clinicEl = item.getElement();
       const clinicDepartment = clinicEl.dataset.department;
+      const acceptingMax = clinicEl.dataset.max;
 
       const passesDepartmentFilter = (selectedDepartment === 'all' || clinicDepartment === selectedDepartment);
+      const passesAcceptingFilter = acceptingMax > 0 || !showAccepting;
 
-      return passesDepartmentFilter;
+      return passesDepartmentFilter && passesAcceptingFilter;
     });
   }
   departmentFilter.addEventListener('change', filterClinics);
+  showAcceptingCheckbox.addEventListener('change', filterClinics);
 
   // Initial filter application
   filterClinics();

@@ -186,6 +186,7 @@ def projectView(request):
         context['clinics'] = clinics
         context['selected_clinics'] = selected_clinics
         context['majors'] = majors
+        context['student'] = studentObject
         return render(request, "projectview.html", context=context)
     elif request.method == "POST":
         print(request.POST)
