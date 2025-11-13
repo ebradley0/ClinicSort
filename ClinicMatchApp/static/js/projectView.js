@@ -13,8 +13,15 @@ var grid = new Muuri('.grid', {
   dragStartPredicate: {
     distance: 10, // only start drag if mouse moves 10px
     delay: 0
+  },
+  sortData: {
+    popularityIndex: function (item, element) {
+      return parseFloat(element.dataset.popIndex) || 0;
+    },
+    randomValue: function (item, element) {
+      return Math.random();
+    }
   }
-  
   
 });
 
@@ -80,10 +87,42 @@ window.addEventListener('load', function() {
   filterClinics();
 })
 
+const sortPIButton = document.getElementById("sort-PI");
+if (sortPIButton) {
+  sortPIButton.addEventListener('click', function() {
+    console.log("Sorting by Popularity Index (descending)");
 
+    // Make sure both grids reflect the current DOM (important after dragging between grids)
+    try {
+      // synchronize() updates the Muuri instance to match DOM nodes moved by drag-sort
+      if (typeof selectGrid !== 'undefined' && selectGrid) selectGrid.synchronize();
+      if (typeof grid !== 'undefined' && grid) grid.synchronize();
+    } catch (err) {
+      // synchronize might not exist depending on Muuri version — ignore safely
+      console.warn("synchronize() error (ignored):", err);
+    }
 
+    // Force Muuri to refresh its internal list of items/elements
+    grid.refreshItems();
 
+    // Use comparator sort so Muuri doesn't rely on internal _sortData
+    // Here we sort descending (largest PI first). Change bVal - aVal for ascending.
+    grid.sort(function(a, b) {
+      const aVal = parseFloat(a.getElement().dataset.popIndex) || 0;
+      const bVal = parseFloat(b.getElement().dataset.popIndex) || 0;
+      return aVal - bVal; // descending
+    });
 
+    // Force layout / animation after sort
+    grid.layout(true);
+  });
+} else {
+  console.warn("sort-PI button not found in DOM");
+}
+
+window.addEventListener('load', function() {
+  grid.sort('randomValue');
+});
 //grid._settings.dragSort = function () { return [grid, selectGrid]; };
 
 

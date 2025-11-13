@@ -150,12 +150,16 @@
 
 /* Links row */
 .linkList {
+  position: absolute;
+  top: 20%;
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
 
 .description {
+  position: absolute;
+  top: 25%;
   margin: 10px;
   width: 90%;
   text-align: left;
