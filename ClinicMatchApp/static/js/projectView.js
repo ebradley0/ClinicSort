@@ -90,31 +90,20 @@ window.addEventListener('load', function() {
 const sortPIButton = document.getElementById("sort-PI");
 if (sortPIButton) {
   sortPIButton.addEventListener('click', function() {
-    console.log("Sorting by Popularity Index (descending)");
-
-    // Make sure both grids reflect the current DOM (important after dragging between grids)
-    try {
-      // synchronize() updates the Muuri instance to match DOM nodes moved by drag-sort
-      if (typeof selectGrid !== 'undefined' && selectGrid) selectGrid.synchronize();
-      if (typeof grid !== 'undefined' && grid) grid.synchronize();
-    } catch (err) {
-      // synchronize might not exist depending on Muuri version — ignore safely
-      console.warn("synchronize() error (ignored):", err);
-    }
+    //synchronize both grids before sorting
+    if (typeof selectGrid !== 'undefined' && selectGrid) selectGrid.synchronize();
+    if (typeof grid !== 'undefined' && grid) grid.synchronize();
 
     // Force Muuri to refresh its internal list of items/elements
     grid.refreshItems();
 
     // Use comparator sort so Muuri doesn't rely on internal _sortData
-    // Here we sort descending (largest PI first). Change bVal - aVal for ascending.
+    // used to prevent weird errors when items have been dragged between grids
     grid.sort(function(a, b) {
       const aVal = parseFloat(a.getElement().dataset.popIndex) || 0;
       const bVal = parseFloat(b.getElement().dataset.popIndex) || 0;
-      return aVal - bVal; // descending
+      return aVal - bVal;
     });
-
-    // Force layout / animation after sort
-    grid.layout(true);
   });
 } else {
   console.warn("sort-PI button not found in DOM");
@@ -123,7 +112,6 @@ if (sortPIButton) {
 window.addEventListener('load', function() {
   grid.sort('randomValue');
 });
-//grid._settings.dragSort = function () { return [grid, selectGrid]; };
 
 
 
