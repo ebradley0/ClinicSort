@@ -175,12 +175,11 @@ def projectView(request):
     majors = Major.objects.all()
     if request.method == "GET":
         clinics = []
-        for clinic in Clinic.objects.all():
+        for clinic in Clinic.objects.all(): #removes selected clinics from the main section
             if clinic in selected_clinics:
                 continue
             clinics.append(clinic)
-            
-        
+
         print("PROJECT VIEW REQUESTED")
         context = {}
         context['clinics'] = clinics
@@ -188,6 +187,7 @@ def projectView(request):
         context['majors'] = majors
         context['student'] = studentObject
         return render(request, "projectview.html", context=context)
+        
     elif request.method == "POST":
         print(request.POST)
         clinicSelections = request.POST.getlist('clinic_name')
@@ -198,11 +198,20 @@ def projectView(request):
             studentObject.choices.add(clinic_object)
         studentObject.save() # Save the instance
         selected_clinics = studentObject.choices.all()
+        
+        # Recalculate popularity index
         clinics = [] 
-        for clinic in Clinic.objects.all(): #Only display clinics not selected in the clinic array. Selected clinics should auto populate into selection grid. This can probably be a helper function.
-            if clinic in selected_clinics:
+        for clinic in Clinic.objects.all(): 
+            clinic.pop_index = 0  # Reset popularity index before recalculation
+            clinic.save()
+            if clinic in selected_clinics: #creates selected clinics list
                 continue
             clinics.append(clinic)
+        for student in StudentModel.objects.all():
+            first_choice = Clinic.objects.get(title=student.choices.first().title) if student.choices.exists() else None
+            if first_choice:
+                first_choice.pop_index += 1
+                first_choice.save()
         return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics, 'majors': Major.objects.all()})
 
 def clinicManagementHomepage(request):

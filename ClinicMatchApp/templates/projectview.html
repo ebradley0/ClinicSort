@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="{% static 'css/clinic_card.css' %}">
 </head>
 
-<style>
-</style>
-
 <body class="body">
 
 
@@ -77,6 +74,7 @@
       style="--clinic-color: {{clinic.department.color}}" 
       data-department="{{ clinic.department }}" 
       data-is-general="{{ clinic.numberHandler.first.general }}" 
+      data-pop-index="{{ clinic.pop_index }}"
       {% if clinic.numberHandler.first.general %} 
         data-max="{{ clinic.numberHandler.first.max }}"
       {% else %}
@@ -90,6 +88,7 @@
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI: {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
                 {%else%}
@@ -164,10 +163,25 @@
 <div class="select-gridWrapper">
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
     {%for clinic in selected_clinics %}
-    <div class="item" style="--clinic-color: {{clinic.department.color}}">
+    <div class="item" 
+      style="--clinic-color: {{clinic.department.color}}" 
+      data-department="{{ clinic.department }}" 
+      data-is-general="{{ clinic.numberHandler.first.general }}" 
+      data-pop-index="{{ clinic.pop_index }}"
+      {% if clinic.numberHandler.first.general %} 
+        data-max="{{ clinic.numberHandler.first.max }}"
+      {% else %}
+        {% for handler in clinic.numberHandler.all %}
+          {% if handler.major == student.major %}
+            data-max="{{ handler.max }}"
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI: {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
 
@@ -201,6 +215,21 @@
                 
                 {%endif%}
 
+            </div>
+            <div class="clinicDetails hidden itemContents">
+                <p class="clinic-title">{{clinic.title}}</p>
+                <div class="linkList">
+                {%for link in clinic.links_list%}
+                    <a href="{{link}}"> [{{forloop.counter}}] </a>
+                {%endfor%}
+                </div>
+
+                
+                
+                <div class="description">
+                  {{clinic.description}}
+                </div>
+                
             </div>
             
     </div>
