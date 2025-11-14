@@ -219,7 +219,7 @@ def clinicManagementHomepage(request):
     context['majors'] = Major.objects.all()
     return render(request, "clinicmanagement.html", context=context)
 
-def clinicManagementView(request, title='all'):
+def clinicManagementView(request, title):
     """
     Clinic management view that:
     - Loads all clinics with assigned students.
