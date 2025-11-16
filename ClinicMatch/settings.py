@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'ClinicMatchApp',
     'colorfield',
     'sortedm2m',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

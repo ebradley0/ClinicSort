@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .hidden {
+        display: none;
+    }
+</style>
+<body>
+
+<div class="cross-reference">
+    <label for="student-xlsx-input">Upload Student Excel File:</label>
+    <input type="file" id="student-xlsx-input" accept=".xlsx" />
+    <button class="hidden" id="load-students-button">Load Students from Excel File</button>
+    <div class="hidden" id="major-mapping" data-majors='{% for major in majors %}{{ major.major }}{% if not forloop.last %}, {% endif %}{% endfor %}'>
+        <!-- Major mapping inputs will be dynamically added here -->
+    </div>
+</div>
+
+</body>
+
+<script src="{% static 'js/student_management.js' %}"></script>
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+</html>

@@ -17,6 +17,7 @@ import csv
 import io
 from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
+from .serializers import StudentSerializer
 # Create your views here.
 
 load_dotenv()
@@ -298,6 +299,11 @@ def clinicManagementView(request, title):
 
     return render(request, "clinicmanagementview.html", context=context)
 
+def studentManagementView(request):
+    context = {}
+    context['majors'] = Major.objects.all()
+    return render(request, "studentmanagement.html", context=context)
+
 def profileView(request):
     user = request.user
     user = UserSocialAuth.objects.get(user=user)
@@ -403,7 +409,38 @@ def mapStudentsToClinics(request):
         print("Error mapping students to clinics:", str(e))
         return JsonResponse({'error': str(e)}, status=500) 
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import JSONParser
 
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
+
+@api_view(['POST'])
+#@permission_classes([IsAuthenticatedOrReadOnly])
+@csrf_exempt
+def importStudents(request):
+    if request.method == "POST":
+        serializer = StudentSerializer(data=request.data, many=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            for student_data in serializer.validated_data:
+                studentExists = StudentModel.objects.get(email=student_data['email']) if StudentModel.objects.filter(email=student_data['email']).exists() else None
+                if studentExists:
+                    continue
+                student = StudentModel(first_name=student_data['first_name'],
+                                       last_name=student_data['last_name'],
+                                       email=student_data['email'],
+                                       banner_id=int(student_data['banner_id']),
+                                       j_or_s=student_data['j_or_s'],
+                                       major=student_data['major'],
+                                       alternative_major=student_data['alternative_major'])
+                student.save()
+            return JsonResponse({'status': 'success'})
+            
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
 from django.db import transaction

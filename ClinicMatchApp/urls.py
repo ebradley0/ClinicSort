@@ -22,6 +22,8 @@ urlpatterns = [
     path('api/mapStudentsToClinics/', views.mapStudentsToClinics, name='map_students_to_clinics'),
     path('login/', views.loginView, name="loginView"),
     path('login-check/', views.login_check, name=""),
+    path('studentmanagement/', views.studentManagementView, name='studentManagementView'),
+    path('importStudents/', views.importStudents, name='importStudents'),
 
     path('', views.index, name='index' ), #Remove this when migrating to etr, this is just done for testing sake to maintain consistency.
 ]
