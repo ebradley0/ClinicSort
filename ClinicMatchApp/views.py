@@ -794,6 +794,7 @@ def runMatchingAlgorithm(request):
                 for requested_student in requested_students:
                     if student_ref == requested_student.strip().lower():
                         student.assigned_clinic = clinic
+                        student.initial_assignment = clinic
                         #Removing from juniors and seniors
                         match student.j_or_s:
                             case 'J':
@@ -806,31 +807,35 @@ def runMatchingAlgorithm(request):
         matchStudent(student)
     for student in juniors:
         matchStudent(student)
-    return render(request, "index.html", {})
+    return JsonResponse({'status': 'success'})
 
 
 
 
 def matchStudent(student):
     for choice in student.choices.all(): #Going through their choices
-            clinic = choice
-            clinicNumberHandlers = clinic.numberHandler.all()
-            for handler in clinicNumberHandlers:
-                if handler.general:
+        clinic = choice
+        clinicNumberHandlers = clinic.numberHandler.all()
+        for handler in clinicNumberHandlers:
+            if handler.general:
+                if clinic.current_students.count() < handler.max:
+                    student.assigned_clinic = clinic
+                    student.initial_assignment = clinic
+                    clinic.current_students.add(student)
+                    clinic.save()
+                    student.save()
+                    break
+            else:
+                if student.major == handler.major:
                     if clinic.current_students.count() < handler.max:
                         student.assigned_clinic = clinic
+                        student.initial_assignment = clinic
                         clinic.current_students.add(student)
                         clinic.save()
                         student.save()
                         break
-                else:
-                    if student.major == handler.major:
-                        if clinic.current_students.count() < handler.max:
-                            student.assigned_clinic = clinic
-                            clinic.current_students.add(student)
-                            clinic.save()
-                            student.save()
-                            break
+        if student.assigned_clinic is not None:
+            break 
 
         
 
