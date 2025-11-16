@@ -218,3 +218,32 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+const algorithmButton = document.getElementById('run-algorithm-button');
+algorithmButton.addEventListener('click', function() {
+    fetch('/MatchingProcess/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text()
+        let body = text;
+        try {
+            body = JSON.parse(text);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+        }
+        console.log('runMatchingAlgorithm response', response.status, body);
+        if (response.ok) {
+            alert('Matching algorithm executed successfully!');
+        } else {
+            alert('Error executing matching algorithm.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error executing matching algorithm.');
+    });
+});
