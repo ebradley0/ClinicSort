@@ -247,3 +247,365 @@ algorithmButton.addEventListener('click', function() {
         alert('Error executing matching algorithm.');
     });
 });
+
+const statsButton = document.getElementById('view-statistics-button');
+statsButton.addEventListener('click', function() {
+    fetch('/api/statistics/mostPopularClinics/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        //console.log('mostPopularClinics response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("Parsed clinic data:", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        const parsedData = parseMostPopularClinicsData(data);
+        console.log("sorted clinic data:",parsedData);
+        displayMostPopularClinicsData(parsedData);
+        if (response.ok) {
+            alert('statistics fetched successfully');
+        } else {
+            alert('Error fetching statistics.');
+        }
+    })
+
+    fetch('/api/statistics/mostPopularProfessors', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        //console.log('mostPopuilarProfessors response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("Parsed prof data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        const parsedData = parseMostPopularProfessorData(data);
+        console.log("sorted prof data: ",parsedData);
+        displayMostPopularProfessorData(parsedData);
+    })
+
+    fetch('/api/statistics/mostPopularDepartment/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        //console.log('mostPopularDepartment response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("parsed department data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        const parsedData = parseMostPopularDepartmentData(data);
+        console.log("sorted major data:", parsedData);
+        displayMostPopularDepartmentData(parsedData);
+    })
+
+    fetch('/api/statistics/proposedProjectsByDepartment/', {
+        method:'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        console.log('proposedProjectsByDepartment response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("parsed proposal data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        const parsedData = parseProposedProjectsByDepartment(data);
+        console.log("sorted proposed data:", parsedData);
+        displayProposedProjectsByDepartment(parsedData);
+    })
+
+    fetch('/api/statistics/studentSignupsByDepartment/', {
+        method:'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        console.log("studentSignupsByDepartment response", response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("parsed signup data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        const parsedData = parseStudentSignupsByDepartment(data);
+        console.log("sorted signup data:", parsedData);
+        displayStudentSignupsByDepartment(parsedData);
+    })
+});
+
+function parseMostPopularClinicsData(data1) {
+    let data = data1;
+    let result = [];
+    let maxClinicIndex=0;
+
+    //basic selection sort, could be optimized later
+    let clinicCount = data.length
+    for(let i = 0; i < clinicCount; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].requests > data[maxClinicIndex].requests)
+                maxClinicIndex = j;
+        }
+        let maxClinic = data.splice(maxClinicIndex,1);
+        result.push({
+            title: maxClinic[0].title,
+            requests: maxClinic[0].requests,
+            color: maxClinic[0].major_color
+        });
+        maxClinicIndex=0;
+    }
+
+    return result;
+}
+
+function parseMostPopularProfessorData(data1) {
+    let data = data1;
+    let result = [];
+    let maxRequestIndex = 0;
+
+    //basic selection sort, could be optimized later
+    let professorCount = data.length
+    for (let i = 0; i < professorCount; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].requests > data[maxRequestIndex].requests)
+                maxRequestIndex = j;
+        }
+        let maxRequestProf = data.splice(maxRequestIndex,1);
+        result.push({
+            name: maxRequestProf[0].name,
+            requests: maxRequestProf[0].requests
+        });
+        maxRequestIndex = 0;
+    }
+
+    return result;
+}
+
+function parseMostPopularDepartmentData(data1) {
+    let data = data1;
+    let result = [];
+    let maxRequestIndex = 0;
+
+    //basic selection sort, could be optimized later
+    let majorCount = data.length
+    for (let i = 0; i < majorCount; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].requests > data[maxRequestIndex].requests)
+                maxRequestIndex = j;
+        }
+        let maxRequestMajor = data.splice(maxRequestIndex,1);
+        result.push({
+            major: maxRequestMajor[0].major,
+            color: maxRequestMajor[0].color,
+            requests: maxRequestMajor[0].requests
+        })
+        maxRequestIndex = 0;
+    }
+
+    return result;
+}
+
+function parseProposedProjectsByDepartment(data1) {
+    let data = data1;
+    let result = [];
+    let maxProposedIndex = 0;
+
+    //basic selection sort, could be optimized later
+    let proposalCount = data.length
+    for (let i = 0; i < proposalCount; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].proposed > data[maxProposedIndex].proposed)
+                maxProposedIndex = j;
+        }
+        let maxProposedMajor = data.splice(maxProposedIndex,1);
+        result.push({
+            major: maxProposedMajor[0].major,
+            color: maxProposedMajor[0].color,
+            proposed: maxProposedMajor[0].proposed
+        })
+        maxProposedIndex = 0;
+    }
+
+    return result;
+}
+
+function parseStudentSignupsByDepartment(data1) {
+    let data = data1;
+    let result = [];
+    let maxSignupIndex = 0;
+
+    //basic selection sort, could be optimized later
+    let departmentCount = data.length
+    for (let i = 0; i < departmentCount; i++) {
+        for (let j = 0; j < data.length; j++) {
+            if (data[j].signups > data[maxSignupIndex].signups)
+                maxSignupIndex = j;
+        }
+        let maxSignupMajor = data.splice(maxSignupIndex,1);
+        result.push({
+            major: maxSignupMajor[0].major,
+            color: maxSignupMajor[0].color,
+            signups: maxSignupMajor[0].signups
+        })
+        maxSignupIndex = 0;
+    }
+
+    return result;
+}
+
+function displayMostPopularClinicsData(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "most-pop-clinics";
+    const title = document.createElement('h1');
+    title.textContent = "Most Popular Clinics";
+    wrapper.appendChild(title);
+
+    for (let i = 0; i < 10; i++) {
+        const p = document.createElement('p');
+        p.className = "pop-clinic";
+        p.style.setProperty("--color",data[i].color);
+        p.textContent = data[i].title;
+
+        wrapper.appendChild(p);
+    }
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}
+
+function displayMostPopularProfessorData(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "most-pop-profs";
+    const title = document.createElement('h1');
+    title.textContent = "Most Popular Professors";
+    wrapper.appendChild(title);
+
+    for (let i = 0; i < 10; i++) {
+        const p = document.createElement('p');
+        p.className = "pop-prof";
+        p.textContent = data[i].name;
+
+        wrapper.appendChild(p);
+    }
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+
+}
+
+function displayMostPopularDepartmentData(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "most-pop-major";
+    const title = document.createElement('h1');
+    title.textContent = "Most Popular Department";
+    wrapper.appendChild(title);
+
+    for (let i = 0; i < data.length; i++) {
+        const p = document.createElement('p');
+        p.className = "pop-major";
+        p.style.setProperty("--color",data[i].color);
+        p.textContent = data[i].major;
+
+        wrapper.appendChild(p);
+    }
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}
+
+function displayProposedProjectsByDepartment(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "proposed-projects";
+    const title = document.createElement('h1');
+    title.textContent = "Proposed Projects By Department";
+    wrapper.appendChild(title);
+    let total = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        const p = document.createElement('p');
+        p.className = "proposed-project";
+        p.style.setProperty("--color",data[i].color);
+        p.textContent = data[i].major + " -- " + data[i].proposed;
+
+        total += data[i].proposed;
+
+        wrapper.appendChild(p);
+    }
+
+    const p = document.createElement('p');
+    p.className = "proposed-project";
+    p.style.setProperty("--color", "#ddd");
+    p.textContent = "total -- " + total;
+    
+    wrapper.appendChild(p);
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}
+
+function displayStudentSignupsByDepartment(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "student-signups";
+    const title = document.createElement('h1');
+    title.textContent = "Student Sign-ups By Department";
+    wrapper.appendChild(title);
+    let total = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        const p = document.createElement('p');
+        p.className = "student-major";
+        p.style.setProperty("--color",data[i].color);
+        p.textContent = data[i].major + " -- " + data[i].signups;
+
+        total += data[i].signups;
+
+        wrapper.appendChild(p);
+    }
+
+    const p = document.createElement('p');
+    p.className = "student-major";
+    p.style.setProperty("--color", "#ddd");
+    p.textContent = "total -- " + total;
+    
+    wrapper.appendChild(p);
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}

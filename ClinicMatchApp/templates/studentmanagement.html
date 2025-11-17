@@ -11,6 +11,22 @@
     .hidden {
         display: none;
     }
+    .pop-clinic {
+        background: var(--color);
+        width: 20%;
+    }
+    .pop-major {
+        background: var(--color);
+        width: 20%;
+    }
+    .proposed-project {
+        background: var(--color);
+        width: 20%;
+    }
+    .student-major {
+        background: var(--color);
+        width: 20%;
+    }
 </style>
 <body>
 
@@ -25,6 +41,10 @@
     <div class="hidden" id="major-mapping" data-majors='{% for major in majors %}{{ major.major }}{% if not forloop.last %}, {% endif %}{% endfor %}'>
         <!-- Major mapping inputs will be dynamically added here -->
     </div>
+</div>
+
+<div class="statistics" id = "statistics">
+    <button id="view-statistics-button">View Statistics</button>
 </div>
 
 </body>

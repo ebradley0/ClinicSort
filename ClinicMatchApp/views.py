@@ -594,6 +594,8 @@ def loadProjectsFromCSV(request):
         else:
                 clinic.clinic_mgmt.add(professor)
         clinic.save()
+        professor.current_clinic.add(clinic)
+        professor.save()
         
         for professorEntry in project.manager_last_names[1:]:
                 
@@ -862,3 +864,87 @@ def createMajor(request):
     # met= Major(major="MET", color="#A4C2F4")
     # met.save()
     return render(request, "index.html", {})
+
+
+
+
+
+# Statistic APIs
+def mostPopularClinics(request):
+    clinics = Clinic.objects.all()
+    data = []
+    for clinic in clinics:
+        data.append({
+            'title': clinic.title,
+            'requests': StudentModel.objects.filter(choices=clinic).count(),
+            'major_color': clinic.department.color,
+        })
+    return JsonResponse(data, safe=False)
+
+def mostPopularProfessors(request):
+    profs = Professor.objects.all()
+    data = []
+    for prof in profs:
+        request = 0
+        current_clinics = prof.current_clinic.all()
+        for clinic in current_clinics:
+            request += StudentModel.objects.filter(choices=clinic).count()
+        data.append({
+            'name': prof.last_name,
+            'requests': request,
+        })
+    return JsonResponse(data, safe=False)
+
+def mostPopularDepartment(request):
+    majors = Major.objects.all()
+    data = []
+    for major in majors:
+        request = 0
+        for student in StudentModel.objects.all():
+            for choice in student.choices.all():
+                if major.major == choice.department.major:
+                    request += 1
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'requests': request,
+        })
+    return JsonResponse(data, safe=False)
+
+def proposedProjectsByDepartment(request):
+    majors = Major.objects.all()
+    clinics = Clinic.objects.all()
+    data = []
+    for major in majors:
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'proposed': clinics.filter(department=major).count(),
+        })
+    return JsonResponse(data, safe=False)
+
+def studentSignupsByDepartment(request):
+    majors = Major.objects.all()
+    students = StudentModel.objects.all()
+    data = []
+    for major in majors:
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'signups': students.filter(major=major).filter(alternative_major=False).count(),
+        })
+        #dealing with MET/EET
+        if major.major == 'ME':
+            data.append({
+                'major': 'MET',
+                'color': '#A4C2F4',
+                'signups': students.filter(major=major).filter(alternative_major=True).count(),
+            })
+        elif major.major == 'ECE':
+            data.append({
+                'major': 'EET',
+                'color': '#F9CB9C',
+                'signups': students.filter(major=major).filter(alternative_major=True).count(),
+            })
+
+    return JsonResponse(data, safe=False)

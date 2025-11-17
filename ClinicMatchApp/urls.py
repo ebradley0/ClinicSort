@@ -25,6 +25,13 @@ urlpatterns = [
     path('studentmanagement/', views.studentManagementView, name='studentManagementView'),
     path('importStudents/', views.importStudents, name='importStudents'),
 
+    # Statistics APIs
+    path('api/statistics/mostPopularClinics/', views.mostPopularClinics, name='mostPopularClinics'),
+    path('api/statistics/mostPopularProfessors', views.mostPopularProfessors, name='mostPopularProfessors'),
+    path('api/statistics/mostPopularDepartment/', views.mostPopularDepartment, name='mostPopularDepartment'),
+    path('api/statistics/proposedProjectsByDepartment/', views.proposedProjectsByDepartment, name='proposedProjectsByDepartment'),
+    path('api/statistics/studentSignupsByDepartment/', views.studentSignupsByDepartment, name='studentSignupsByDepartment'),
+
     path('', views.index, name='index' ), #Remove this when migrating to etr, this is just done for testing sake to maintain consistency.
 ]
 """ 
