@@ -24,6 +24,10 @@ load_dotenv()
 def login_check(request): #Runs post login. Import 
     code = request.session.pop('professor_code', None)
     user = request.user
+    print(user)
+    if user.is_anonymous:
+        print("User is Anonymous")
+        return
     if not user.email: #If the user is manually created then skip this process, this is mostly used for dev and won't be in production
         print("User has no email associated, cannot create Student object.")
         return
@@ -519,12 +523,12 @@ def loadProjectsFromCSV(request):
     for project in projects:
         
         primaryManager = project.manager_last_names[0] 
-        primaryManager = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', primaryManager).group(1)
+        primaryManager = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', primaryManager).group(1) #Regex generated via CHATGPT
         primaryManagerEmail = project.email
         links = []
         for link in project.project_url_links:
             print(link)
-            link = re.match(r'=HYPERLINK\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)', link)
+            link = re.match(r'=HYPERLINK\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)', link) #Regex generated via CHATGPT
             if link  != None:
                 link = link.group(1)
                 links.append(link)

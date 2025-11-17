@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import ModelForm, inlineformset_factory, modelformset_factory
+from django.forms import ModelForm, inlineformset_factory
 from .models import Student, Major, Clinic, Professor, Review, ClinicNumberHandler
 
 
@@ -11,6 +11,8 @@ class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
         fields = '__all__' #Use all fields from the model
+        
+        
 
 
 #Creating a basic form template to be sued by ClinicNumberHandler. These will be used by a formset to store them all together

@@ -39,6 +39,7 @@ class Clinic(models.Model):
     current_students = SortedManyToManyField('Student', related_name="current_students_in_clinic", null=True, blank=True) #Connects to student objects
     image = models.FileField(null=True, blank=True, upload_to="clinicImages/")
     links = models.JSONField(default=list, blank=True, null=True)
+
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
@@ -97,7 +98,7 @@ class Student(models.Model):
     assigned_clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Assigned_Output', null=True, blank=True)
     initial_assignment = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name='Initial_Assignments', null=True, blank=True)
     alternative_major = models.BooleanField(default=False) #Used to handle majors like MET/EET who's students are treated as a different major but need to be differentiated in the database
-
+    link = models.CharField(blank=False, null=True)
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.major})"
 
