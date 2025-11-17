@@ -369,6 +369,27 @@ statsButton.addEventListener('click', function() {
         console.log("sorted signup data:", parsedData);
         displayStudentSignupsByDepartment(parsedData);
     })
+
+    fetch('/api/statistics/studentChoiceDistribution/', {
+        method:'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        console.log('studentChoiceDistribution response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("parsed choice data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        displayStudentChoiceDistribution(data);
+    })
 });
 
 function parseMostPopularClinicsData(data1) {
@@ -604,6 +625,34 @@ function displayStudentSignupsByDepartment(data) {
     p.style.setProperty("--color", "#ddd");
     p.textContent = "total -- " + total;
     
+    wrapper.appendChild(p);
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}
+
+function displayStudentChoiceDistribution(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "student-choices";
+    const title = document.createElement('h1');
+    title.textContent = "Student Choice Distribution";
+    wrapper.appendChild(title);
+    let total = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        const p = document.createElement('p');
+        p.className = "student-choice";
+        p.textContent = data[i].choice + " -- " + data[i].count;
+
+        total += data[i].count;
+
+        wrapper.appendChild(p);
+    }
+
+    const p = document.createElement('p');
+    p.className = "student-choice";
+    p.textContent = "total -- " + total;
+
     wrapper.appendChild(p);
 
     const statisticsPage = document.getElementById("statistics");
