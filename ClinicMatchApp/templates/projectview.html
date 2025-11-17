@@ -9,16 +9,13 @@
     <link rel="stylesheet" href="{% static 'css/clinic_card.css' %}">
 </head>
 
-<style>
-</style>
-
 <body class="body">
 
 
 <div class="header">
 <p>Clinic Selection Form</p> 
 
-<div>
+<div class="userInfo" data-user-email="{{student.email}}" data-user-major="{{student.major}}">
   <p>{{user.email}} 
   <button id="infoButton" class="infoButton"> I </button></p>
     <div class="popup" id="legendPopup">
@@ -43,8 +40,18 @@
                       {%endfor%}
                     </div>
                   </div>
-      </div>
-      </p>
+    </div>
+  </p>
+  <label for="clinic-department-filter">Filter by department:</label>
+    <select id="clinic-department-filter">
+      <option value="all">All</option>
+      {% for major in majors %}
+      <option value="{{ major.major }}">{{ major.major }}</option>
+      {% endfor %}
+    </select>
+  <label for="show-accepting">Filter by clinics accepting major</label>
+    <input type="checkbox" id="show-accepting" />
+  <button id="sort-PI"> Sort by Popularity Index </button>
 </div>
 
 
@@ -64,10 +71,25 @@
     
     <!-- Each item must be of class item -->
     {% for clinic in clinics %}
-    <div class="item" style="--clinic-color: {{clinic.department.color}}">
+    <div class="item" 
+      style="--clinic-color: {{clinic.department.color}}" 
+      data-department="{{ clinic.department }}" 
+      data-is-general="{{ clinic.numberHandler.first.general }}" 
+      data-pop-index="{{ clinic.pop_index }}"
+      {% if clinic.numberHandler.first.general %} 
+        data-max="{{ clinic.numberHandler.first.max }}"
+      {% else %}
+        {% for handler in clinic.numberHandler.all %}
+          {% if handler.major == student.major %}
+            data-max="{{ handler.max }}"
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI: {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
                 {%else%}
@@ -142,10 +164,25 @@
 <div class="select-gridWrapper">
   <div class="select-grid" > <!-- Selection grid for chosen clinics   -->
     {%for clinic in selected_clinics %}
-    <div class="item" style="--clinic-color: {{clinic.department.color}}">
+    <div class="item" 
+      style="--clinic-color: {{clinic.department.color}}" 
+      data-department="{{ clinic.department }}" 
+      data-is-general="{{ clinic.numberHandler.first.general }}" 
+      data-pop-index="{{ clinic.pop_index }}"
+      {% if clinic.numberHandler.first.general %} 
+        data-max="{{ clinic.numberHandler.first.max }}"
+      {% else %}
+        {% for handler in clinic.numberHandler.all %}
+          {% if handler.major == student.major %}
+            data-max="{{ handler.max }}"
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI: {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
 
@@ -179,6 +216,21 @@
                 
                 {%endif%}
 
+            </div>
+            <div class="clinicDetails hidden itemContents">
+                <p class="clinic-title">{{clinic.title}}</p>
+                <div class="linkList">
+                {%for link in clinic.links_list%}
+                    <a href="{{link}}"> [{{forloop.counter}}] </a>
+                {%endfor%}
+                </div>
+
+                
+                
+                <div class="description">
+                  {{clinic.description}}
+                </div>
+                
             </div>
             
     </div>

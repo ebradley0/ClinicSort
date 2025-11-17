@@ -112,7 +112,7 @@ window.addEventListener('load', function () {
             <p><strong>Email:</strong> ${data.email}</p>
             <p><strong>Banner ID:</strong> ${data.banner_id}</p>
             <p><strong>Status:</strong> ${data.j_or_s === 'J' ? 'Junior' : 'Senior'}</p>
-            <p><strong>Major:</strong> ${data.major}</p>
+            <p><strong>Major:</strong> ${data.alternative_major ? (data.major === "ECE" ? 'EET' : 'MET') : data.major}</p>
             <p><strong>Initial Assigned Clinic:</strong> ${data.initial_assignment}</p>
             <p><strong>Preferences:</strong> ${data.choices.join('<br>')}</p>
             <p><strong>Requested For:</strong> ${data.requested_by.join('<br>')}</p>

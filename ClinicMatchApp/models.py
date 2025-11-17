@@ -39,7 +39,7 @@ class Clinic(models.Model):
     current_students = SortedManyToManyField('Student', related_name="current_students_in_clinic", null=True, blank=True) #Connects to student objects
     image = models.FileField(null=True, blank=True, upload_to="clinicImages/")
     links = models.JSONField(default=list, blank=True, null=True)
-
+    pop_index = models.PositiveIntegerField(default=0) #Used to store popularity index during matching process.
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler

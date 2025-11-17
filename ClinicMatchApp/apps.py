@@ -24,15 +24,15 @@ class ClinicMatchAppConfig(AppConfig):
 
             urls_module = importlib.import_module("ClinicMatchApp.urls")
 
-            for major in Major.objects.all():
-                urls_module.urlpatterns.append(
-                    path(
-                        f"clinicManagementView/{major.major}/",
-                        views.clinicManagementView,
-                        {"title": f"{major.major}"},
-                        name=f"clinicManagementView_{major.major}"
-                    )
-                )
+            # for major in Major.objects.all():
+            #     urls_module.urlpatterns.append(
+            #         path(
+            #             f"clinicManagementView/{major.major}/",
+            #             views.clinicManagementView,
+            #             {"title": f"{major.major}"},
+            #             name=f"clinicManagementView_{major.major}"
+            #         )
+            #     )
         except Exception:
             # don't crash startup — optionally log the error
             pass

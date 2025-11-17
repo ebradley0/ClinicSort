@@ -11,11 +11,13 @@ function updateDepartmentColorPreview() {
     const majorInput = document.getElementById('id_department');
     const itemElementFront = document.querySelector('.item');
     const itemElementBack = document.querySelector('.item.back');
+    const PIElementFront = document.querySelector('.pop-index');
     const majorValue = majorInput ? majorInput.value : '';
 
     if (!majorValue) {
         if (itemElementFront) itemElementFront.style.background = '#ffffff';
         if (itemElementBack) itemElementBack.style.background = '#ffffff';
+        if (PIElementFront) PIElementFront.style.color = '#000000';
         return;
     }
 
@@ -27,6 +29,7 @@ function updateDepartmentColorPreview() {
     .then(data => {
         if (itemElementFront) itemElementFront.style.background = data.color;
         if (itemElementBack) itemElementBack.style.background = data.color;
+        if (PIElementFront) PIElementFront.style.color = data.color;
     })
     .catch(error => {
         console.error("Error loading major color:", error);
