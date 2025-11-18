@@ -87,8 +87,8 @@ def index(request):
 
         #Checking whether its a student or professor
         userAuth = UserSocialAuth.objects.get(user=user)
-        student_object = StudentModel.objects.get(userAuth=userAuth), None 
-        professor_object = Professor.objects.first(userAuth=userAuth), None
+        student_object = StudentModel.objects.filter(userAuth=userAuth).first()
+        professor_object = Professor.objects.filter(userAuth=userAuth).first()
 
         if professor_object:
             context['status'] = "professor"

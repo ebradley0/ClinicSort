@@ -23,4 +23,5 @@ services:
     env_file:
       - .env
     depends_on: # Basially lets the database load first, so Django won't crash
-      - db
+      db:
+        condition: service_healthy
