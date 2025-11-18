@@ -59,6 +59,11 @@ class StudentProfileForm(forms.ModelForm):
             'alternative_major': 'EET/MET',
         }
 
+class ProfessorProfileForm(forms.ModelForm):
+    class Meta:
+        model = Professor
+        fields = ['department', 'crn']
+
 
 class StudentForm(forms.ModelForm):
     first_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)

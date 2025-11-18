@@ -52,11 +52,19 @@
     
 
     {% if logged_in %}
+    {%if status == "student" %}
     <a href="{% url 'projectView' %}" class="button">Project View</a>
     <a href="{% url 'profile' %}" class="button">Profile</a>
+    <a href="{% url 'clinicSubmission'}" class="button">Clinic Submission</a>
     
-    <a href="{%url 'clinicManagementViewHomepage'%}" class="button">Clinic Management </a>
     <a href="{% url 'logout' %}" class="button">Logout</a>
+    {%elif status == "professor" %}
+    <a href="{% url 'profile' %}" class="button">Profile</a>
+    <a href="{%url 'clinicSubmission' %}" class="button"> Submit Clinic</a>
+    <a href="{%url 'clinicManagementView'%}" class="button">Clinic Management </a>
+    <a href="{% url 'logout' %}" class="button">Logout</a>
+    {%endif%}
+
     
     {%else%}
     <a href="{% url 'loginView' %}" class="button">Login</a>

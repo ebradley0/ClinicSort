@@ -8,7 +8,7 @@ from django.db.models import Sum, Prefetch
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404, redirect
 from ClinicMatchApp.models import ClinicNumberHandler, Clinic, Major, Professor, Student
-from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm, StudentProfileForm
+from .forms import ClinicForm, get_ClinicNumbersFormset, StudentForm, StudentProfileForm, ProfessorProfileForm
 from social_django.models import UserSocialAuth
 from .models import Student as StudentModel
 from django.db.models.fields import NOT_PROVIDED
@@ -84,10 +84,18 @@ def index(request):
         user = None
     if user and user.is_authenticated:
         #Since they're logged in, let them view the profile and Project View buttons
+
+        #Checking whether its a student or professor
+        userAuth = UserSocialAuth.objects.get(user=user)
+        student_object = StudentModel.objects.get(userAuth=userAuth), None 
+        professor_object = Professor.objects.first(userAuth=userAuth), None
+
+        if professor_object:
+            context['status'] = "professor"
+        else:
+            context['status'] = "student"
+
         context['logged_in'] = True
-    load_dotenv()  # Load environment variables from a .env file if present
-    print("HOME PAGE REQUESTED")
-    print(os.getenv("GOOGLE_OAUTH2_KEY"))
     return render(request, 'index.html', context=context)
 
 
@@ -747,24 +755,49 @@ def loadStudentsFromCSV(request):
 def profileView(request):
     user = request.user
     user = UserSocialAuth.objects.get(user=user)
-    profile_object = StudentModel.objects.get(userAuth=user)
+    student_object = StudentModel.objects.get(userAuth=user), None 
+    professor_object = Professor.objects.first(userAuth=user), None
 
     if request.method == "POST":
-        form = StudentProfileForm(request.POST, instance=profile_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
-        context = {"user": request.user,
-                "profile": profile_object,
+        if student_object:
+            form = StudentProfileForm(request.POST, instance=student_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
+            context = {"user": request.user,
+                    "profile": student_object,
+                    "profileForm": form,
+                    "status": "student"
+                    }
+            if form.is_valid():
+                form.save()
+            return render(request, "profile.html", context=context)
+        elif professor_object:
+            form = ProfessorProfileForm(request.POST, instance=professor_object)
+            context = {
+                "user": request.user,
+                "profile": professor_object,
                 "profileForm": form,
-                }
-        if form.is_valid():
-            form.save()
-        return render(request, "profile.html", context=context)
+                "status": "professor"
+            }
+            if form.is_valid():
+                form.save()
+            return render(request, "profile.html", context=context)
+    
     else:
-        profile_form = StudentProfileForm(instance=profile_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
-        context = {"user": request.user,
-                "profile": profile_object,
-                "profileForm": profile_form,
-                }
-        return render(request, "profile.html", context=context)
+        if student_object:
+            profile_form = StudentProfileForm(instance=student_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
+            context = {"user": request.user,
+                    "profile": student_object,
+                    "profileForm": profile_form,
+                    }
+            return render(request, "profile.html", context=context)
+        elif professor_object:
+            form = ProfessorProfileForm(request.POST, instance=professor_object)
+            context = {
+                "user": request.user,
+                "profile": professor_object,
+                "profileForm": form,
+                "status": "professor"
+            }
+            return render(request, "profile.html", context=context)
 
 
 
