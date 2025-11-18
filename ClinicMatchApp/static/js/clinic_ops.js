@@ -7,8 +7,8 @@ window.addEventListener('load', function () {
 
   // 1. Set each clinic .item to 1000px width BEFORE Muuri initializes
   document.querySelectorAll('.clinics-board .item').forEach(function (item) {
-    item.style.width = '1000px';     // ✅ full width of the board
-    item.style.height = '200px';     // match .clinic-container height
+    item.style.width = '1000px';
+    item.style.height = '200px';
   });
 
   // 2. Initialize the students board
