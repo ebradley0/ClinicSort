@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    .hidden {
+        display: none;
+    }
+    .pop-clinic {
+        background: var(--color);
+        width: 20%;
+    }
+    .pop-major {
+        background: var(--color);
+        width: 20%;
+    }
+    .proposed-project {
+        background: var(--color);
+        width: 20%;
+    }
+    .student-major {
+        background: var(--color);
+        width: 20%;
+    }
+    .chart-container {
+        width: 320px;
+        height:240px;
+        margin: 8px 0;
+        display: inline-block;
+    }
+
+</style>
+<body>
+
+<div class="algorithm">
+    <button id="run-algorithm-button">Run Matching Algorithm</button>
+</div>
+
+<div class="cross-reference">
+    <label for="student-xlsx-input">Upload Student Excel File:</label>
+    <input type="file" id="student-xlsx-input" accept=".xlsx" />
+    <button class="hidden" id="load-students-button">Load Students from Excel File</button>
+    <div class="hidden" id="major-mapping" data-majors='{% for major in majors %}{{ major.major }}{% if not forloop.last %}, {% endif %}{% endfor %}'>
+        <!-- Major mapping inputs will be dynamically added here -->
+    </div>
+</div>
+
+<div class="statistics" id = "statistics">
+    <button id="view-statistics-button">View Statistics</button>
+</div>
+
+</body>
+
+<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/student_management.js' %}"></script>
+</html>

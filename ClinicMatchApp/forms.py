@@ -1,5 +1,6 @@
+from enum import auto
 from django import forms
-from django.forms import ModelForm, inlineformset_factory, modelformset_factory
+from django.forms import ModelForm, inlineformset_factory
 from .models import Student, Major, Clinic, Professor, Review, ClinicNumberHandler
 
 
@@ -11,6 +12,8 @@ class ClinicForm(forms.ModelForm):
     class Meta:
         model = Clinic
         fields = '__all__' #Use all fields from the model
+        
+        
 
 
 #Creating a basic form template to be sued by ClinicNumberHandler. These will be used by a formset to store them all together
@@ -48,7 +51,13 @@ def get_ClinicNumbersFormset(extra=None):
 class StudentProfileForm(forms.ModelForm):
     class Meta:
         model = Student
-        fields = ['banner_id', 'j_or_s', 'major'] 
+        fields = ['banner_id', 'j_or_s', 'major', 'alternative_major'] 
+        labels = {
+            'banner_id': 'Banner ID',
+            'j_or_s': 'Grade Level (J/S)',
+            'major': 'Major',
+            'alternative_major': 'EET/MET',
+        }
 
 class ProfessorProfileForm(forms.ModelForm):
     class Meta:

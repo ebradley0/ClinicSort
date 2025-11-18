@@ -1,0 +1,124 @@
+    .front {
+        position:fixed;
+        top: 0px;
+        right: 0px;
+    }
+    .back {
+        position:fixed;
+        top: 450px;
+        right: 0px;
+    }
+
+.body {
+  
+ margin: 0px;
+ gap: 0px;
+ padding: 0px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  overflow: hidden;
+}
+
+.preview-cards {
+  display: flex;
+  margin: 0px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  overflow-y: auto;
+
+}
+
+.clinic-mgmt-container{
+    height: 400px;
+    width: 400px;
+    overflow-y: auto;
+}
+
+.submission-form-container{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    gap:0px;
+    padding:0px;
+    justify-content: center;
+    background-color: aquamarine;
+}
+.submission-form{
+    display: flex;
+    flex-direction: column;
+    background-color: beige;
+    width:800px;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+}
+.submission-form p{
+    margin:0px;
+    font-weight: 450;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 24px;
+}
+.title 
+{
+    font-weight: 600;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 36px;
+    
+}
+
+#id_title{
+    border:none;
+    border-bottom: 2px solid #000;
+    padding: 0;
+    font-size: 12px;
+    width: 50%;
+    outline: none;
+    line-height: 16px;
+    background: transparent;
+}
+#id_department{
+      padding: 4px;
+        border-radius: 4px;
+        background: transparent;
+        width: 50%;
+        text-align: center;
+}
+#id_department select{
+      padding: 4px;
+        border-radius: 4px;
+        background: transparent;
+        width: 50%;
+}
+
+.sortedm2m-item {
+    background-color: #e1c10f8a;
+    border: 1px solid #ccc;
+    padding: 3px;
+  
+}
+.sortedm2m {
+    background-color: transparent;
+    scale: 150%;
+    padding: 5px;
+    gap: 5px;
+
+}
+
+.sortedm2m-items {
+    list-style: none;  
+    padding-left: 0; 
+}
+
+
+
+
+
+#clinic_type{
+      padding: 4px;
+        border-radius: 4px;
+        background: transparent;
+        width: 50%;
+        text-align: center;
+}

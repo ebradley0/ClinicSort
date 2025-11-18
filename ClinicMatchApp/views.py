@@ -17,6 +17,7 @@ import csv
 import io
 from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
+from .serializers import StudentSerializer
 # Create your views here.
 
 load_dotenv()
@@ -24,6 +25,10 @@ load_dotenv()
 def login_check(request): #Runs post login. Import 
     code = request.session.pop('professor_code', None)
     user = request.user
+    print(user)
+    if user.is_anonymous:
+        print("User is Anonymous")
+        return
     if not user.email: #If the user is manually created then skip this process, this is mostly used for dev and won't be in production
         print("User has no email associated, cannot create Student object.")
         return
@@ -183,18 +188,19 @@ def projectView(request):
     majors = Major.objects.all()
     if request.method == "GET":
         clinics = []
-        for clinic in Clinic.objects.all():
+        for clinic in Clinic.objects.all(): #removes selected clinics from the main section
             if clinic in selected_clinics:
                 continue
             clinics.append(clinic)
-            
-        
+
         print("PROJECT VIEW REQUESTED")
         context = {}
         context['clinics'] = clinics
         context['selected_clinics'] = selected_clinics
         context['majors'] = majors
+        context['student'] = studentObject
         return render(request, "projectview.html", context=context)
+        
     elif request.method == "POST":
         print(request.POST)
         clinicSelections = request.POST.getlist('clinic_name')
@@ -205,11 +211,20 @@ def projectView(request):
             studentObject.choices.add(clinic_object)
         studentObject.save() # Save the instance
         selected_clinics = studentObject.choices.all()
+        
+        # Recalculate popularity index
         clinics = [] 
-        for clinic in Clinic.objects.all(): #Only display clinics not selected in the clinic array. Selected clinics should auto populate into selection grid. This can probably be a helper function.
-            if clinic in selected_clinics:
+        for clinic in Clinic.objects.all(): 
+            clinic.pop_index = 0  # Reset popularity index before recalculation
+            clinic.save()
+            if clinic in selected_clinics: #creates selected clinics list
                 continue
             clinics.append(clinic)
+        for student in StudentModel.objects.all():
+            first_choice = Clinic.objects.get(title=student.choices.first().title) if student.choices.exists() else None
+            if first_choice:
+                first_choice.pop_index += 1
+                first_choice.save()
         return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics, 'majors': Major.objects.all()})
 
 def clinicManagementHomepage(request):
@@ -217,7 +232,7 @@ def clinicManagementHomepage(request):
     context['majors'] = Major.objects.all()
     return render(request, "clinicmanagement.html", context=context)
 
-def clinicManagementView(request, title='all'):
+def clinicManagementView(request, title):
     """
     Clinic management view that:
     - Loads all clinics with assigned students.
@@ -296,6 +311,11 @@ def clinicManagementView(request, title='all'):
 
     return render(request, "clinicmanagementview.html", context=context)
 
+def studentManagementView(request):
+    context = {}
+    context['majors'] = Major.objects.all()
+    return render(request, "studentmanagement.html", context=context)
+
 def profileView(request):
     user = request.user
     user = UserSocialAuth.objects.get(user=user)
@@ -371,7 +391,7 @@ def student_detail_api(request, student_id):
         'assigned_clinic': str(student.assigned_clinic.title) if student.assigned_clinic else None,
         'initial_assignment': str(student.initial_assignment.title) if student.initial_assignment else None,
         'requested_by': requested_by if requested_by else [],
-        # Add more fields as needed
+        'alternative_major': student.alternative_major,
     })
 
 def major_api(request, major_id):
@@ -401,7 +421,38 @@ def mapStudentsToClinics(request):
         print("Error mapping students to clinics:", str(e))
         return JsonResponse({'error': str(e)}, status=500) 
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import JSONParser
 
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
+
+@api_view(['POST'])
+#@permission_classes([IsAuthenticatedOrReadOnly])
+@csrf_exempt
+def importStudents(request):
+    if request.method == "POST":
+        serializer = StudentSerializer(data=request.data, many=True)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            for student_data in serializer.validated_data:
+                studentExists = StudentModel.objects.get(email=student_data['email']) if StudentModel.objects.filter(email=student_data['email']).exists() else None
+                if studentExists:
+                    continue
+                student = StudentModel(first_name=student_data['first_name'],
+                                       last_name=student_data['last_name'],
+                                       email=student_data['email'],
+                                       banner_id=int(student_data['banner_id']),
+                                       j_or_s=student_data['j_or_s'],
+                                       major=student_data['major'],
+                                       alternative_major=student_data['alternative_major'])
+                student.save()
+            return JsonResponse({'status': 'success'})
+            
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt  # If you want to exempt CSRF for now
 from django.db import transaction
@@ -527,12 +578,12 @@ def loadProjectsFromCSV(request):
     for project in projects:
         
         primaryManager = project.manager_last_names[0] 
-        primaryManager = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', primaryManager).group(1)
+        primaryManager = re.match(r'^\s*=HYPERLINK\("[^"]*",\s*"([^"]*)"\)\s*$', primaryManager).group(1) #Regex generated via CHATGPT
         primaryManagerEmail = project.email
         links = []
         for link in project.project_url_links:
             print(link)
-            link = re.match(r'=HYPERLINK\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)', link)
+            link = re.match(r'=HYPERLINK\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)', link) #Regex generated via CHATGPT
             if link  != None:
                 link = link.group(1)
                 links.append(link)
@@ -555,6 +606,8 @@ def loadProjectsFromCSV(request):
         else:
                 clinic.clinic_mgmt.add(professor)
         clinic.save()
+        professor.current_clinic.add(clinic)
+        professor.save()
         
         for professorEntry in project.manager_last_names[1:]:
                 
@@ -780,6 +833,7 @@ def runMatchingAlgorithm(request):
                 for requested_student in requested_students:
                     if student_ref == requested_student.strip().lower():
                         student.assigned_clinic = clinic
+                        student.initial_assignment = clinic
                         #Removing from juniors and seniors
                         match student.j_or_s:
                             case 'J':
@@ -792,31 +846,35 @@ def runMatchingAlgorithm(request):
         matchStudent(student)
     for student in juniors:
         matchStudent(student)
-    return render(request, "index.html", {})
+    return JsonResponse({'status': 'success'})
 
 
 
 
 def matchStudent(student):
     for choice in student.choices.all(): #Going through their choices
-            clinic = choice
-            clinicNumberHandlers = clinic.numberHandler.all()
-            for handler in clinicNumberHandlers:
-                if handler.general:
+        clinic = choice
+        clinicNumberHandlers = clinic.numberHandler.all()
+        for handler in clinicNumberHandlers:
+            if handler.general:
+                if clinic.current_students.count() < handler.max:
+                    student.assigned_clinic = clinic
+                    student.initial_assignment = clinic
+                    clinic.current_students.add(student)
+                    clinic.save()
+                    student.save()
+                    break
+            else:
+                if student.major == handler.major:
                     if clinic.current_students.count() < handler.max:
                         student.assigned_clinic = clinic
+                        student.initial_assignment = clinic
                         clinic.current_students.add(student)
                         clinic.save()
                         student.save()
                         break
-                else:
-                    if student.major == handler.major:
-                        if clinic.current_students.count() < handler.max:
-                            student.assigned_clinic = clinic
-                            clinic.current_students.add(student)
-                            clinic.save()
-                            student.save()
-                            break
+        if student.assigned_clinic is not None:
+            break 
 
         
 
@@ -843,3 +901,118 @@ def createMajor(request):
     # met= Major(major="MET", color="#A4C2F4")
     # met.save()
     return render(request, "index.html", {})
+
+
+
+
+
+# Statistic APIs
+def mostPopularClinics(request):
+    clinics = Clinic.objects.all()
+    data = []
+    for clinic in clinics:
+        data.append({
+            'title': clinic.title,
+            'requests': StudentModel.objects.filter(choices=clinic).count(),
+            'major_color': clinic.department.color,
+        })
+    return JsonResponse(data, safe=False)
+
+def mostPopularProfessors(request):
+    profs = Professor.objects.all()
+    data = []
+    for prof in profs:
+        request = 0
+        current_clinics = prof.current_clinic.all()
+        for clinic in current_clinics:
+            request += StudentModel.objects.filter(choices=clinic).count()
+        data.append({
+            'name': prof.last_name,
+            'requests': request,
+        })
+    return JsonResponse(data, safe=False)
+
+def mostPopularDepartment(request):
+    majors = Major.objects.all()
+    data = []
+    for major in majors:
+        request = 0
+        for student in StudentModel.objects.all():
+            for choice in student.choices.all():
+                if major.major == choice.department.major:
+                    request += 1
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'requests': request,
+        })
+    return JsonResponse(data, safe=False)
+
+def proposedProjectsByDepartment(request):
+    majors = Major.objects.all()
+    clinics = Clinic.objects.all()
+    data = []
+    for major in majors:
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'proposed': clinics.filter(department=major).count(),
+        })
+    return JsonResponse(data, safe=False)
+
+def studentSignupsByDepartment(request):
+    majors = Major.objects.all()
+    students = StudentModel.objects.all()
+    data = []
+    for major in majors:
+        data.append({
+            'major': major.major,
+            'color': major.color,
+            'signups': students.filter(major=major).filter(alternative_major=False).count(),
+        })
+        #dealing with MET/EET
+        if major.major == 'ME':
+            data.append({
+                'major': 'MET',
+                'color': '#A4C2F4',
+                'signups': students.filter(major=major).filter(alternative_major=True).count(),
+            })
+        elif major.major == 'ECE':
+            data.append({
+                'major': 'EET',
+                'color': '#F9CB9C',
+                'signups': students.filter(major=major).filter(alternative_major=True).count(),
+            })
+
+    return JsonResponse(data, safe=False)
+
+from num2words import num2words
+def studentChoiceDistribution(request):
+    students = StudentModel.objects.all()
+    data = []
+    for i in range(1,9):
+        data.append({
+            'choice': num2words(i, ordinal=True),
+            'count': 0,
+        })
+    data.append({
+        'choice': 'none',
+        'count': 0,
+    })
+    for student in students:
+        i = 0
+        foundClinic = False
+        for choice in student.choices.all():
+            if student.assigned_clinic:
+                if choice.title == student.assigned_clinic.title:
+                    data[i]['count'] += 1
+                    foundClinic = True
+                    break
+                i += 1
+            else:
+                break
+
+        if not foundClinic:
+            data[8]['count'] += 1
+    
+    return JsonResponse(data, safe=False)

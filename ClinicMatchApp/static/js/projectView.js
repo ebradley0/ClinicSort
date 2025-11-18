@@ -13,8 +13,15 @@ var grid = new Muuri('.grid', {
   dragStartPredicate: {
     distance: 10, // only start drag if mouse moves 10px
     delay: 0
+  },
+  sortData: {
+    popularityIndex: function (item, element) {
+      return parseFloat(element.dataset.popIndex) || 0;
+    },
+    randomValue: function (item, element) {
+      return Math.random();
+    }
   }
-  
   
 });
 
@@ -52,15 +59,59 @@ window.addEventListener('load', function() {
     infoPopOut.classList.toggle('show');
 
   });
+
+  // Filtering Functionality, can expand later to include more filters
+  const departmentFilter = document.getElementById("clinic-department-filter");
+  const showAcceptingCheckbox = document.getElementById("show-accepting");
+
+  function filterClinics() {
+    const selectedDepartment = departmentFilter.value;
+    const showAccepting = showAcceptingCheckbox.checked;
+    
+
+    grid.filter(function (item) {
+      const clinicEl = item.getElement();
+      const clinicDepartment = clinicEl.dataset.department;
+      const acceptingMax = clinicEl.dataset.max;
+
+      const passesDepartmentFilter = (selectedDepartment === 'all' || clinicDepartment === selectedDepartment);
+      const passesAcceptingFilter = acceptingMax > 0 || !showAccepting;
+
+      return passesDepartmentFilter && passesAcceptingFilter;
+    });
+  }
+  departmentFilter.addEventListener('change', filterClinics);
+  showAcceptingCheckbox.addEventListener('change', filterClinics);
+
+  // Initial filter application
+  filterClinics();
 })
 
+const sortPIButton = document.getElementById("sort-PI");
+if (sortPIButton) {
+  sortPIButton.addEventListener('click', function() {
+    //synchronize both grids before sorting
+    if (typeof selectGrid !== 'undefined' && selectGrid) selectGrid.synchronize();
+    if (typeof grid !== 'undefined' && grid) grid.synchronize();
 
+    // Force Muuri to refresh its internal list of items/elements
+    grid.refreshItems();
 
+    // Use comparator sort so Muuri doesn't rely on internal _sortData
+    // used to prevent weird errors when items have been dragged between grids
+    grid.sort(function(a, b) {
+      const aVal = parseFloat(a.getElement().dataset.popIndex) || 0;
+      const bVal = parseFloat(b.getElement().dataset.popIndex) || 0;
+      return aVal - bVal;
+    });
+  });
+} else {
+  console.warn("sort-PI button not found in DOM");
+}
 
-
-
-
-//grid._settings.dragSort = function () { return [grid, selectGrid]; };
+window.addEventListener('load', function() {
+  grid.sort('randomValue');
+});
 
 
 

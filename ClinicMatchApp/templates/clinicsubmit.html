@@ -1,72 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="{% static 'css/clinic_card.css' %}">
+    <link rel="stylesheet" href="{%static 'css/clinic_submit.css' %}">
+    <link rel="stylesheet" href="{% static 'sortedm2m/sortedm2m.css' %}">
+    <script src="{% static 'js/clinic_submit.js' %}"></script>
 </head>
 
 <style>
-    .front {
-        position:fixed;
-        top: 0px;
-        right: 0px;
-    }
-    .back {
-        position:fixed;
-        top: 450px;
-        right: 0px;
-    }
 
-.body {
-  
- margin: 0px;
- gap: 0px;
- padding: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  overflow: hidden;
-}
-
-.preview-cards {
-  display: flex;
-  margin: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  overflow-y: auto;
-
-}
 </style>
 
 <body>
 
-    <h1>Clinic Submission</h1>
-    <form method="POST">
-        {% csrf_token %}
-
-            {{form}}
-
-
-            <div class="numform-list" id="">
-                {{formset}}
-            </div>
-
-             
-
-            <!-- <button id="add_numForm" class="add-button" type="submit">+</button> -->
-        
-        <button type="submit">Submit</button>
     
-    </form>
+  <div class="submission-form-container">
+    >
+        <form method="POST" class="submission-form">
+            {% csrf_token %}
+            <h1 class="title">Clinic Submission</h1>
+                <p class="">Title</p>
+                {{form.title}}
+                <p class="">Department</p>
+                {{form.department}}
+                <p>Clinic Management</p>
+                  <div class="clinic-mgmt-container">
+                      {{form.clinic_mgmt}}
+                  </div>
+                <p>Description</p>
+                {{form.description}}
+                <p>Links</p>
+                {{form.links}}
+                <p>Image Upload</p>
+                {{form.image}}
+                <p>Clinic Type</p>
+                <select id="clinic_type">
+                  <option value="general">General</option>
+                  <option value="specific">Specific</option>
+                </select>
+                
+
+
+                <div class="numform-list" id="numform-list">
+                    {{formset}}
+                </div>
+
+                
+
+                <!-- <button id="add_numForm" class="add-button" type="submit">+</button> -->
+            
+            <button type="submit">Submit</button>
+        
+        </form>
+      
+</div>
+
+
+
+
+
+
+
+    <!--Clinic card preview, dont touch-->
     <div class="preview-cards">
     <div class="item front" style="--clinic-color: #ddd;">
       <div class="itemContents">
         <p class="clinic-title" id="clinic-title-front">Clinic Title</p>
+        <div class="pop-index" id="pop-index">PI: 0</div>
     
-        <!-- use a div for imageSlot so tags match and CSS applies -->
         <div class="imageSlot" id="image-slot">Image Slot</div>
     
         <div class="managers">Managers</div>
