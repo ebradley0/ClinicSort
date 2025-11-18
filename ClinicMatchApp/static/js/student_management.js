@@ -369,6 +369,27 @@ statsButton.addEventListener('click', function() {
         console.log("sorted signup data:", parsedData);
         displayStudentSignupsByDepartment(parsedData);
     })
+
+    fetch('/api/statistics/studentChoiceDistribution/', {
+        method:'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(async response => {
+        const text = await response.text();
+        console.log('studentChoiceDistribution response', response.status, text);
+        let data;
+        try {
+            data = JSON.parse(text);
+            console.log("parsed choice data", data);
+        } catch (e) {
+            console.error("Failed to parse response as JSON:", e);
+            alert('Error parsing statistics data.');
+            return;
+        }
+        displayStudentChoiceDistribution(data);
+    })
 });
 
 function parseMostPopularClinicsData(data1) {
@@ -557,12 +578,19 @@ function displayProposedProjectsByDepartment(data) {
     title.textContent = "Proposed Projects By Department";
     wrapper.appendChild(title);
     let total = 0;
+    let labels = [];
+    let values = [];
+    let backgroundColors = [];
 
     for (let i = 0; i < data.length; i++) {
         const p = document.createElement('p');
         p.className = "proposed-project";
         p.style.setProperty("--color",data[i].color);
         p.textContent = data[i].major + " -- " + data[i].proposed;
+
+        labels.push(data[i].major);
+        values.push(data[i].proposed);
+        backgroundColors.push(data[i].color);
 
         total += data[i].proposed;
 
@@ -573,8 +601,28 @@ function displayProposedProjectsByDepartment(data) {
     p.className = "proposed-project";
     p.style.setProperty("--color", "#ddd");
     p.textContent = "total -- " + total;
-    
+
     wrapper.appendChild(p);
+
+    const canvas = document.createElement('canvas');
+    canvas.className = "proposed-project-graph";
+    canvas.id = "proposed-project-graph";
+    wrapper.appendChild(canvas);
+    
+    new Chart (
+        canvas.getContext('2d'),
+        {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "# of Projects",
+                    data: values,
+                    backgroundColor: backgroundColors,
+                }]
+            }
+        }
+    )
 
     const statisticsPage = document.getElementById("statistics");
     statisticsPage.appendChild(wrapper);
@@ -587,12 +635,19 @@ function displayStudentSignupsByDepartment(data) {
     title.textContent = "Student Sign-ups By Department";
     wrapper.appendChild(title);
     let total = 0;
+    let labels = [];
+    let values = [];
+    let backgroundColors = [];
 
     for (let i = 0; i < data.length; i++) {
         const p = document.createElement('p');
         p.className = "student-major";
         p.style.setProperty("--color",data[i].color);
         p.textContent = data[i].major + " -- " + data[i].signups;
+
+        labels.push(data[i].major);
+        values.push(data[i].signups);
+        backgroundColors.push(data[i].color);
 
         total += data[i].signups;
 
@@ -603,8 +658,90 @@ function displayStudentSignupsByDepartment(data) {
     p.className = "student-major";
     p.style.setProperty("--color", "#ddd");
     p.textContent = "total -- " + total;
+
+    const canvas = document.createElement('canvas');
+    canvas.className = "student-major-graph";
+    canvas.id = "student-major-graph";
+    wrapper.appendChild(canvas);
+
+    new Chart(
+        canvas.getContext('2d'),
+        {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "# of Students",
+                    data: values,
+                    backgroundColor: backgroundColors,
+                }]
+            }
+        }
+    );
+
     
     wrapper.appendChild(p);
+
+    const statisticsPage = document.getElementById("statistics");
+    statisticsPage.appendChild(wrapper);
+}
+
+function displayStudentChoiceDistribution(data) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "student-choices";
+    const title = document.createElement('h1');
+    title.textContent = "Student Choice Distribution";
+    wrapper.appendChild(title);
+    let total = 0;
+    let labels = [];
+    let values = [];
+
+    for (let i = 0; i < data.length; i++) {
+        const p = document.createElement('p');
+        p.className = "student-choice";
+        p.textContent = data[i].choice + " -- " + data[i].count;
+
+        labels.push(data[i].choice);
+        values.push(data[i].count);
+        total += data[i].count;
+
+        wrapper.appendChild(p);
+    }
+
+    const p = document.createElement('p');
+    p.className = "student-choice";
+    p.textContent = "total -- " + total;
+
+    wrapper.appendChild(p);
+
+    const canvas = document.createElement('canvas');
+    canvas.className="student-choices-graph";
+    canvas.id="student-choices-graph";
+    canvas.height=500;
+    canvas.width=500;
+    wrapper.appendChild(canvas);
+
+    const backgroundColors = labels.map((_, idx) => {
+        // simple color palette; replace with nicer colors if you want
+        const palette = ['#4dc9f6','#f67019','#f53794','#537bc4','#acc236','#166a8f','#00a950','#58595b','#8549ba'];
+        return palette[idx % palette.length];
+    });
+    
+    new Chart(
+        canvas.getContext('2d'),
+        {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '# of students',
+                    data: values,
+                    backgroundColor: backgroundColors,
+                }]
+            }
+        }
+    );
+
 
     const statisticsPage = document.getElementById("statistics");
     statisticsPage.appendChild(wrapper);

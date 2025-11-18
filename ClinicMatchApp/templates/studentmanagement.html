@@ -27,6 +27,13 @@
         background: var(--color);
         width: 20%;
     }
+    .chart-container {
+        width: 320px;
+        height:240px;
+        margin: 8px 0;
+        display: inline-block;
+    }
+
 </style>
 <body>
 
@@ -49,6 +56,7 @@
 
 </body>
 
-<script src="{% static 'js/student_management.js' %}"></script>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/student_management.js' %}"></script>
 </html>

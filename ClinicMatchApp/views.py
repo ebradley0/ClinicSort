@@ -952,3 +952,34 @@ def studentSignupsByDepartment(request):
             })
 
     return JsonResponse(data, safe=False)
+
+from num2words import num2words
+def studentChoiceDistribution(request):
+    students = StudentModel.objects.all()
+    data = []
+    for i in range(1,9):
+        data.append({
+            'choice': num2words(i, ordinal=True),
+            'count': 0,
+        })
+    data.append({
+        'choice': 'none',
+        'count': 0,
+    })
+    for student in students:
+        i = 0
+        foundClinic = False
+        for choice in student.choices.all():
+            if student.assigned_clinic:
+                if choice.title == student.assigned_clinic.title:
+                    data[i]['count'] += 1
+                    foundClinic = True
+                    break
+                i += 1
+            else:
+                break
+
+        if not foundClinic:
+            data[8]['count'] += 1
+    
+    return JsonResponse(data, safe=False)
