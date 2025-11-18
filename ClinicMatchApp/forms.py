@@ -50,6 +50,11 @@ class StudentProfileForm(forms.ModelForm):
         model = Student
         fields = ['banner_id', 'j_or_s', 'major'] 
 
+class ProfessorProfileForm(forms.ModelForm):
+    class Meta:
+        model = Professor
+        fields = ['department', 'crn']
+
 
 class StudentForm(forms.ModelForm):
     first_choice = forms.ModelChoiceField(queryset=Clinic.objects.all(), required=True)
