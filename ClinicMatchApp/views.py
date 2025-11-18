@@ -755,8 +755,8 @@ def loadStudentsFromCSV(request):
 def profileView(request):
     user = request.user
     user = UserSocialAuth.objects.get(user=user)
-    student_object = StudentModel.objects.get(userAuth=user), None 
-    professor_object = Professor.objects.first(userAuth=user), None
+    student_object = StudentModel.objects.filter(userAuth=user).first()
+    professor_object = Professor.objects.filter(userAuth=user).first()
 
     if request.method == "POST":
         if student_object:
@@ -783,14 +783,15 @@ def profileView(request):
     
     else:
         if student_object:
-            profile_form = StudentProfileForm(instance=student_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
+            profile_form = StudentProfileForm(request.GET, instance=student_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
             context = {"user": request.user,
                     "profile": student_object,
                     "profileForm": profile_form,
+                    "status": "student",
                     }
             return render(request, "profile.html", context=context)
         elif professor_object:
-            form = ProfessorProfileForm(request.POST, instance=professor_object)
+            form = ProfessorProfileForm(request.GET, instance=professor_object)
             context = {
                 "user": request.user,
                 "profile": professor_object,
