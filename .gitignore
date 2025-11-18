@@ -5,7 +5,7 @@ __pycache__/
 *.csv
 failed_students.txt
 !AddedProjects.csv
-!Student Clinic Request (Responses) - Form.csv
+Student Clinic Request (Responses) - Form.csv
 Professor Clinic Request (Responses) - Form.csv
 *.sql
 __pycache__/

@@ -13,3 +13,14 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
+  
+  
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on: # Basially lets the database load first, so Django won't crash
+      - db
