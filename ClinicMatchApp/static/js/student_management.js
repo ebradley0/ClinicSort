@@ -604,10 +604,13 @@ function displayProposedProjectsByDepartment(data) {
 
     wrapper.appendChild(p);
 
+    const canvasDiv = document.createElement('div');
+    canvasDiv.className = "proposed-project-wrapper graph";
     const canvas = document.createElement('canvas');
     canvas.className = "proposed-project-graph";
     canvas.id = "proposed-project-graph";
-    wrapper.appendChild(canvas);
+    canvasDiv.appendChild(canvas);
+    wrapper.appendChild(canvasDiv);
     
     new Chart (
         canvas.getContext('2d'),
@@ -659,10 +662,13 @@ function displayStudentSignupsByDepartment(data) {
     p.style.setProperty("--color", "#ddd");
     p.textContent = "total -- " + total;
 
+    const canvasDiv = document.createElement('div');
+    canvasDiv.className = "student-major-wrapper graph";
     const canvas = document.createElement('canvas');
     canvas.className = "student-major-graph";
     canvas.id = "student-major-graph";
-    wrapper.appendChild(canvas);
+    canvasDiv.appendChild(canvas);
+    wrapper.appendChild(canvasDiv);
 
     new Chart(
         canvas.getContext('2d'),
@@ -714,18 +720,13 @@ function displayStudentChoiceDistribution(data) {
 
     wrapper.appendChild(p);
 
+    const canvasDiv = document.createElement('div');
+    canvasDiv.className = "student-choices-wrapper graph";
     const canvas = document.createElement('canvas');
     canvas.className="student-choices-graph";
     canvas.id="student-choices-graph";
-    canvas.height=500;
-    canvas.width=500;
-    wrapper.appendChild(canvas);
-
-    const backgroundColors = labels.map((_, idx) => {
-        // simple color palette; replace with nicer colors if you want
-        const palette = ['#4dc9f6','#f67019','#f53794','#537bc4','#acc236','#166a8f','#00a950','#58595b','#8549ba'];
-        return palette[idx % palette.length];
-    });
+    canvasDiv.appendChild(canvas);
+    wrapper.appendChild(canvasDiv);
     
     new Chart(
         canvas.getContext('2d'),
@@ -736,7 +737,6 @@ function displayStudentChoiceDistribution(data) {
                 datasets: [{
                     label: '# of students',
                     data: values,
-                    backgroundColor: backgroundColors,
                 }]
             }
         }

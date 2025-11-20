@@ -23,7 +23,6 @@ window.addEventListener('load', function() {
 clinic_type_dropdown.addEventListener('input', clinic_type_changer);
 
 function clinic_type_changer() {
-    console.log("changer called");
     const clinic_type = clinic_type_dropdown.value;
     if (clinic_type == "general") {
         const numHandlerMajor1=document.getElementById("id_numberHandler-0-major");
@@ -70,8 +69,6 @@ function clinic_type_changer() {
             numhandlerMinLabel.hidden = false;
             numhandlerMax.hidden = false;
             numhandlerMaxLabel.hidden = false;
-
         }
-        
     }
 }
