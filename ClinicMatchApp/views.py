@@ -4,6 +4,7 @@ import re
 import os
 import time
 from re import S
+# from tkinter import W
 from django.db.models import Sum, Prefetch
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, get_object_or_404, redirect
@@ -976,7 +977,7 @@ def mostPopularClinics(request):
         data.append({
             'title': clinic.title,
             'requests': StudentModel.objects.filter(choices=clinic).count(),
-            'major_color': clinic.department.color,
+            'major_color': clinic.department.color if clinic.department else "#ffffff",
         })
     return JsonResponse(data, safe=False)
 

@@ -1,0 +1,80 @@
+
+.hidden {
+    display: none;
+}
+.pop-clinic {
+    background: var(--color);
+    width: 100%;
+}
+.pop-major {
+    background: var(--color);
+    width: 100%;
+}
+.proposed-project {
+    background: var(--color);
+    width: 50%;
+}
+.student-major {
+    background: var(--color);
+    width: 50%;
+}
+.statistics {
+    position:absolute;
+    top: 10%;
+    width: 100%;
+    height: 100%;
+}
+.graph {
+    height: 100%;
+    width: 50%;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.most-pop-clinics {
+    height: 30%;
+    width: 30%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.most-pop-profs {
+    height: 30%;
+    width: 30%;
+    position: absolute;
+    top:35%;
+    left: 0;
+}
+.most-pop-major {
+    height: 30%;
+    width: 30%;
+    position: absolute;
+    top:70%;
+    left: 0;
+}
+.proposed-projects {
+    height: 30%;
+    width: 65%;
+    position: absolute;
+    left: 35%;
+    top: 0;
+}
+/* .proposed-project-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+} */
+.student-signups {
+    height: 30%;
+    width: 65%;
+    position: absolute;
+    left:35%;
+    top: 30%;
+}
+.student-choices {
+    height: 30%;
+    width: 65%;
+    position: absolute;
+    left: 35%;
+    bottom: 5%;
+}
