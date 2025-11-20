@@ -43,6 +43,7 @@ document.getElementById('student-xlsx-input').addEventListener('change', functio
         majorsListDiv.classList.remove('hidden');
         loadButton.disabled = false;
         loadButton.classList.remove('hidden');
+        document.getElementById('statistics').classList.add('hidden');
 
         allMajors.forEach(major => {
             const wrapper = document.createElement('div');
@@ -189,6 +190,8 @@ document.getElementById('load-students-button').addEventListener('click', functi
             console.log('importStudents response', response.status, body);
             if (response.ok) {
                 alert('Students imported successfully!');
+                document.getElementById('cross-reference').classList.add('hidden');
+                document.getElementById('statistics').classList.remove('hidden');
             } else {
                 alert('Error importing students.');
             }

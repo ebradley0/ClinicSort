@@ -502,7 +502,7 @@ def importStudents(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             for student_data in serializer.validated_data:
-                studentExists = StudentModel.objects.get(email=student_data['email']) if StudentModel.objects.filter(email=student_data['email']).exists() else None
+                studentExists = StudentModel.objects.filter(email=student_data['email']).first() if StudentModel.objects.filter(email=student_data['email']).exists() else None
                 if studentExists:
                     continue
                 student = StudentModel(first_name=student_data['first_name'],
