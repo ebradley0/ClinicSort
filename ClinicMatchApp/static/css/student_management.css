@@ -1,4 +1,11 @@
 
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
 .hidden {
     display: none;
 }
@@ -35,7 +42,7 @@
     height: 30%;
     width: 30%;
     position: absolute;
-    top: 0;
+    top: 2%;
     left: 0;
 }
 .most-pop-profs {
@@ -57,7 +64,7 @@
     width: 65%;
     position: absolute;
     left: 35%;
-    top: 0;
+    top: 2%;
 }
 /* .proposed-project-wrapper {
     position: absolute;
@@ -69,12 +76,12 @@
     width: 65%;
     position: absolute;
     left:35%;
-    top: 30%;
+    top: 32%;
 }
 .student-choices {
     height: 30%;
     width: 65%;
     position: absolute;
     left: 35%;
-    bottom: 5%;
+    bottom: 4%;
 }
