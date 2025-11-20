@@ -12,7 +12,7 @@
         <div>
             <form method="get">
                 <a href="{%url 'clinicView'%}?clinic_id={{clinic.id}}">
-                    {{clinic.title}}
+                    {% if clinic.title %}{{clinic.title}}{% else %}Clinic #{{clinic.id}}{% endif %}
                 </a>
             </form>
         </div>
