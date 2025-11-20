@@ -19,7 +19,7 @@
 
     
   <div class="submission-form-container">
-    >
+    
         <form method="POST" class="submission-form">
             {% csrf_token %}
             <h1 class="title">Clinic Submission</h1>
@@ -38,10 +38,12 @@
                 <p>Image Upload</p>
                 {{form.image}}
                 <p>Clinic Type</p>
-                <select id="clinic_type">
+                <select id="clinic_type" name="clinic_type">
                   <option value="general">General</option>
                   <option value="specific">Specific</option>
                 </select>
+
+         
                 
 
 
