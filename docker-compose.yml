@@ -13,6 +13,12 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - ./db_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"] # Will signal service healthy if this returns a 0. This just checks the status of the database, it'll be marked healthy when the database is ready
+      interval: 2s
+      timeout: 5s
+      retries: 10
   
   
   web:

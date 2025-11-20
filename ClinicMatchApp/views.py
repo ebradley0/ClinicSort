@@ -19,6 +19,8 @@ import io
 from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
 from .serializers import StudentSerializer
+import logging
+logger = logging.getLogger(__name__)
 # Create your views here.
 
 load_dotenv()
@@ -87,7 +89,11 @@ def index(request):
         #Since they're logged in, let them view the profile and Project View buttons
 
         #Checking whether its a student or professor
-        userAuth = UserSocialAuth.objects.get(user=user)
+        userAuth = UserSocialAuth.objects.filter(user=user).first()
+
+        if userAuth is None:
+            context['status'] = "none"
+
         student_object = StudentModel.objects.filter(userAuth=userAuth).first()
         professor_object = Professor.objects.filter(userAuth=userAuth).first()
 
@@ -99,39 +105,94 @@ def index(request):
         context['logged_in'] = True
     return render(request, 'index.html', context=context)
 
+def clinicViewList(request): # Lists prfoessors clinics if edits are needed to be made, will connect directly to clinicView
+    user = request.user
+    userAuth = UserSocialAuth.objects.get(user=user)
+    professor = Professor.objects.get(userAuth=userAuth)
+    if request.method == "GET":
+        print(professor)
+        clinics = professor.current_clinic.all()
+        context = {}
+        context['clinics'] = clinics
+        print(clinics)
+
+        return render(request, 'clinicsubmitlist.html', context)
+
+    pass
 
 def clinicView(request):
     print("Doing stuff")
     if request.method == "GET":
-        major_dict = [{'major': major} for major in ClinicNumberHandler.objects.all()] #Creating a dictionary of all the majors in the database to be used to populate the formset
-        context = {}
-        form = ClinicForm()
-        context['form'] = form
-        context['majors'] = Major.objects.all()        # <-- add this line
-        ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
-        formset = ClinicNumbersFormset(initial=major_dict) #Populate the formset with a major field for each major in the database
-        
-        context['formset'] = formset
+        clinic_id = request.GET.get('clinic_id')
+        if clinic_id:
+            major_dict = [{'major': major} for major in ClinicNumberHandler.objects.all()] #Creating a dictionary of all the majors in the database to be used to populate the formset
+            clinic = Clinic.objects.get(id=clinic_id)
+            context = {}
+            context['form'] = ClinicForm(instance=clinic)
+            context['majors'] = Major.objects.all()        # <-- add this line
+            ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
+            formset = ClinicNumbersFormset(
+                    initial=major_dict,
+                    instance=clinic,
+                    queryset=clinic.numberHandler.all()
+                    )
+            print(formset)
+            
+            context['formset'] = formset
+            return render(request, 'clinicsubmit.html', context)
+            pass
+        else:
+
+            major_dict = [{'major': major} for major in ClinicNumberHandler.objects.all()] #Creating a dictionary of all the majors in the database to be used to populate the formset
+            context = {}
+            form = ClinicForm()
+            context['form'] = form
+            context['majors'] = Major.objects.all()        # <-- add this line
+            ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
+            formset = ClinicNumbersFormset(initial=major_dict) #Populate the formset with a major field for each major in the database
+            
+            context['formset'] = formset
         
 
-        return render(request, 'clinicsubmit.html', context)
+            return render(request, 'clinicsubmit.html', context)
     elif request.method == "POST":
+        user = request.user
+        userAuth = UserSocialAuth.objects.get(user=user)
+        professor = Professor.objects.get(userAuth=userAuth)
         print("Posting Request Recieved")
         print(request.POST)
         form = ClinicForm(request.POST)
         ClinicNumbersFormset = get_ClinicNumbersFormset()  # Get the formset class with the correct number of extra forms
-        formset = ClinicNumbersFormset(request.POST)
-        if form.is_valid() and formset.is_valid():
+        if request.POST['clinic_type'] == "general":
+            formset = None
+        else:
+
+            formset = ClinicNumbersFormset(request.POST)
+        
+        if form.is_valid() and (formset is None or formset.is_valid() ):
             clinic_instance = form.save() #Save the clinic instance first to get the foreign key relationship
-            formset.instance = clinic_instance
-            formset.save()
+            clinic_instance.clinic_mgmt.add(professor)
+            professor.current_clinic.add(clinic_instance)
+            clinic_instance.save()
+            professor.save()
+            if formset:
+                formset.instance = clinic_instance
+                formset.save()
+            else:
+                #general clinic, so take the min and max vals
+                clinic_instance.min = request.POST['numberHandler-0-min'] 
+                clinic_instance.max = request.POST['numberHandler-0-max']
+                clinic_instance.save()
+                pass
         else:
             print("Form or Formset Invalid")
             print("Form Errors:", form.errors)
             print("Formset Errors:", formset.non_form_errors())
 
         context = {}
-        return render(request, 'clinicsubmit.html', context)
+        context['status'] = "professor"
+        context['logged_in'] = True
+        return render(request, 'index.html', context)
 
 
 def studentView(request):

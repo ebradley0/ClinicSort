@@ -6,6 +6,8 @@ from .models import Major
 urlpatterns = [
     path("ClinicMatch", views.index, name="index"),
     path("clinicsubmission/", views.clinicView, name="clinicView"),
+    path("clinicsubmissionlist/", views.clinicViewList, name="clinicViewList"),
+    path("clinicsubmission/<int:clinic_id>/", views.clinicView, name="clinicView"), #USed for accessing and editing an already existing clinic. This url just allows us to send info via get request. When a professor clicks their clinic, the url includes the clinic ID, which we need to tell Django to accept via this urls.py file.
     path("studentsubmission/", views.studentView, name="studentView"),
     path("loadProjectsFromCSV/", views.loadProjectsFromCSV, name="loadProjectsFromCSV"),
     path("loadStudentsFromCSV/", views.loadStudentsFromCSV, name="loadStudentsFromCSV"),
