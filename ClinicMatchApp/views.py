@@ -888,7 +888,7 @@ def runMatchingAlgorithm(request):
     #Doing requested student matching
 
     for clinic in clinics:
-        requested_students = clinic.requested_students.split(',')
+        requested_students = clinic.requested_students.split(',') if clinic.requested_students else []
         if requested_students is not []:
             for student in students:
                 
