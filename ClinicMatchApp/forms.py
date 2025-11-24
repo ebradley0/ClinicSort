@@ -24,12 +24,13 @@ class ClinicForm(forms.ModelForm):
 class ClinicNumbersForm(forms.ModelForm):
     class Meta:
         model = ClinicNumberHandler
-        fields = '__all__' #Use all fields from the model
-        exclude = ['clinic']
+        fields = ['id', 'major', 'min', 'max']
+        exclude = ['clinic', 'general']
     def __init__(self, *args, **kwargs):
         super(ClinicNumbersForm, self).__init__(*args, **kwargs)
         self.fields['major'].widget.attrs['readonly'] = True
         self.fields['major'].widget.attrs['style'] = 'pointer-events:none;'
+     
         #This is a very scuffed workaround for trying to dynamically populate a form, but it works
         
 #extraMajorCount = Major.objects.count() if Major.objects.count() > 0 else 1 # Calculate the amount of forms we need, 1 per major
@@ -37,7 +38,7 @@ class ClinicNumbersForm(forms.ModelForm):
 
 #ClinicNumbersFormset = inlineformset_factory(Clinic,  ClinicNumberHandler, form=ClinicNumbersForm, extra=extraMajorCount, can_delete=False,) #Formset for the major requirement numbers associated with a clinic
 
-def get_ClinicNumbersFormset(extra=None):
+def get_ClinicNumbersFormset(extra):
     from .models import Major  # Local import to avoid circular issues
     if extra is None:
         try:
@@ -50,7 +51,7 @@ def get_ClinicNumbersFormset(extra=None):
         Clinic,
         ClinicNumberHandler,
         form=ClinicNumbersForm,
-        extra=extra,
+        extra=extra, #Forced to zero to avoid duplicates
         can_delete=False,
     )
 

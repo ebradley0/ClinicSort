@@ -22,6 +22,7 @@
     
         <form method="POST" class="submission-form">
             {% csrf_token %}
+            <input name="id" value="{{clinic.id}}" type="hidden">
             <h1 class="title">Clinic Submission</h1>
                 <p class="">Title</p>
                 {{form.title}}
@@ -39,8 +40,9 @@
                 {{form.image}}
                 <p>Clinic Type</p>
                 <select id="clinic_type" name="clinic_type">
-                  <option value="general">General</option>
                   <option value="specific">Specific</option>
+                  <option value="general">General</option>
+                  
                 </select>
 
          
@@ -48,6 +50,7 @@
 
 
                 <div class="numform-list" id="numform-list" data-major-count="{{majors.count}}">
+                    {{formset.management_form}}
                     {{formset}}
                 </div>
 
