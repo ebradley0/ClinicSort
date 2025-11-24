@@ -90,3 +90,11 @@ document.getElementById('id_image').addEventListener('change', updateImagePrevie
 document.getElementById('id_department').addEventListener('input', updateDepartmentColorPreview);
 
 document.getElementById('id_title').addEventListener('input', updateTitlePreview);
+
+window.addEventListener('load', function () {
+    updateDescriptionPreview();
+    updateLinkPreview();
+    updateImagePreview();
+    updateDepartmentColorPreview();
+    updateTitlePreview();
+});
