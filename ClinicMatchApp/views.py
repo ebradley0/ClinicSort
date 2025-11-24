@@ -28,7 +28,7 @@ load_dotenv()
 def login_check(request): #Runs post login. Import 
     code = request.session.pop('professor_code', None)
     user = request.user
-    print(user)
+    print(code)
     if user.is_anonymous:
         print("User is Anonymous")
         return
@@ -43,8 +43,9 @@ def login_check(request): #Runs post login. Import
         print(f"No UserSocialAuth found for {user.username} — probably a local/admin login. Skipping student sync.")
         return
     
-    if code is None:
-        print("Code DNE")
+    if code is None: 
+        return False
+        print("Code DNE") #This all can be removed, if the code doesnt exist they can retry. When the student button is clicked it defaults them to saving as a student object, so no need for a second check
         #Student login post, return to index
 
         created, updated = Student.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
@@ -63,13 +64,19 @@ def login_check(request): #Runs post login. Import
             created, updated = Professor.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
                                                         last_name=user.last_name,
                                                         email=user.email)
+            return True
         else:
-            return
+            return False
 
 def loginView(request):
     if request.method == "POST":
         code = request.POST.get('professor_code')
         request.session['professor_code'] = code
+
+        validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
+        if not validation:
+            return render(request, "login.html")
+    
         
         return redirect('social:begin', backend='google-oauth2') # Proceed to the normal social auth screen, now that the code was saved
         
@@ -79,7 +86,9 @@ def loginView(request):
         return render(request, 'login.html')
 
 def index(request):
-    login_check(request) # Passing for profile verifcation, this might need to be relocated.
+    validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
+    
+    
     context = {}
     try:
         user = request.user
