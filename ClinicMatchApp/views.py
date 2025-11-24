@@ -20,6 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
 from .serializers import StudentSerializer
 import logging
+from decorations import professor_only
 logger = logging.getLogger(__name__)
 # Create your views here.
 
@@ -128,7 +129,7 @@ def clinicViewList(request): # Lists prfoessors clinics if edits are needed to b
         return render(request, 'clinicsubmitlist.html', context)
 
     pass
-
+@professor_only #Place this tag on anything to restrict access to professors only
 def clinicView(request):
     print("Doing stuff")
     if request.method == "GET":
@@ -304,12 +305,12 @@ def projectView(request):
                 first_choice.pop_index += 1
                 first_choice.save()
         return render(request, "projectview.html", context={'clinics': clinics, 'selected_clinics': selected_clinics, 'majors': Major.objects.all()})
-
+@professor_only #Change this to DM only once we have a configuration in our model for that
 def clinicManagementHomepage(request):
     context = {}
     context['majors'] = Major.objects.all()
     return render(request, "clinicmanagement.html", context=context)
-
+@professor_only #Change this to DM only once we have a configuration in our model for that
 def clinicManagementView(request, title):
     """
     Clinic management view that:
@@ -388,7 +389,7 @@ def clinicManagementView(request, title):
     }
 
     return render(request, "clinicmanagementview.html", context=context)
-
+@professor_only #Change to DM when possible
 def studentManagementView(request):
     context = {}
     context['majors'] = Major.objects.all()
