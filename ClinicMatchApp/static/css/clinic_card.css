@@ -30,14 +30,14 @@
 /* Title and layout */
 .clinic-title {
   position: absolute;
-  top: 8px;
+  top: 3px;
   left: 5%;
-  font-weight: bold;
+  font-weight: lighter;
   width: 80%;
   font-size: 20px;
-  line-height: 1.2rem;
-  min-height: 2.4rem;
-  max-height: 2.4rem;
+  line-height: 1.5rem;
+  min-height: 3rem;
+  max-height: 3rem;
 }
 
 .pop-index {
@@ -45,7 +45,7 @@
   font-weight: bold;
   background-color: rgba(37, 37, 37, 0.469);
   width: 10%;
-  text-align: right;
+  text-align: center;
   margin-top: 2px;
   margin-right: 2px;
   /* color: rgba(255, 255, 255, 0.7); */
@@ -83,7 +83,7 @@
 /* Bottom overlays for requested counts */
 .generalRequest {
   display: flex;
-  width: 100%;
+  width: 90%;
   background: gray;
   height: 48px;
   font-size: 24px;
@@ -91,7 +91,7 @@
   align-items: center;
   text-align: center;
   position: absolute;
-  bottom: 0;
+  bottom: 3%;
 }
 
 /* Manager line */
@@ -119,12 +119,13 @@
 /* Specific per-major request row */
 .specificRequestHolder {
   display: flex;
-  width: 100%;
+  width: 90%;
   height: 48px;
   font-size: 24px;
   flex-direction: row;
   position: absolute;
-  bottom: 0;
+  bottom: 3%;
+  border: #888 solid 1px;
 }
 .specificRequest {
   display: flex;
