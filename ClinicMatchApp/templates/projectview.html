@@ -13,11 +13,42 @@
 
 
 <div class="header">
-<p>Clinic Selection Form</p> 
+<p>Clinic Match: Project View</p> 
 
 <div class="userInfo" data-user-email="{{student.email}}" data-user-major="{{student.major}}">
-  <p>{{user.email}} 
-  <button id="infoButton" class="infoButton"> I </button></p>
+  <p class="userName">{{student.first_name}} {{student.last_name}}</p>
+  <p class="userEmail">{{user.email}}</p>
+</div>
+
+
+
+
+</div>
+
+  
+
+<!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
+ <div class="main">
+  <div class="filter-container">
+    <label for="clinic-department-filter">Filter by department:</label>
+      <select id="clinic-department-filter">
+        <option value="all">All</option>
+        {% for major in majors %}
+        <option value="{{ major.major }}">{{ major.major }}</option>
+        {% endfor %}
+      </select>
+      <br>
+    <label for="show-accepting">Filter by clinics accepting {{student.major}}</label>
+      <input type="checkbox" id="show-accepting" />
+      <br>
+    <button id="sort-PI"> Sort by Popularity Index (Ascending) </button>
+  </div>
+
+  <button id="infoButton" class="infoButton pushable">
+        <span class="shadow"></span>
+        <span class="edge"></span>
+        <span class="front"> Info </span>
+  </button>
     <div class="popup" id="legendPopup">
                     <div class="itemContents">
                     <p class="clinic-title">Clinic Title</p>
@@ -41,29 +72,6 @@
                     </div>
                   </div>
     </div>
-  </p>
-  <label for="clinic-department-filter">Filter by department:</label>
-    <select id="clinic-department-filter">
-      <option value="all">All</option>
-      {% for major in majors %}
-      <option value="{{ major.major }}">{{ major.major }}</option>
-      {% endfor %}
-    </select>
-  <label for="show-accepting">Filter by clinics accepting major</label>
-    <input type="checkbox" id="show-accepting" />
-  <button id="sort-PI"> Sort by Popularity Index </button>
-</div>
-
-
-
-
-</div>
-
-  
-
-<!-- This is the Grid, it contains all the clinics, which will be procedurally loaded via Djangos automation -->
- <div class="main">
-
 <div class="gridWrapper"> 
 <div class="grid">
 
@@ -89,7 +97,7 @@
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
-                <div class="pop-index">PI: {{clinic.pop_index}}</div>
+                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
                 {%else%}
@@ -125,6 +133,7 @@
             </div>
             <div class="clinicDetails hidden itemContents">
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 <div class="linkList">
                 {%for link in clinic.links_list%}
                     <a href="{{link}}"> [{{forloop.counter}}] </a>
@@ -182,7 +191,7 @@
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
-                <div class="pop-index">PI: {{clinic.pop_index}}</div>
+                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
 
@@ -219,6 +228,7 @@
             </div>
             <div class="clinicDetails hidden itemContents">
                 <p class="clinic-title">{{clinic.title}}</p>
+                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 <div class="linkList">
                 {%for link in clinic.links_list%}
                     <a href="{{link}}"> [{{forloop.counter}}] </a>

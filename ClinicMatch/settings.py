@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-rvid6hgy-sommcw*&sfeah#c%tkn(flg%p$j2a@=-8j%lc*)(c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['clinic-match.gotdns.ch', 'localhost']
 
 dotenv.load_dotenv()  # Load environment variables from a .env file if present
 GOOGLE_OAUTH2_KEY = os.getenv("GOOGLE_OAUTH2_KEY")

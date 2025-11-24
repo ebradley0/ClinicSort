@@ -385,29 +385,6 @@ def studentManagementView(request):
     context['majors'] = Major.objects.all()
     return render(request, "studentmanagement.html", context=context)
 
-def profileView(request):
-    user = request.user
-    user = UserSocialAuth.objects.get(user=user)
-    profile_object = StudentModel.objects.get(userAuth=user)
-
-    if request.method == "POST":
-        form = StudentProfileForm(request.POST, instance=profile_object) #"Binding" the form. This basically tells django to store all the data, and gives us the option to save it. It does this by automatically matching the request fields to the form fields if they match. The instance is added to cover stuff not included in the form
-        context = {"user": request.user,
-                "profile": profile_object,
-                "profileForm": form,
-                }
-        if form.is_valid():
-            form.save()
-        return render(request, "profile.html", context=context)
-    else:
-        profile_form = StudentProfileForm(instance=profile_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
-        context = {"user": request.user,
-                "profile": profile_object,
-                "profileForm": profile_form,
-                }
-        return render(request, "profile.html", context=context)
-
-
 def logoutView(request):
     from django.contrib.auth import logout #Imported here just for cleanliness, shouldn't be needed outside of this function
     logout(request)
@@ -837,6 +814,7 @@ def profileView(request):
                     }
             if form.is_valid():
                 form.save()
+                return redirect('index')
             return render(request, "profile.html", context=context)
         elif professor_object:
             form = ProfessorProfileForm(request.POST, instance=professor_object)
@@ -848,11 +826,12 @@ def profileView(request):
             }
             if form.is_valid():
                 form.save()
+                return redirect('index')
             return render(request, "profile.html", context=context)
     
     else:
         if student_object:
-            profile_form = StudentProfileForm(request.GET, instance=student_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
+            profile_form = StudentProfileForm(instance=student_object) #Since the profile exists, automatically populate it from the existing data. The form should always be valid by default since its pulled stragiht from the model.
             context = {"user": request.user,
                     "profile": student_object,
                     "profileForm": profile_form,
@@ -860,7 +839,7 @@ def profileView(request):
                     }
             return render(request, "profile.html", context=context)
         elif professor_object:
-            form = ProfessorProfileForm(request.GET, instance=professor_object)
+            form = ProfessorProfileForm(instance=professor_object)
             context = {
                 "user": request.user,
                 "profile": professor_object,
@@ -895,7 +874,7 @@ def runMatchingAlgorithm(request):
     #Doing requested student matching
 
     for clinic in clinics:
-        requested_students = clinic.requested_students.split(',')
+        requested_students = clinic.requested_students.split(',') if clinic.requested_students else []
         if requested_students is not []:
             for student in students:
                 

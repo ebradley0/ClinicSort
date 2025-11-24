@@ -589,7 +589,7 @@ function displayProposedProjectsByDepartment(data) {
         const p = document.createElement('p');
         p.className = "proposed-project";
         p.style.setProperty("--color",data[i].color);
-        p.textContent = data[i].major + " -- " + data[i].proposed;
+        p.textContent = data[i].major + " : " + data[i].proposed;
 
         labels.push(data[i].major);
         values.push(data[i].proposed);
@@ -603,7 +603,7 @@ function displayProposedProjectsByDepartment(data) {
     const p = document.createElement('p');
     p.className = "proposed-project";
     p.style.setProperty("--color", "#ddd");
-    p.textContent = "total -- " + total;
+    p.textContent = "total : " + total;
 
     wrapper.appendChild(p);
 
@@ -649,7 +649,7 @@ function displayStudentSignupsByDepartment(data) {
         const p = document.createElement('p');
         p.className = "student-major";
         p.style.setProperty("--color",data[i].color);
-        p.textContent = data[i].major + " -- " + data[i].signups;
+        p.textContent = data[i].major + " : " + data[i].signups;
 
         labels.push(data[i].major);
         values.push(data[i].signups);
@@ -708,7 +708,7 @@ function displayStudentChoiceDistribution(data) {
     for (let i = 0; i < data.length; i++) {
         const p = document.createElement('p');
         p.className = "student-choice";
-        p.textContent = data[i].choice + " -- " + data[i].count;
+        p.textContent = data[i].choice + " : " + data[i].count;
 
         labels.push(data[i].choice);
         values.push(data[i].count);
@@ -719,7 +719,7 @@ function displayStudentChoiceDistribution(data) {
 
     const p = document.createElement('p');
     p.className = "student-choice";
-    p.textContent = "total -- " + total;
+    p.textContent = "total : " + total;
 
     wrapper.appendChild(p);
 

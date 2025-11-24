@@ -61,7 +61,7 @@ class StudentProfileForm(forms.ModelForm):
         fields = ['banner_id', 'j_or_s', 'major', 'alternative_major'] 
         labels = {
             'banner_id': 'Banner ID',
-            'j_or_s': 'Grade Level (J/S)',
+            'j_or_s': 'Taking ____ Clinic',
             'major': 'Major',
             'alternative_major': 'EET/MET',
         }

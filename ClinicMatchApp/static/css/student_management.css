@@ -6,6 +6,9 @@ p {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
 }
+h1 {
+    font-weight: lighter;
+}
 .hidden {
     display: none;
 }
