@@ -2,6 +2,26 @@ const clinic_type_dropdown = document.getElementById('clinic_type');
 const numformList = document.getElementById('numform-list');
 const majorCount = numformList.dataset.majorCount;
 
+window.addEventListener('load', function() {
+    for (let i = 0; i < majorCount; i++) {
+        const majorSelectorId = "id_numberHandler-" + i + "-major";
+        const numhandlerGeneralId = "id_numberHandler-" + i + "-general";
+        //console.log(majorSelectorId);
+        const majorSelector = document.getElementById(majorSelectorId);
+        const numberhandlerGeneral = document.getElementById(numhandlerGeneralId);
+        const numberhandlerGeneralLabel = document.querySelector('label[for="' + numhandlerGeneralId + '"]');
+
+        //numberhandlerGeneral.hidden = true;
+        // numberhandlerGeneralLabel.hidden = true;
+        majorSelector.selectedIndex = i+1;
+        //console.log(majorSelector);
+        
+        // Will need to go through and delete unnecessary code later back when general labels still existed
+
+    }
+    console.log(clinic_type_dropdown.value);
+    clinic_type_changer();
+});
 
 
 clinic_type_dropdown.addEventListener('input', clinic_type_changer);

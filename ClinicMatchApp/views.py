@@ -74,7 +74,8 @@ def loginView(request):
         code = request.POST.get('professor_code')
         request.session['professor_code'] = code
 
-        validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
+        # validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
+        validation = True if code == os.getenv('PROFESSOR_KEY') else False
         if not validation:
             return render(request, "login.html")
     
@@ -110,6 +111,7 @@ def index(request):
         if professor_object:
             context['status'] = "professor"
         else:
+            student_object = StudentModel.object.get_or_create(user=userAuth, first_name=user.first_name, last_name=user.last_name, email=user.email)
             context['status'] = "student"
 
         context['logged_in'] = True
