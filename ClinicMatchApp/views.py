@@ -111,7 +111,7 @@ def index(request):
         if professor_object:
             context['status'] = "professor"
         else:
-            student_object = StudentModel.object.get_or_create(user=userAuth, first_name=user.first_name, last_name=user.last_name, email=user.email)
+            student_object = StudentModel.objects.get_or_create(userAuth=userAuth, first_name=user.first_name, last_name=user.last_name, email=user.email)
             context['status'] = "student"
 
         context['logged_in'] = True
