@@ -159,16 +159,21 @@ def clinicView(request):
         userAuth = UserSocialAuth.objects.get(user=user)
         professor = Professor.objects.get(userAuth=userAuth)
         id = request.POST.get('id')
-        print("Posting Request Recieved")
+        
         print(request.POST)
         if id != "": #As long as the ID exists, it means we have a clinic to update
+            print("Updating existing clinic....")
             clinic = Clinic.objects.get(id=id)
            
             #Updating an existing clinic
             form = ClinicForm(request.POST, instance=clinic) #Creating a new form to save to our clinic instance. We make a new one to load it with all the data from request.POST
-
+            ClinicNumbersFormset = get_ClinicNumbersFormset(extra=0)  # Get the formset class with the correct number of extra forms
+            formset = ClinicNumbersFormset(request.POST, instance=clinic)
+            formset.save()
             if form.is_valid(): #If it passes, save it. It shoudl almost always pass, as the user can't edit values that would make it fail.
                 form.save()
+            else:
+                print("Form could not be saved")
             context = {}
             context['logged_in'] = True
             return render(request, "index.html")
