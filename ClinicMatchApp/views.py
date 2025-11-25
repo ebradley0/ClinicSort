@@ -166,9 +166,9 @@ def clinicView(request):
             clinic = Clinic.objects.get(id=id)
            
             #Updating an existing clinic
-            form = ClinicForm(request.POST, instance=clinic) #Creating a new form to save to our clinic instance. We make a new one to load it with all the data from request.POST
+            form = ClinicForm(request.POST, request.FILES, instance=clinic) #Creating a new form to save to our clinic instance. We make a new one to load it with all the data from request.POST
             ClinicNumbersFormset = get_ClinicNumbersFormset(extra=0)  # Get the formset class with the correct number of extra forms
-            formset = ClinicNumbersFormset(request.POST, instance=clinic)
+            formset = ClinicNumbersFormset(request.POST, request.FILES, instance=clinic)
             formset.save()
             if form.is_valid(): #If it passes, save it. It shoudl almost always pass, as the user can't edit values that would make it fail.
                 form.save()
@@ -181,7 +181,7 @@ def clinicView(request):
             form = ClinicForm(request.POST)
             clinic = Clinic() # Generating a new clinic instance to bind our form to.
             ClinicNumbersFormset = get_ClinicNumbersFormset(extra=0)  # Get the formset class with the correct number of extra forms
-            formset = ClinicNumbersFormset(request.POST, instance=clinic)
+            formset = ClinicNumbersFormset(request.POST, request.FILES, instance=clinic)
             
             
                 

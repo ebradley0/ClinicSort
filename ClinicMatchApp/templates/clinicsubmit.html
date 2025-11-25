@@ -20,7 +20,7 @@
     
   <div class="submission-form-container">
     
-        <form method="POST" class="submission-form">
+        <form method="POST" class="submission-form" enctype="multipart/form-data">
             {% csrf_token %}
             <input name="id" value="{{clinic.id}}" type="hidden">
             <h1 class="title">Clinic Submission</h1>

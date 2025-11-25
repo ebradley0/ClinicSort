@@ -78,6 +78,10 @@ function clinic_type_changer() {
             numhandlerMinLabel.hidden = false;
             numhandlerMax.hidden = false;
             numhandlerMaxLabel.hidden = false;
+            
         }
+        const numhandlerGeneralId = "id_numberHandler-0-general";
+        const numhandlerGeneral = document.getElementById(numhandlerGeneralId);
+        numhandlerGeneral.checked = false;
     }
 }
