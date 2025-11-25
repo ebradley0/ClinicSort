@@ -115,6 +115,7 @@ def index(request):
         context['logged_in'] = True
     return render(request, 'index.html', context=context)
 
+@professor_only
 def clinicViewList(request): # Lists prfoessors clinics if edits are needed to be made, will connect directly to clinicView
     user = request.user
     userAuth = UserSocialAuth.objects.get(user=user)
