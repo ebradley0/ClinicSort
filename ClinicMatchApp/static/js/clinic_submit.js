@@ -19,7 +19,12 @@ window.addEventListener('load', function() {
         // Will need to go through and delete unnecessary code later back when general labels still existed
 
     }
-    console.log(clinic_type_dropdown.value);
+    const isGeneral = document.getElementById("id_numberHandler-0-general").checked;
+    if (isGeneral) {
+        clinic_type_dropdown.value = "general";
+    } else {
+        clinic_type_dropdown.value = "specific";
+    }
     clinic_type_changer();
 });
 
