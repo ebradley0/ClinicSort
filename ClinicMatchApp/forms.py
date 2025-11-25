@@ -24,8 +24,8 @@ class ClinicForm(forms.ModelForm):
 class ClinicNumbersForm(forms.ModelForm):
     class Meta:
         model = ClinicNumberHandler
-        fields = ['id', 'major', 'min', 'max']
-        exclude = ['clinic', 'general']
+        fields = ['id', 'major', 'min', 'max', 'general']
+        exclude = ['clinic']
     def __init__(self, *args, **kwargs):
         super(ClinicNumbersForm, self).__init__(*args, **kwargs)
         self.fields['major'].widget.attrs['readonly'] = True

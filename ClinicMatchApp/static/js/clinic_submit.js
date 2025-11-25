@@ -11,8 +11,8 @@ window.addEventListener('load', function() {
         const numberhandlerGeneral = document.getElementById(numhandlerGeneralId);
         const numberhandlerGeneralLabel = document.querySelector('label[for="' + numhandlerGeneralId + '"]');
 
-        //numberhandlerGeneral.hidden = true;
-        // numberhandlerGeneralLabel.hidden = true;
+        numberhandlerGeneral.hidden = true;
+        numberhandlerGeneralLabel.hidden = true;
         majorSelector.selectedIndex = i+1;
         //console.log(majorSelector);
         
