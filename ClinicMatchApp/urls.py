@@ -23,7 +23,6 @@ urlpatterns = [
     path('api/major/<int:major_id>/', views.major_api, name='major-api'),
     path('api/mapStudentsToClinics/', views.mapStudentsToClinics, name='map_students_to_clinics'),
     path('login/', views.loginView, name="loginView"),
-    path('login-check/', views.login_check, name=""),
     path('studentmanagement/', views.studentManagementView, name='studentManagementView'),
     path('importStudents/', views.importStudents, name='importStudents'),
 

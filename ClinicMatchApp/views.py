@@ -46,12 +46,6 @@ def login_check(request): #Runs post login. Import
     
     if code is None: 
         return False
-        print("Code DNE") #This all can be removed, if the code doesnt exist they can retry. When the student button is clicked it defaults them to saving as a student object, so no need for a second check
-        #Student login post, return to index
-
-        created, updated = Student.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
-                                                    last_name=user.last_name,
-                                                    email=user.email)
 
         if created:
             print("Created new Student object for user:", user)
@@ -60,26 +54,20 @@ def login_check(request): #Runs post login. Import
 
         
     else:
-
         if code == os.getenv('PROFESSOR_KEY'):
             created, updated = Professor.objects.get_or_create(userAuth=UserAuthObject, first_name=user.first_name,
                                                         last_name=user.last_name,
                                                         email=user.email)
-            return True
-        else:
-            return False
+
+      
 
 def loginView(request):
     if request.method == "POST":
         code = request.POST.get('professor_code')
         request.session['professor_code'] = code
-
-        # validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
-        validation = True if code == os.getenv('PROFESSOR_KEY') else False
-        if not validation:
+        if code != os.getenv('PROFESSOR_KEY'):
             return render(request, "login.html")
     
-        
         return redirect('social:begin', backend='google-oauth2') # Proceed to the normal social auth screen, now that the code was saved
         
 
@@ -88,7 +76,7 @@ def loginView(request):
         return render(request, 'login.html')
 
 def index(request):
-    validation =  login_check(request) # Passing for profile verifcation, this might need to be relocated.
+    login_check(request) # Passing for profile verifcation, this might need to be relocated.
     
     
     context = {}
@@ -111,13 +99,11 @@ def index(request):
         if professor_object:
             context['status'] = "professor"
         else:
-            student_object = StudentModel.object.get_or_create(user=userAuth, first_name=user.first_name, last_name=user.last_name, email=user.email)
             context['status'] = "student"
 
         context['logged_in'] = True
     return render(request, 'index.html', context=context)
 
-@professor_only
 def clinicViewList(request): # Lists prfoessors clinics if edits are needed to be made, will connect directly to clinicView
     user = request.user
     userAuth = UserSocialAuth.objects.get(user=user)
