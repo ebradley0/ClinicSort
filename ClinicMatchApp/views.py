@@ -20,7 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from dotenv import load_dotenv
 from .serializers import StudentSerializer
 import logging
-from decorations import professor_only
+from .decorations import professor_only
 logger = logging.getLogger(__name__)
 # Create your views here.
 
