@@ -352,13 +352,17 @@ window.addEventListener('load', function () {
     return cookieValue;
   }
 
-  document.getElementById('generate-csv').addEventListener('click', generateCSV);
-  function generateCSV() {
+  document.getElementById('generate-name-csv').addEventListener('click', generateNameCSV);
+  document.getElementById('generate-email-csv').addEventListener('click', generateEmailCSV);
+
+  function generateNameCSV() {
     let assignmentArray = []
     document.querySelectorAll('.clinic-container.item').forEach(clinicEl => {
       const clinicId = clinicEl.dataset.clinicId;
       const clinicInner = clinicEl.querySelector('.clinic-inner');
       const clinicTitle = clinicEl.dataset.title;
+      const clinicDepartment = clinicEl.dataset.major;
+      const clinicFunding = clinicEl.dataset.isFunded;
       
 
       if (!clinicInner) return;
@@ -367,19 +371,9 @@ window.addEventListener('load', function () {
       // Find all student items inside this clinic
       clinicInner.querySelectorAll('.student-item').forEach(studentEl => {
         const studentId = studentEl.dataset.studentId;
-        const bannerId = studentEl.dataset.banner;
-        const major = studentEl.dataset.major;
-        const email = studentEl.dataset.email;
         const name = studentEl.dataset.name;
 
         if (studentId && clinicId) {
-          // assignments.push({
-          //   id: studentId,
-          //   name: name,
-          //   banner_id: bannerId,
-          //   major: major,
-          //   email: email
-          // });
           assignments.push(
             name
           )
@@ -387,14 +381,53 @@ window.addEventListener('load', function () {
       });
 
       assignmentArray.push({
-        clinic_title: clinicTitle,
-        assignments: assignments
+        'Title': clinicTitle,
+        'Department': clinicDepartment,
+        'Externally Funded': clinicFunding,
+        'Assigned Students': assignments
       });
     });
 
-    console.log(assignmentArray);
+    // console.log(assignmentArray);
 
-    downloadCSV(assignmentArray);
+    downloadCSV(assignmentArray, 'name.csv');
+  }
+  function generateEmailCSV() {
+    let assignmentArray = []
+    document.querySelectorAll('.clinic-container.item').forEach(clinicEl => {
+      const clinicId = clinicEl.dataset.clinicId;
+      const clinicInner = clinicEl.querySelector('.clinic-inner');
+      const clinicTitle = clinicEl.dataset.title;
+      const clinicDepartment = clinicEl.dataset.major;
+      const clinicFunding = clinicEl.dataset.isFunded;
+      
+
+      if (!clinicInner) return;
+
+      let assignments = []
+      // Find all student items inside this clinic
+      clinicInner.querySelectorAll('.student-item').forEach(studentEl => {
+        const studentId = studentEl.dataset.studentId;
+        const email = studentEl.dataset.email;
+
+        if (studentId && clinicId) {
+          assignments.push(
+            email
+          )
+        }
+      });
+
+      assignmentArray.push({
+        'Title': clinicTitle,
+        'Department': clinicDepartment,
+        'Externally Funded': clinicFunding,
+        'Assigned Students': assignments
+      });
+    });
+
+    // console.log(assignmentArray);
+
+    downloadCSV(assignmentArray, 'email.csv');
   }
   function downloadCSV(dataArray, filename = 'data.csv') {
       if (!dataArray || dataArray.length === 0) {

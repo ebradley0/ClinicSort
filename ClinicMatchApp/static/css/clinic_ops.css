@@ -94,6 +94,27 @@
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+.csv-button {
+  z-index: 1200;
+  background-color: #057883;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.name-button {
+  position: absolute;
+  top: 50px;
+  left: 0;
+}
+.email-button {
+  position: absolute;
+  top: 100px;
+  left: 0;
+}
 .secondary-header {
   position: absolute;
   top: 0;
