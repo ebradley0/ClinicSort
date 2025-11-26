@@ -46,13 +46,14 @@
       </div>
       <button class="save-button" id="save-assignments">Save Assignments</button>
       <button class="reset-button" id="reset-assignments">Reset Assignments</button>
+      <button class="csv-button" id="generate-csv">Generate CSV</button>
     </div>
   </div>
   </div>
   <!-- left clinics column -->
   <div class="clinics-board" aria-label="Clinics column">
         {% for clinic in clinics %}
-        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}" data-is-general="{{ clinic.is_general }}" data-total="{{ clinic.current_students.count|default_if_none:0 }}" data-total-max="{{ clinic.total_max|default:0 }}" data-total-min="{{ clinic.total_min|default:0 }}">
+        <div class="clinic-container item" data-clinic-id="{{ clinic.id }}" data-major="{{ clinic.department.major }}" data-is-general="{{ clinic.is_general }}" data-total="{{ clinic.current_students.count|default_if_none:0 }}" data-total-max="{{ clinic.total_max|default:0 }}" data-total-min="{{ clinic.total_min|default:0 }}" data-title="{{ clinic.title }}">
             <div class="clinic-card {{ clinic.department }}"
                  style="--color: {{ clinic.department.color }};">
                 <div class="clinic-info">
@@ -85,6 +86,8 @@
                         data-student-id="{{ student.id }}"
                         data-banner="{{ student.banner_id }}"
                         data-major="{{ student.major }}"
+                        data-email="{{ student.email }}"
+                        data-name="{{ student.first_name }} {{student.last_name }}"
                         {% if student.alternative_major %} 
                           style="--color: {{ student.major.color }}; background: linear-gradient(to right, var(--color) 0%, #fff 100%);"
                         {% else %} 

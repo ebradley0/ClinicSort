@@ -351,4 +351,85 @@ window.addEventListener('load', function () {
     }
     return cookieValue;
   }
+
+  document.getElementById('generate-csv').addEventListener('click', generateCSV);
+  function generateCSV() {
+    let assignmentArray = []
+    document.querySelectorAll('.clinic-container.item').forEach(clinicEl => {
+      const clinicId = clinicEl.dataset.clinicId;
+      const clinicInner = clinicEl.querySelector('.clinic-inner');
+      const clinicTitle = clinicEl.dataset.title;
+      
+
+      if (!clinicInner) return;
+
+      let assignments = []
+      // Find all student items inside this clinic
+      clinicInner.querySelectorAll('.student-item').forEach(studentEl => {
+        const studentId = studentEl.dataset.studentId;
+        const bannerId = studentEl.dataset.banner;
+        const major = studentEl.dataset.major;
+        const email = studentEl.dataset.email;
+        const name = studentEl.dataset.name;
+
+        if (studentId && clinicId) {
+          // assignments.push({
+          //   id: studentId,
+          //   name: name,
+          //   banner_id: bannerId,
+          //   major: major,
+          //   email: email
+          // });
+          assignments.push(
+            name
+          )
+        }
+      });
+
+      assignmentArray.push({
+        clinic_title: clinicTitle,
+        assignments: assignments
+      });
+    });
+
+    console.log(assignmentArray);
+
+    downloadCSV(assignmentArray);
+  }
+  function downloadCSV(dataArray, filename = 'data.csv') {
+      if (!dataArray || dataArray.length === 0) {
+          console.warn("No data to export to CSV.");
+          return;
+      }
+
+      const headers = Object.keys(dataArray[0]);
+      let csvContent = headers.join(',') + '\n';
+
+      dataArray.forEach(row => {
+          const values = headers.map(header => {
+              let value = row[header];
+              // Handle potential commas or newlines within values by wrapping in quotes
+              if (typeof value === 'string' && (value.includes(',') || value.includes('\n'))) {
+                  value = `"${value.replace(/"/g, '""')}"`; // Escape double quotes
+              }
+              return value;
+          });
+          csvContent += values.join(',') + '\n';
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      if (link.download !== undefined) { // Feature detection for download attribute
+          const url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', filename);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      } else {
+          // Fallback for browsers that don't support the download attribute
+          window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+      }
+  }
 });
