@@ -52,6 +52,7 @@
     <div class="popup" id="legendPopup">
                     <div class="itemContents">
                     <p class="clinic-title">Clinic Title</p>
+                    <div class="pop-index" style="width:30%;"># of first choice picks</div>
 
                     <img src="" class="imageSlot" alt="Clinic image">
 
@@ -65,9 +66,10 @@
                     <br>
                     (Click Card for more info...)
 
+                    <p style="margin-top: 270px; font-size: 14px;">Maximum number of students per major: </p>
                     <div class="specificRequestHolder">
                       {% for major in majors %}
-                      <div class="specificRequest" style="--color: {{major.color}};"> {{major}} </div>
+                      <div class="specificRequest" style="--color: {{major.color}}; font-size: 18px"> {{major}} </div>
                       {%endfor%}
                     </div>
                   </div>
@@ -98,7 +100,7 @@
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
-                <div class="clinic-id">Clinic #{{clinic.id}}</div>
+                <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
                 {%else%}
@@ -135,11 +137,14 @@
             <div class="clinicDetails hidden itemContents">
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
-                <div class="clinic-id">Clinic #{{clinic.id}}</div>
+                <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 <div class="linkList">
-                {%for link in clinic.links_list%}
-                    <a href="{{link}}"> [{{forloop.counter}}] </a>
-                {%endfor%}
+                  {%if clinic.links_list|length > 0 %}
+                    <div>Learn More: </div>
+                    {%for link in clinic.links_list%}
+                      <a href="{{link}}"> [{{forloop.counter}}] </a>
+                    {%endfor%}
+                  {%endif%}
                 </div>
 
                 
@@ -164,10 +169,10 @@
 
 <form method="POST" id="submission-form" class="clinicSelection">
     {% csrf_token %}
-    <div>
+    <div class="submission-descriptor">
       <p>Top  8 Clinic Choices</p>
     </div>
-    <button id="submit-button" type="submit" class="pushable">
+    <button id="submit-button" type="submit" class="pushable submit">
         <span class="shadow"></span>
         <span class="edge"></span>
         <span class="front"> Submit</span>
@@ -194,7 +199,7 @@
             <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
-                <div class="clinic-id">Clinic #{{clinic.id}}</div>
+                <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
 
@@ -232,11 +237,14 @@
             <div class="clinicDetails hidden itemContents">
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
-                <div class="clinic-id">Clinic #{{clinic.id}}</div>
+                <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 <div class="linkList">
-                {%for link in clinic.links_list%}
-                    <a href="{{link}}"> [{{forloop.counter}}] </a>
-                {%endfor%}
+                  {%if clinic.links_list|length > 0 %}
+                    <div>Learn More: </div>
+                    {%for link in clinic.links_list%}
+                      <a href="{{link}}"> [{{forloop.counter}}] </a>
+                    {%endfor%}
+                  {%endif%}
                 </div>
 
                 

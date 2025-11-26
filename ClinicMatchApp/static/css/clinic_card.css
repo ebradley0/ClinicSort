@@ -30,22 +30,23 @@
 /* Title and layout */
 .clinic-title {
   position: absolute;
-  top: 0;
-  left: 5%;
+  top: 3%;
+  right: 5%;
   font-weight: lighter;
   width: 80%;
   font-size: 24px;
-  line-height: 1.5rem;
-  min-height: 3rem;
-  max-height: 3rem;
-  margin-top: 3%;
+  text-align: right;
+  line-height: 2rem;
+  min-height: 4rem;
+  max-height: 4rem;
+  margin: 0;
 }
 
 .pop-index {
   font-size: 14px;
   font-weight: bold;
   background-color: rgba(37, 37, 37, 0.469);
-  width: 10%;
+  width: 6%;
   text-align: center;
   margin-top: 2px;
   margin-right: 2px;
@@ -55,8 +56,8 @@
   padding: 2px 4px;
   border-radius: 4px;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 2%;
+  left: 5%;
 }
 
 .clinic-id {
