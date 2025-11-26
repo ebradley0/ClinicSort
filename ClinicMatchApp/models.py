@@ -40,6 +40,7 @@ class Clinic(models.Model):
     image = models.FileField(null=True, blank=True, upload_to="clinicImages/")
     links = models.JSONField(default=list, blank=True, null=True)
     pop_index = models.PositiveIntegerField(default=0) #Used to store popularity index during matching process.
+    is_externally_funded = models.BooleanField(default=0)
     def __init__(self, *args, **kwargs):
         super(Clinic, self).__init__(*args, **kwargs)
         #Create a major field for each major in the database using ClinicNumberHandler
