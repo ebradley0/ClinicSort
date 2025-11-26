@@ -26,7 +26,7 @@
   justify-content: center;
   align-items: center;
   width: 1240px;
-  background-color: #888;
+  background-color: lightgray;
 }
 
 .gridWrapper{
@@ -148,7 +148,7 @@
 
 .header {
   display: flex;
-  background-color: #aaa;
+  background-color: var(--color, lightgrey);
   width: 100%;
   height: 75px;
   padding: 5px;
@@ -220,4 +220,9 @@
 
   .popup.show {
     display: block;
+  }
+
+  .filter-container {
+    text-align: right;
+    margin: 15px;
   }

@@ -30,7 +30,7 @@
 /* Title and layout */
 .clinic-title {
   position: absolute;
-  top: 3px;
+  top: 0;
   left: 5%;
   font-weight: lighter;
   width: 80%;
@@ -38,6 +38,7 @@
   line-height: 1.5rem;
   min-height: 3rem;
   max-height: 3rem;
+  margin-top: 3%;
 }
 
 .pop-index {
@@ -56,6 +57,19 @@
   position: absolute;
   top: 0;
   right: 0;
+}
+
+.clinic-id {
+  font-size: 10px;
+  font-weight: lighter;
+  background-color: rgba(37, 37, 37, 0.469);
+  color: var(--clinic-color, #ffffff);
+  position: absolute;
+  width: 10%;
+  top: 12%;
+  right: 1%;
+  padding:2px 4px;
+  border-radius: 4px;
 }
 
 /* Remove button (small UI helper) */
@@ -153,7 +167,7 @@
 /* Links row */
 .linkList {
   position: absolute;
-  top: 20%;
+  bottom: 5%;
   display: flex;
   flex-direction: row;
   gap: 8px;
@@ -161,8 +175,9 @@
 
 .description {
   position: absolute;
-  top: 25%;
+  top: 20%;
   margin: 10px;
+  margin-top: 0px;
   width: 90%;
   text-align: left;
 }

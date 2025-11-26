@@ -219,7 +219,7 @@
 /* Clinic student area (Muuri horizontal grid) */
 .clinic-inner {
   /* display: flex; */
-  position: absolute;          /* ✅ Required for Muuri */
+  position: absolute;          /* Required for Muuri */
   left: 350px;
   top:0px;
   min-width:600px;
