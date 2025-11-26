@@ -364,7 +364,7 @@ def clinicManagementView(request, title):
         if title != 'all':
             clinic.assigned_students = [
                 student for student in clinic.assigned_students
-                if student.major.major.lower() == title.lower()
+                if student.major and student.major.major.lower() == title.lower()
             ]
 
     # Filter unassigned students by selected major
