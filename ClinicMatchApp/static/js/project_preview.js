@@ -59,10 +59,15 @@ function updateLinkPreview() {
     const linkInput = document.getElementById('id_links');
     const linkPreview = document.getElementById('link-list');
     
-    const linksText = linkInput.value;
+    const linksText = linkInput.value.replace(/[\[\]]/g, '');
     const links = linksText.split('\n').filter(link => link.trim() !== '');
     
     linkPreview.innerHTML = '';
+    if (links.length > 0) {
+        const div = document.createElement('div');
+        div.textContent = "Learn More: ";
+        linkPreview.appendChild(div);
+    }
     links.forEach((link, index) => {
         const div = document.createElement('div');
         const a = document.createElement('a');
