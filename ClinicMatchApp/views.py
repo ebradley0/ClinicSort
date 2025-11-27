@@ -169,14 +169,22 @@ def clinicView(request):
             form = ClinicForm(request.POST, request.FILES, instance=clinic) #Creating a new form to save to our clinic instance. We make a new one to load it with all the data from request.POST
             ClinicNumbersFormset = get_ClinicNumbersFormset(extra=0)  # Get the formset class with the correct number of extra forms
             formset = ClinicNumbersFormset(request.POST, request.FILES, instance=clinic)
-            formset.save()
-            if form.is_valid(): #If it passes, save it. It shoudl almost always pass, as the user can't edit values that would make it fail.
+            if formset.is_valid() and form.is_valid(): #If it passes, save it. It shoudl almost always pass, as the user can't edit values that would make it fail.
+                formset.save()
                 form.save()
             else:
                 print("Form could not be saved")
+                context = {}
+                context['logged_in'] = True
+                context['form'] = form
+                context['majors'] = Major.objects.all()        # <-- add this line
+                context['formset'] = formset
+                return render(request, 'clinicsubmit.html', context)
+
             context = {}
             context['logged_in'] = True
-            return render(request, "index.html")
+            # return render(request, "index.html")
+            return redirect('index')
         else: #Saving a new clinic
             form = ClinicForm(request.POST)
             clinic = Clinic() # Generating a new clinic instance to bind our form to.
@@ -199,11 +207,17 @@ def clinicView(request):
                 print("Form or Formset Invalid")
                 print("Form Errors:", form.errors)
                 print("Formset Errors:", formset.non_form_errors())
+                context = {}
+                context['logged_in'] = True
+                context['form'] = form
+                context['majors'] = Major.objects.all()        # <-- add this line
+                context['formset'] = formset
+                return render(request, 'clinicsubmit.html', context)
 
             context = {}
             context['status'] = "professor"
             context['logged_in'] = True
-            return render(request, 'index.html', context)
+            return redirect('index')
             
 
 

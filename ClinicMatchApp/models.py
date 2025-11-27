@@ -28,10 +28,10 @@ class Major(models.Model):
 
 
 class Clinic(models.Model):
-    title = models.CharField()
+    title = models.CharField() # Max should be 37 characters due to Lorem Ipsum testing
     department = models.ForeignKey(Major, on_delete=models.CASCADE, null=True)
     clinic_mgmt = SortedManyToManyField('Professor', related_name="professor_list", null=True, blank=True) #Connects to professor objects
-    description = models.TextField(max_length=500, null=True)
+    description = models.TextField(max_length=500, null=True) # should likely make max length 435 characters due to testing on the cards with Lorem Ipsum
     min = models.PositiveIntegerField(null=True, blank=True) # Minimum number of students required for the clinic to run
     max = models.PositiveIntegerField(null=True, blank=True) # Maximum number of students that can be accepted into the clinic
     links = models.CharField(null=True, blank=True) # CSV of links related to the clinic
@@ -58,8 +58,8 @@ class ClinicNumberHandler(models.Model): #Used for dynamically select numbers fo
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE, related_name="numberHandler", null=True) #Which clinic this min max requirement is related to.
     major = models.ForeignKey(Major, on_delete=models.CASCADE) #Which major this min max requirement is related to.
     general = models.BooleanField(default=False) #If this is a general requirement, not tied to a specific major
-    min = models.PositiveIntegerField(null=True, blank=True) #This can be blank or null if this major isnt needed
-    max = models.PositiveIntegerField(null=True, blank=True)
+    min = models.PositiveIntegerField(default=0, null=True, blank=True) #This can be blank or null if this major isnt needed
+    max = models.PositiveIntegerField(default=0, null=True, blank=True)
     class Meta:
         unique_together = ('clinic', 'major') #Ensure that each clinic can only have one entry per major
 

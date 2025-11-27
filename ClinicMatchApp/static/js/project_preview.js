@@ -3,9 +3,6 @@ function updateTitlePreview() {
     const titlePreviewFront = document.getElementById('clinic-title-front');
     const titlePreviewBack = document.getElementById('clinic-title-back');
 
-    // titlePreviewFront.innerHTML = '';
-    // titlePreviewBack.innerHTML = '';
-
     titlePreviewFront.textContent = titleInput.value || 'Clinic Title';
     titlePreviewBack.textContent = titleInput.value || 'Clinic Title';
 
