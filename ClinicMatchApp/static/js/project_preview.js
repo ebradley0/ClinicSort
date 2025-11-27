@@ -81,6 +81,42 @@ function updateDescriptionPreview() {
     descriptionPreview.textContent = descriptionInput.value || 'Clinic Description';
 }
 
+function generalVsSpecificPreview() {
+    const isGeneral = document.getElementById('clinic_type').value == "general";
+    const specificRequestHolder = document.getElementById('specific-request-holder');
+    const generalRequestHolder = document.getElementById('general-request-holder');
+
+    if (isGeneral) {
+        specificRequestHolder.classList.add('hidden');
+        generalRequestHolder.classList.remove('hidden');
+        console.log('isGeneral');
+    } else {
+        specificRequestHolder.classList.remove('hidden');
+        generalRequestHolder.classList.add('hidden');
+        console.log('isSpecific');
+    }
+}
+
+function updateNumberHandlerPreview() {
+    const isGeneral = document.getElementById('clinic_type').value == "general";
+    const specificRequestHolder = document.getElementById('specific-request-holder');
+    const generalRequestHolder = document.getElementById('general-request-holder');
+    let specificRequestArray = Array.from(specificRequestHolder.children);
+
+    if (isGeneral) {
+        let generalMax = document.getElementById('id_numberHandler-0-max').value;
+        generalRequestHolder.textContent = "General: " + generalMax;
+    } else {
+        for (let i = 0; i < specificRequestArray.length; i++) {
+            let specificMax = document.getElementById('id_numberHandler-' + i + '-max').value;
+            if (specificMax == '') 
+                specificMax = '0';
+            specificRequestArray[i].textContent = specificMax;
+        }
+    }
+
+}
+
 document.getElementById('id_description').addEventListener('input', updateDescriptionPreview);
 
 document.getElementById('id_links').addEventListener('input', updateLinkPreview);
@@ -91,10 +127,16 @@ document.getElementById('id_department').addEventListener('input', updateDepartm
 
 document.getElementById('id_title').addEventListener('input', updateTitlePreview);
 
+document.getElementById('clinic_type').addEventListener('input', generalVsSpecificPreview);
+
+document.getElementById('submission-form').addEventListener('input', updateNumberHandlerPreview);
+
 window.addEventListener('load', function () {
     updateDescriptionPreview();
     updateLinkPreview();
     updateImagePreview();
     updateDepartmentColorPreview();
     updateTitlePreview();
+    //generalVsSpecificPreview();
+    //updateNumberHandlerPreview();
 });

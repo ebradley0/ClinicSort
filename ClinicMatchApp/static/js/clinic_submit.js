@@ -26,6 +26,8 @@ window.addEventListener('load', function() {
         clinic_type_dropdown.value = "specific";
     }
     clinic_type_changer();
+    generalVsSpecificPreview();
+    updateNumberHandlerPreview();
 });
 
 

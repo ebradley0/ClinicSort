@@ -20,7 +20,7 @@
     
   <div class="submission-form-container">
     
-        <form method="POST" class="submission-form" enctype="multipart/form-data">
+        <form method="POST" class="submission-form" enctype="multipart/form-data" id="submission-form">
             {% csrf_token %}
             <input name="id" value="{{clinic.id}}" type="hidden">
             <h1 class="title">Clinic Submission</h1>
@@ -85,13 +85,13 @@
     
         <div class="managers">Managers</div>
     
-        <div class="specificRequestHolder">
+        <div class="specificRequestHolder" id="specific-request-holder">
           {% for major in majors %}
             <div class="specificRequest" style="--color: {{ major.color }};">0</div>
           {% endfor %}
         </div>
     
-        <div class="generalRequest hidden"> General: 0 </div>
+        <div class="generalRequest" id="general-request-holder" hidden> General: 0 </div>
       </div>
     </div>
     
