@@ -3,8 +3,14 @@ function updateTitlePreview() {
     const titlePreviewFront = document.getElementById('clinic-title-front');
     const titlePreviewBack = document.getElementById('clinic-title-back');
 
+    // titlePreviewFront.innerHTML = '';
+    // titlePreviewBack.innerHTML = '';
+
     titlePreviewFront.textContent = titleInput.value || 'Clinic Title';
     titlePreviewBack.textContent = titleInput.value || 'Clinic Title';
+
+    textFit(titlePreviewFront, {maxFontSize: 24, multiLine: true});
+    textFit(titlePreviewBack, {maxFontSize: 24, multiLine: true});
 }
 
 function updateDepartmentColorPreview() {
@@ -12,12 +18,14 @@ function updateDepartmentColorPreview() {
     const itemElementFront = document.querySelector('.item');
     const itemElementBack = document.querySelector('.item.back');
     const PIElementFront = document.querySelector('.pop-index');
+    const PIElementBack = document.getElementById('pop-index-back');
     const majorValue = majorInput ? majorInput.value : '';
 
     if (!majorValue) {
         if (itemElementFront) itemElementFront.style.background = '#ffffff';
         if (itemElementBack) itemElementBack.style.background = '#ffffff';
         if (PIElementFront) PIElementFront.style.color = '#000000';
+        if (PIElementBack) PIElementBack.style.color = '#000000';
         return;
     }
 
@@ -30,6 +38,7 @@ function updateDepartmentColorPreview() {
         if (itemElementFront) itemElementFront.style.background = data.color;
         if (itemElementBack) itemElementBack.style.background = data.color;
         if (PIElementFront) PIElementFront.style.color = data.color;
+        if (PIElementBack) PIElementBack.style.color = data.color;
     })
     .catch(error => {
         console.error("Error loading major color:", error);
@@ -51,7 +60,18 @@ function updateImagePreview() {
         }
         reader.readAsDataURL(file);
     } else {
-        imagePreview.style.backgroundImage = '';
+        const imageLink = document.querySelector('a');
+        if (imageLink) {
+            console.log(imageLink.href);
+            imagePreview.textContent = '';
+            imagePreview.style.backgroundSize = 'cover';
+            imagePreview.style.backgroundPosition = 'center';
+            imagePreview.style.backgroundImage = `url(${imageLink.href})`;
+        }
+        else {
+            imagePreview.textContent = 'Image Slot';
+            imagePreview.style.backgroundImage = '';
+        }
     }
 }
 
@@ -115,7 +135,7 @@ function updateNumberHandlerPreview() {
         for (let i = 0; i < specificRequestArray.length; i++) {
             let specificMax = document.getElementById('id_numberHandler-' + i + '-max').value;
             if (specificMax == '') 
-                specificMax = '0';
+                specificMax = 'NULL';
             specificRequestArray[i].textContent = specificMax;
         }
     }
@@ -143,5 +163,5 @@ window.addEventListener('load', function () {
     updateDepartmentColorPreview();
     updateTitlePreview();
     //generalVsSpecificPreview();
-    //updateNumberHandlerPreview();
+    //updateNumberHandlerPreview(); Moved to clinic_submit.js to run after initial dropdown change script
 });

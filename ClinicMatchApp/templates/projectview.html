@@ -97,9 +97,9 @@
       {% endif %}
     >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
-            <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
+            <div class="itemContents" >
                 <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
@@ -135,8 +135,6 @@
 
             </div>
             <div class="clinicDetails hidden itemContents">
-                <p class="clinic-title">{{clinic.title}}</p>
-                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 <div class="linkList">
                   {%if clinic.links_list|length > 0 %}
@@ -196,9 +194,9 @@
       {% endif %}
     >
       <input type="hidden" name="clinic_name" value="{{clinic.title}}"> <!-- Used to identify which clinics are selected-->
-            <div class="itemContents" >
                 <p class="clinic-title">{{clinic.title}}</p>
                 <div class="pop-index">PI {{clinic.pop_index}}</div>
+            <div class="itemContents" >
                 <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
@@ -235,8 +233,6 @@
 
             </div>
             <div class="clinicDetails hidden itemContents">
-                <p class="clinic-title">{{clinic.title}}</p>
-                <div class="pop-index">PI {{clinic.pop_index}}</div>
                 <!-- <div class="clinic-id">Clinic #{{clinic.id}}</div> -->
                 <div class="linkList">
                   {%if clinic.links_list|length > 0 %}
@@ -275,11 +271,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2/web-animations.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/textfit@2.4.0/textFit.min.js"></script>
 <script>
-
-    // Remove button functionality, triggering grid remove
-    
-    
+  Array.from(document.getElementsByClassName('clinic-title')).forEach(el => {
+    try {
+      textFit(el, {maxFontSize:24, multiLine:true});
+    } catch(e) {
+      console.warn('skipping element ', el, e);
+    }
+  })
 </script>
 <script src="{% static 'js/projectView.js' %}"></script>
 
