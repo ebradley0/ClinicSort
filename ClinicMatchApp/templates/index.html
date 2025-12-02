@@ -48,20 +48,22 @@
 
     <h1>Welcome to ClinicMatch</h1>
     <p>This is the homepage.</p>
+    <p> User: {{profileMade.0}}</p>
 
     
 
     {% if logged_in %}
-    {%if status == "student" %}
+    {% if status == "student" %}
+    {% if profileMade.0.major %}
     <a href="{% url 'projectView' %}" class="button">Project View</a>
+    {% endif %}
     <a href="{% url 'profile' %}" class="button">Profile</a>
-    <a href="{% url 'clinicViewList'}" class="button">Clinic Submission</a>
     
     <a href="{% url 'logout' %}" class="button">Logout</a>
     {%elif status == "professor" %}
     <a href="{% url 'profile' %}" class="button">Profile</a>
-    <a href="{%url 'clinicViewList' %}" class="button"> Submit Clinic</a>
-    <a href="{%url 'clinicManagementViewHomepage'%}" class="button">Clinic Management </a>
+    <a href="{% url 'clinicViewList' %}" class="button"> Submit Clinic</a>
+    <a href="{% url 'clinicManagementViewHomepage'%}" class="button">Clinic Management </a>
     <a href="{% url 'logout' %}" class="button">Logout</a>
     {%else%}
     <a href="{% url 'logout' %}" class="button">Logout</a>
@@ -72,8 +74,5 @@
     <a href="{% url 'loginView' %}" class="button">Login</a>
 
     {%endif%}
-
-    
-    test
 </body>
 </html>

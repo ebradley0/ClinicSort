@@ -101,6 +101,7 @@ def index(request):
         else:
             student_object = StudentModel.objects.get_or_create(userAuth=userAuth, first_name=user.first_name, last_name=user.last_name, email=user.email)
             context['status'] = "student"
+            context['profileMade'] = student_object
 
         context['logged_in'] = True
     return render(request, 'index.html', context=context)
