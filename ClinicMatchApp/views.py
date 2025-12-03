@@ -187,7 +187,7 @@ def clinicView(request):
             # return render(request, "index.html")
             return redirect('index')
         else: #Saving a new clinic
-            form = ClinicForm(request.POST)
+            form = ClinicForm(request.POST, request.FILES)
             clinic = Clinic() # Generating a new clinic instance to bind our form to.
             ClinicNumbersFormset = get_ClinicNumbersFormset(extra=0)  # Get the formset class with the correct number of extra forms
             formset = ClinicNumbersFormset(request.POST, request.FILES, instance=clinic)
