@@ -104,7 +104,8 @@
                 {%if clinic.image%}
                 <img src="{{clinic.image.url}}" class="imageSlot">
                 {%else%}
-                <p class="imageSlot" >No image provided</p>
+                <!-- <p class="imageSlot" >No image provided</p> -->
+                 <img src="/media/clinicImages/images.png" class="imageSlot">
                 {%endif%}
                 <div class="managers">           
                   {%for manager in clinic.clinic_mgmt.all%}

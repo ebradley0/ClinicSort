@@ -12,4 +12,3 @@ __pycache__/
 *.env
 secrets.json
 db_data
-media/

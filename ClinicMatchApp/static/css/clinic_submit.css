@@ -14,14 +14,14 @@
  margin: 0px;
  gap: 0px;
  padding: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Helvetica, Geneva, Tahoma, sans-serif;
   overflow: hidden;
 }
 
 .preview-cards {
   display: flex;
   margin: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Helvetica, Geneva, Tahoma, sans-serif;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;
@@ -43,27 +43,42 @@
     gap:0px;
     padding:0px;
     justify-content: center;
-    background-color: aquamarine;
+    background-color: #aaa;
+    font-family: helvetica, Geneva, Tahoma, sans-serif;
 }
 .submission-form{
     display: flex;
     flex-direction: column;
     background-color: beige;
     width:800px;
-    justify-content: center;
-    align-items: center;
+    justify-content: left;
+    align-items: left;
     margin: 0px;
 }
 .submission-form p{
-    margin:0px;
+    margin:10px;
     font-weight: 450;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 24px;
+    font-size: 14px;
+}
+.submission-form input{
+    margin:10px;
+    font-weight: 450;
+    font-size: 12px;
+}
+.submission-form select{
+    margin:10px;
+    font-weight: 450;
+    font-size: 12px;
+}
+.submission-form textarea{
+    margin:10px;
+    font-weight: 450;
+    font-size: 12px;
+    height: 100px;
 }
 .title 
 {
     font-weight: 600;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 36px;
     
 }

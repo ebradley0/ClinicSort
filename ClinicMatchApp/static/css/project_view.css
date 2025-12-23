@@ -5,14 +5,14 @@
  margin: 0px;
  gap: 0px;
  padding: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Helvetica, sans-serif, Geneva, Tahoma, sans-serif;
   overflow: hidden;
 }
 
 .main {
   display: flex;
   margin: 0px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Helvetica, Geneva, Tahoma, sans-serif;
   flex-direction: row;
   justify-content: space-between;
   align-items: flex-start;

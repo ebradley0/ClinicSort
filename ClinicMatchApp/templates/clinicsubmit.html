@@ -25,24 +25,33 @@
             <input name="id" value="{{clinic.id}}" type="hidden">
             <h1 class="title">Clinic Submission</h1>
                 <p class="">Title</p>
+                <p><i>40 character limit</i></p>
                 {{form.title}}
                 <p class="">Department</p>
+                <p><i>Select primary department for this project</i></p>
                 {{form.department}}
                 <p>Clinic Management</p>
+                <p><i>Besides yourself, who else will be managing this project?</i></p>
                   <div class="clinic-mgmt-container">
                       {{form.clinic_mgmt}}
                   </div>
                 <p>Description</p>
+                <p><i>Describe the project in 450 characters or less</i></p>
                 {{form.description}}
                 <p>Links</p>
+                <p><i>Put all links in quotes separated by a comma<br>E.g.: "https://www.google.com/,https://www.bing.com/"</i></p>
                 {{form.links}}
                 <p>Image Upload</p>
+                <p><i>Upload an identifiable image for your project<br>Maintain an aspect ratio of 4:3, verify with the preview</i></p>
                 {{form.image}}
                 <p>Requested Students</p>
+                <p><i>Comma separated, using the part of the student's email before the '@'<br>E.g.: to request teiper12@students.rowan.edu and bradle17@rowan.edu, enter "teiper12,bradle17"</i></p>
                 {{form.requested_students}}
                 <p>Is the clinic externally funded?</p>
                 {{form.is_externally_funded}}
-                <p>Clinic Type</p>
+                <p>Student Request Criteria</p>
+                <p><i>The choice between requesting specific majors or general (any major will be accepted)</i></p>
+                {{form.student_request_criteria}}
                 <select id="clinic_type" name="clinic_type">
                   <option value="specific">Specific</option>
                   <option value="general">General</option>
@@ -83,7 +92,7 @@
     
         <div class="imageSlot" id="image-slot">Image Slot</div>
     
-        <div class="managers">Managers</div>
+        <div class="managers">Managers (Does not update)</div>
     
         <div class="specificRequestHolder" id="specific-request-holder">
           {% for major in majors %}
